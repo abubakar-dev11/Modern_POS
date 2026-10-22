@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern POS | Inventory</title>
+    <link rel="stylesheet" href="css/pos.css">
+</head>
+<body>
+    <div class="pos-app">
+        <aside id="posSidebar" class="pos-sidebar"></aside>
+        <main class="pos-main">
+            <header id="posTopbar" class="pos-topbar"></header>
+
+            <div class="pos-content">
+                <div class="pos-page-header">
+                    <div>
+                        <h1 class="pos-page-title">Inventory</h1>
+                        <p class="pos-page-description">Manage product stock, stock movements and inventory history.</p>
+                    </div>
+                    <button class="pos-btn pos-btn-primary" onclick="loadProducts()">↻ Refresh Inventory</button>
+                </div>
+
+                <div class="pos-stat-grid">
+                    <div class="pos-stat-card">
+                        <div class="pos-stat-label">Total Products</div>
+                        <div class="pos-stat-value" id="totalProducts">0</div>
+                    </div>
+                    <div class="pos-stat-card">
+                        <div class="pos-stat-label">Total Stock</div>
+                        <div class="pos-stat-value" id="totalStock">0</div>
+                    </div>
+                    <div class="pos-stat-card">
+                        <div class="pos-stat-label">Low Stock</div>
+                        <div class="pos-stat-value" id="lowStock">0</div>
+                    </div>
+                    <div class="pos-stat-card">
+                        <div class="pos-stat-label">Active Products</div>
+                        <div class="pos-stat-value" id="activeProducts">0</div>
+                    </div>
+                </div>
+
+                <section class="pos-card">
+                    <h2 class="pos-card-title">Inventory Products</h2>
+                    <div class="pos-form-group">
+                        <label class="pos-form-label" for="searchProduct">Search Product</label>
+                        <input type="text" id="searchProduct" class="pos-input" placeholder="Search by product name or SKU..." oninput="filterProducts()">
+                    </div>
+                </section>
+
+                <section class="pos-card">
+                    <h2 class="pos-card-title">Stock Overview</h2>
+                    <p class="pos-page-description" style="margin-top:-10px;margin-bottom:18px;">View current stock levels and manage product inventory.</p>
+                    <div class="pos-table-wrapper">
+                        <table class="pos-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Selling Price</th>
+                                    <th>Stock</th>
+                                    <th>Stock Status</th>
+                                    <th>Product Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <tr><td colspan="7" class="pos-loading">Loading inventory...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="stockForm" class="pos-card" style="display:none;">
+                    <h2 class="pos-card-title">Add Stock</h2>
+                    <div style="background:#f9fafb;border:1px solid var(--border);border-radius:7px;padding:15px;margin-bottom:20px;">
+                        <div style="font-size:13px;color:var(--muted);margin-bottom:5px;">Product</div>
+                        <div id="selectedProductName" style="font-size:17px;font-weight:bold;">-</div>
+                        <div style="margin-top:12px;font-size:13px;color:var(--muted);">SKU: <strong id="selectedProductSku">-</strong></div>
+                        <div style="margin-top:5px;font-size:13px;color:var(--muted);">Current Stock: <strong id="selectedProductStock">0</strong></div>
+                    </div>
+
+                    <div class="pos-form-grid">
+                        <div class="pos-form-group">
+                            <label class="pos-form-label" for="stockQuantity">Quantity</label>
+                            <input type="number" id="stockQuantity" class="pos-input" min="1" step="1" placeholder="Enter quantity">
+                        </div>
+                        <div class="pos-form-group">
+                            <label class="pos-form-label" for="stockNote">Note</label>
+                            <input type="text" id="stockNote" class="pos-input" placeholder="Optional note">
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:10px;margin-top:5px;">
+                        <button id="addStockButton" class="pos-btn pos-btn-success" onclick="addStock()">Add Stock</button>
+                        <button class="pos-btn pos-btn-primary" onclick="closeStockForm()">Cancel</button>
+                    </div>
+                    <div id="stockMessage" class="pos-message" style="display:none;"></div>
+                </section>
+
+                <section id="historySection" class="pos-card" style="display:none;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:18px;">
+                        <div>
+                            <h2 class="pos-card-title" style="margin-bottom:5px;">Stock History</h2>
+                            <p class="pos-page-description" style="margin:0;">Stock movements for <strong id="historyProductName">-</strong></p>
+                        </div>
+                        <button class="pos-btn pos-btn-primary" onclick="closeHistory()">Close</button>
+                    </div>
+                    <div class="pos-table-wrapper">
+                        <table class="pos-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Quantity</th>
+                                    <th>Reference</th>
+                                    <th>Note</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <tr><td colspan="5" class="pos-loading">Loading history...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/pos-layout.js"></script>
+    <script>
+        "use strict";
+
+        const API_BASE = "http://127.0.0.1:3000/api";
+        let products = [];
+        let selectedProduct = null;
+
+        function getAuthToken() {
+            const token = localStorage.getItem("posToken");
+            if (!token) {
+                window.location.replace("login.html");
+                return null;
+            }
+            return token;
+        }
+
+        async function apiFetch(endpoint, options = {}) {
+            const token = getAuthToken();
+            if (!token) throw new Error("Authentication required. Please log in.");
+
+            const headers = {
+                ...(options.headers || {}),
+                Authorization: `Bearer ${token}`
+            };
+
+            const response = await fetch(`${API_BASE}${endpoint}`, {
+                ...options,
+                headers
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem("posToken");
+                localStorage.removeItem("posUser");
+                window.location.replace("login.html");
+                throw new Error("Your session has expired. Please log in again.");
+            }
+
+            return response;
+        }
+
+        async function readResponse(response) {
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(data.message || `Request failed (${response.status}).`);
+            }
+            return data;
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function showTableMessage(elementId, colspan, message, className = "pos-empty") {
+            document.getElementById(elementId).innerHTML =
+                `<tr><td colspan="${colspan}" class="${className}">${escapeHtml(message)}</td></tr>`;
+        }
+
+        async function loadProducts() {
+            showTableMessage("inventoryTableBody", 7, "Loading inventory...", "pos-loading");
+
+            try {
+                const response = await apiFetch("/products");
+                products = await readResponse(response);
+
+                if (!Array.isArray(products)) {
+                    throw new Error("Unexpected products response from the server.");
+                }
+
+                filterProducts();
+                updateStatistics(products);
+            } catch (error) {
+                console.error("Load inventory error:", error);
+                showTableMessage("inventoryTableBody", 7, error.message || "Failed to load inventory.");
+            }
+        }
+
+        function displayProducts(productList) {
+            const tableBody = document.getElementById("inventoryTableBody");
+
+            if (!productList.length) {
+                showTableMessage("inventoryTableBody", 7, "No products found.");
+                return;
+            }
+
+            tableBody.innerHTML = productList.map(product => {
+                const stock = Number(product.stockQuantity || 0);
+                const lowStock = stock <= 5;
+                const active = product.status === "ACTIVE";
+                const stockClass = lowStock ? "pos-status-danger" : "pos-status-paid";
+                const productClass = active ? "pos-status-paid" : "pos-status-pending";
+
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(product.name || "-")}</strong></td>
+                        <td>${escapeHtml(product.sku || "-")}</td>
+                        <td>₦${Number(product.sellingPrice || 0).toLocaleString()}</td>
+                        <td><strong>${stock.toLocaleString()}</strong></td>
+                        <td><span class="pos-status ${stockClass}">${lowStock ? "Low Stock" : "In Stock"}</span></td>
+                        <td><span class="pos-status ${productClass}">${escapeHtml(product.status || "INACTIVE")}</span></td>
+                        <td>
+                            <div style="display:flex;gap:7px;flex-wrap:wrap;">
+                                <button class="pos-btn pos-btn-success" onclick="openStockForm(${Number(product.id)})">Add Stock</button>
+                                <button class="pos-btn pos-btn-primary" onclick="viewHistory(${Number(product.id)})">History</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join("");
+        }
+
+        function updateStatistics(productList) {
+            document.getElementById("totalProducts").textContent = productList.length.toLocaleString();
+            document.getElementById("totalStock").textContent = productList.reduce((sum, product) => sum + Number(product.stockQuantity || 0), 0).toLocaleString();
+            document.getElementById("lowStock").textContent = productList.filter(product => Number(product.stockQuantity || 0) <= 5).length.toLocaleString();
+            document.getElementById("activeProducts").textContent = productList.filter(product => product.status === "ACTIVE").length.toLocaleString();
+        }
+
+        function filterProducts() {
+            const search = document.getElementById("searchProduct").value.trim().toLowerCase();
+            const filtered = products.filter(product =>
+                String(product.name || "").toLowerCase().includes(search) ||
+                String(product.sku || "").toLowerCase().includes(search)
+            );
+            displayProducts(filtered);
+        }
+
+        function openStockForm(productId) {
+            selectedProduct = products.find(product => Number(product.id) === Number(productId));
+
+            if (!selectedProduct) {
+                alert("Product not found.");
+                return;
+            }
+
+            document.getElementById("selectedProductName").textContent = selectedProduct.name || "-";
+            document.getElementById("selectedProductSku").textContent = selectedProduct.sku || "-";
+            document.getElementById("selectedProductStock").textContent = Number(selectedProduct.stockQuantity || 0).toLocaleString();
+            document.getElementById("stockQuantity").value = "";
+            document.getElementById("stockNote").value = "";
+            document.getElementById("stockMessage").style.display = "none";
+            document.getElementById("stockForm").style.display = "block";
+            document.getElementById("stockForm").scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function closeStockForm() {
+            selectedProduct = null;
+            document.getElementById("stockForm").style.display = "none";
+        }
+
+        function showStockMessage(message, isError = false) {
+            const element = document.getElementById("stockMessage");
+            element.textContent = message;
+            element.style.display = "block";
+            element.style.background = isError ? "#fee2e2" : "#dcfce7";
+            element.style.color = isError ? "#991b1b" : "#166534";
+        }
+
+        async function addStock() {
+            if (!selectedProduct) return;
+
+            const quantity = Number(document.getElementById("stockQuantity").value);
+            const note = document.getElementById("stockNote").value.trim();
+
+            if (!Number.isInteger(quantity) || quantity <= 0) {
+                showStockMessage("Enter a valid whole-number quantity.", true);
+                return;
+            }
+
+            const button = document.getElementById("addStockButton");
+            button.disabled = true;
+            button.textContent = "Adding...";
+
+            try {
+                const response = await apiFetch("/inventory/add", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        productId: selectedProduct.id,
+                        quantity,
+                        referenceType: "OPENING_STOCK",
+                        referenceId: null,
+                        note: note || "Opening stock"
+                    })
+                });
+
+                await readResponse(response);
+                showStockMessage("Stock added successfully.");
+
+                const productId = selectedProduct.id;
+                await loadProducts();
+
+                selectedProduct = products.find(product => Number(product.id) === Number(productId)) || null;
+
+                if (selectedProduct) {
+                    document.getElementById("selectedProductStock").textContent =
+                        Number(selectedProduct.stockQuantity || 0).toLocaleString();
+                }
+
+                window.setTimeout(closeStockForm, 700);
+            } catch (error) {
+                console.error("Add stock error:", error);
+                showStockMessage(error.message || "Failed to add stock.", true);
+            } finally {
+                button.disabled = false;
+                button.textContent = "Add Stock";
+            }
+        }
+
+        async function viewHistory(productId) {
+            const product = products.find(item => Number(item.id) === Number(productId));
+            if (!product) return;
+
+            document.getElementById("historyProductName").textContent = product.name || "-";
+            document.getElementById("historySection").style.display = "block";
+            showTableMessage("historyTableBody", 5, "Loading history...", "pos-loading");
+            document.getElementById("historySection").scrollIntoView({ behavior: "smooth", block: "start" });
+
+            try {
+                const response = await apiFetch(`/inventory/${productId}/history`);
+                const history = await readResponse(response);
+
+                if (!Array.isArray(history)) {
+                    throw new Error("Unexpected stock history response from the server.");
+                }
+
+                displayHistory(history);
+            } catch (error) {
+                console.error("Stock history error:", error);
+                showTableMessage("historyTableBody", 5, error.message || "Failed to load stock history.");
+            }
+        }
+
+        function displayHistory(history) {
+            const historyBody = document.getElementById("historyTableBody");
+
+            if (!history.length) {
+                showTableMessage("historyTableBody", 5, "No stock movement history found.");
+                return;
+            }
+
+            historyBody.innerHTML = history.map(movement => {
+                const type = movement.type || movement.referenceType || "-";
+                const quantity = Number(movement.quantity || 0);
+                const isSale = type === "SALE";
+                const quantityDisplay = `${isSale ? "-" : "+"}${quantity.toLocaleString()}`;
+                const statusClass = isSale ? "pos-status-danger" : "pos-status-paid";
+                const date = movement.createdAt ? new Date(movement.createdAt).toLocaleString() : "-";
+                const reference = movement.referenceId ?? movement.referenceType ?? "-";
+
+                return `
+                    <tr>
+                        <td>${escapeHtml(date)}</td>
+                        <td><span class="pos-status ${statusClass}">${escapeHtml(type)}</span></td>
+                        <td><span class="pos-status ${statusClass}">${quantityDisplay}</span></td>
+                        <td>${escapeHtml(reference)}</td>
+                        <td>${escapeHtml(movement.note || "-")}</td>
+                    </tr>`;
+            }).join("");
+        }
+
+        function closeHistory() {
+            document.getElementById("historySection").style.display = "none";
+        }
+
+        document.addEventListener("DOMContentLoaded", loadProducts);
+    </script>
+</body>
+</html>

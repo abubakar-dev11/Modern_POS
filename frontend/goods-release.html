@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Modern POS - Goods Release</title>
+
+    <link rel="stylesheet" href="css/pos.css">
+
+    <style>
+        /* GOODS RELEASE PAGE */
+
+        .queue-card,
+        .sale-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+
+        .queue-card {
+            overflow: hidden;
+        }
+
+        .queue-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .queue-card-title {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .queue-card-subtitle {
+            margin: 5px 0 0;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .refresh-button {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            background: #111827;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .refresh-button:hover {
+            background: #1f2937;
+        }
+
+        /* SEARCH BOX */
+
+        .queue-search-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #ffffff;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 18px;
+            pointer-events: none;
+        }
+
+        .queue-search-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 42px 12px 42px;
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+            outline: none;
+            font-family: inherit;
+            font-size: 14px;
+            color: #111827;
+            background: #ffffff;
+        }
+
+        .queue-search-input:focus {
+            border-color: #111827;
+            box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+        }
+
+        .queue-search-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .clear-search-button {
+            position: absolute;
+            right: 9px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: #f3f4f6;
+            color: #4b5563;
+            width: 27px;
+            height: 27px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 17px;
+            display: none;
+        }
+
+        .clear-search-button:hover {
+            background: #e5e7eb;
+        }
+
+        .search-result-count {
+            color: #6b7280;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        /* SUMMARY CARDS */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        .summary-label {
+            display: block;
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .summary-value {
+            display: block;
+            color: #111827;
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        /* TABLE */
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        th {
+            background: #f9fafb;
+            color: #6b7280;
+            font-size: 12px;
+            text-transform: uppercase;
+            padding: 13px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        td {
+            padding: 14px 16px;
+            color: #374151;
+            font-size: 14px;
+            border-bottom: 1px solid #eef0f2;
+        }
+
+        tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 35px !important;
+            color: #6b7280;
+        }
+
+        /* STATUS */
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-paid {
+            background: #ecfdf5;
+            color: #166534;
+        }
+
+        .status-partial {
+            background: #fffbeb;
+            color: #a16207;
+        }
+
+        .status-pending {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .status-unknown {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        /* OPEN BUTTON */
+
+        .open-button {
+            border: none;
+            border-radius: 7px;
+            padding: 8px 14px;
+            background: #111827;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .open-button:hover {
+            background: #1f2937;
+        }
+
+        /* SALE DETAILS */
+
+        .sale-card {
+            margin-top: 24px;
+            padding: 24px;
+        }
+
+        .sale-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 22px;
+        }
+
+        .sale-card-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #111827;
+        }
+
+        .sale-card-header p {
+            margin: 5px 0 0;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .close-button {
+            border: none;
+            border-radius: 7px;
+            padding: 9px 15px;
+            background: #f3f4f6;
+            color: #374151;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .close-button:hover {
+            background: #e5e7eb;
+        }
+
+        /* INFO GRID */
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .info-box {
+            background: #f9fafb;
+            border: 1px solid #eef0f2;
+            border-radius: 9px;
+            padding: 14px;
+        }
+
+        .info-label {
+            display: block;
+            color: #6b7280;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            display: block;
+            color: #111827;
+            font-size: 14px;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        /* TOTAL */
+
+        .total-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 18px;
+            background: #f9fafb;
+            border-radius: 10px;
+            border: 1px solid #eef0f2;
+        }
+
+        .total-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .total-value {
+            color: #111827;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        /* ITEMS */
+
+        .section-title {
+            margin: 0 0 14px;
+            font-size: 16px;
+            color: #111827;
+        }
+
+        .items-table {
+            margin-bottom: 28px;
+        }
+
+        /* RELEASE FORM */
+
+        .release-form {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 17px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: #374151;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #111827;
+        }
+
+        .form-group textarea {
+            min-height: 85px;
+            resize: vertical;
+        }
+
+        .release-button {
+            width: 100%;
+            margin-top: 5px;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            background: #166534;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .release-button:hover {
+            background: #14532d;
+        }
+
+        .release-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* MESSAGE */
+
+        #message {
+            display: none;
+            margin-top: 18px;
+            padding: 13px 15px;
+            border-radius: 8px;
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 900px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .queue-card-header,
+            .sale-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .refresh-button {
+                width: 100%;
+            }
+
+            .queue-search-area {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .search-result-count {
+                white-space: normal;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sale-card {
+                padding: 18px;
+            }
+
+            .close-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="pos-app">
+    <aside id="posSidebar" class="pos-sidebar"></aside>
+    <main class="pos-main">
+        <header id="posTopbar" class="pos-topbar"></header>
+        <div class="pos-content">
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Goods Release</h1>
+
+                    <p class="page-subtitle">
+                        Verify paid sales and release goods to customers.
+                    </p>
+                </div>
+            </div>
+
+            <!-- SUMMARY -->
+
+            <div class="summary-grid">
+
+                <div class="summary-card">
+                    <span class="summary-label">
+                        Waiting for Release
+                    </span>
+
+                    <span id="queueCount" class="summary-value">
+                        0
+                    </span>
+                </div>
+
+                <div class="summary-card">
+                    <span class="summary-label">
+                        Paid Sales
+                    </span>
+
+                    <span id="paidCount" class="summary-value">
+                        0
+                    </span>
+                </div>
+
+                <div class="summary-card">
+                    <span class="summary-label">
+                        Total Sales Value
+                    </span>
+
+                    <span id="queueTotal" class="summary-value">
+                        ₦0
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- GOODS RELEASE QUEUE -->
+
+            <div class="queue-card">
+
+                <div class="queue-card-header">
+
+                    <div>
+                        <h2 class="queue-card-title">
+                            Goods Release Queue
+                        </h2>
+
+                        <p class="queue-card-subtitle">
+                            Sales waiting for goods to be released.
+                        </p>
+                    </div>
+
+                    <button
+                        class="refresh-button"
+                        onclick="loadGoodsReleaseQueue()"
+                    >
+                        Refresh Queue
+                    </button>
+
+                </div>
+
+                <!-- SEARCH BOX -->
+
+                <div class="queue-search-area">
+
+                    <div class="search-input-wrapper">
+
+                        <span class="search-icon">⌕</span>
+
+                        <input
+                            type="search"
+                            id="goodsReleaseSearch"
+                            class="queue-search-input"
+                            placeholder="Search customer, sale number, or payment status..."
+                            autocomplete="off"
+                            oninput="filterGoodsReleaseQueue()"
+                        >
+
+                        <button
+                            type="button"
+                            id="clearSearchButton"
+                            class="clear-search-button"
+                            onclick="clearGoodsReleaseSearch()"
+                            aria-label="Clear search"
+                            title="Clear search"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                    <span
+                        id="searchResultCount"
+                        class="search-result-count"
+                    >
+                        0 sales
+                    </span>
+
+                </div>
+
+                <!-- QUEUE TABLE -->
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Sale Number</th>
+                                <th>Total</th>
+                                <th>Payment Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="queueTable">
+                            <tr>
+                                <td colspan="5" class="empty-message">
+                                    Loading queue...
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            <!-- SALE DETAILS -->
+
+            <div
+                id="saleSection"
+                class="sale-card"
+                style="display: none;"
+            >
+
+                <div class="sale-card-header">
+
+                    <div>
+                        <h2>Sale Information</h2>
+
+                        <p>
+                            Review the sale before releasing goods.
+                        </p>
+                    </div>
+
+                    <button
+                        class="close-button"
+                        onclick="closeSale()"
+                    >
+                        Close
+                    </button>
+
+                </div>
+
+                <!-- SALE INFORMATION -->
+
+                <div class="info-grid">
+
+                    <div class="info-box">
+                        <span class="info-label">Sale Number</span>
+                        <span id="displaySaleNumber" class="info-value"></span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">Customer</span>
+                        <span id="customerName" class="info-value"></span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">Customer ID</span>
+                        <span id="customerId" class="info-value"></span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">Branch ID</span>
+                        <span id="branchId" class="info-value"></span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">Salesperson ID</span>
+                        <span id="salespersonId" class="info-value"></span>
+                    </div>
+
+                    <div class="info-box">
+                        <span class="info-label">Payment Status</span>
+                        <span id="saleStatus" class="info-value"></span>
+                    </div>
+
+                </div>
+
+                <!-- SALE TOTAL -->
+
+                <div class="total-box">
+                    <span class="total-label">Sale Total</span>
+
+                    <span class="total-value">
+                        ₦<span id="totalAmount"></span>
+                    </span>
+                </div>
+
+                <!-- SALE ITEMS -->
+
+                <h2 class="section-title">Sale Items</h2>
+
+                <div class="table-container">
+
+                    <table class="items-table">
+
+                        <thead>
+                            <tr>
+                                <th>Product Number</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="itemsTable"></tbody>
+
+                    </table>
+
+                </div>
+
+                <!-- RELEASE FORM -->
+
+                <div class="release-form">
+
+                    <div class="form-group">
+                        <label for="releasedBy">Released By</label>
+
+                        <input
+                            type="number"
+                            id="releasedBy"
+                            placeholder="Enter user ID"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="note">Note</label>
+
+                        <textarea
+                            id="note"
+                            placeholder="Optional note"
+                        ></textarea>
+                    </div>
+
+                    <button
+                        id="releaseButton"
+                        class="release-button"
+                        onclick="releaseGoods()"
+                    >
+                        Release Goods
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- MESSAGE -->
+
+            <div id="message"></div>
+
+        </div>
+    </main>
+</div>
+
+<!-- POS LAYOUT -->
+
+<script src="js/pos-layout.js" defer></script>
+
+<script>
+
+"use strict";
+const API_BASE = "http://127.0.0.1:3000/api";
+
+let currentSale = null;
+let goodsReleaseSales = [];
+
+// =========================
+// JWT AUTHENTICATION
+// =========================
+
+function getToken() {
+    return localStorage.getItem("posToken");
+}
+
+function redirectToLogin() {
+    window.location.href = "login.html";
+}
+
+async function apiRequest(url, options = {}) {
+    const token = getToken();
+
+    if (!token) {
+        redirectToLogin();
+        throw new Error("Authentication required. Please log in.");
+    }
+
+    const headers = {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`
+    };
+
+    if (options.body && !headers["Content-Type"]) {
+        headers["Content-Type"] = "application/json";
+    }
+
+    const response = await fetch(url, {
+        ...options,
+        headers
+    });
+
+    let data;
+
+    try {
+        data = await response.json();
+    } catch {
+        data = {};
+    }
+
+    if (response.status === 401) {
+        showMessage("Your session has expired. Please log in again.");
+        localStorage.removeItem("posToken");
+        redirectToLogin();
+
+        throw new Error("Session expired. Please log in again.");
+    }
+
+    if (response.status === 403) {
+        throw new Error(
+            data.message || "You do not have permission to perform this action."
+        );
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            data.message || `Request failed (${response.status})`
+        );
+    }
+
+    return data;
+}
+
+// =========================
+// LOAD GOODS RELEASE QUEUE
+// =========================
+
+async function loadGoodsReleaseQueue() {
+    const table = document.getElementById("queueTable");
+
+    table.innerHTML = `
+        <tr>
+            <td colspan="5" class="empty-message">Loading queue...</td>
+        </tr>
+    `;
+
+    try {
+        const sales = await apiRequest(
+            `${API_BASE}/sales/goods-release-queue`
+        );
+
+        if (!Array.isArray(sales)) {
+            throw new Error("Unexpected goods release queue response.");
+        }
+
+        goodsReleaseSales = sales;
+
+        updateSummary(sales);
+        filterGoodsReleaseQueue();
+
+    } catch (error) {
+        console.error("Load queue error:", error);
+
+        goodsReleaseSales = [];
+        updateSummary([]);
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="5" class="empty-message">
+                    ${escapeHtml(error.message || "Failed to load queue.")}
+                </td>
+            </tr>
+        `;
+
+        document.getElementById("searchResultCount").textContent = "0 sales";
+    }
+}
+
+// =========================
+// SEARCH QUEUE
+// =========================
+
+function filterGoodsReleaseQueue() {
+    const searchInput = document.getElementById("goodsReleaseSearch");
+    const clearButton = document.getElementById("clearSearchButton");
+    const resultCount = document.getElementById("searchResultCount");
+
+    const term = searchInput.value.trim().toLowerCase();
+
+    clearButton.style.display = term ? "block" : "none";
+
+    const filteredSales = goodsReleaseSales.filter(sale => {
+        const customerName =
+            sale.customerName ||
+            sale.Customer?.name ||
+            sale.customer?.name ||
+            "Walk-in Customer";
+
+        const saleNumber = sale.saleNumber || "";
+        const status = sale.status || "UNKNOWN";
+
+        const customerPhone =
+            sale.customerPhone ||
+            sale.phone ||
+            sale.Customer?.phone ||
+            sale.customer?.phone ||
+            "";
+
+        const searchableText = [
+            customerName,
+            saleNumber,
+            status,
+            status.replace(/_/g, " "),
+            customerPhone,
+            sale.id ?? ""
+        ].join(" ").toLowerCase();
+
+        return searchableText.includes(term);
+    });
+
+    renderGoodsReleaseQueue(filteredSales);
+
+    resultCount.textContent =
+        `Showing ${filteredSales.length} of ${goodsReleaseSales.length} sales`;
+}
+
+function clearGoodsReleaseSearch() {
+    const searchInput = document.getElementById("goodsReleaseSearch");
+
+    searchInput.value = "";
+    filterGoodsReleaseQueue();
+    searchInput.focus();
+}
+
+// =========================
+// RENDER QUEUE
+// =========================
+
+function renderGoodsReleaseQueue(sales) {
+    const table = document.getElementById("queueTable");
+    table.innerHTML = "";
+
+    if (!sales.length) {
+        const searchTerm = document.getElementById(
+            "goodsReleaseSearch"
+        ).value.trim();
+
+        const message = searchTerm
+            ? "No sales match your search."
+            : "No goods waiting for release.";
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="5" class="empty-message">
+                    ${escapeHtml(message)}
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    sales.forEach(sale => {
+        const row = document.createElement("tr");
+
+        const customerName =
+            sale.customerName ||
+            sale.Customer?.name ||
+            sale.customer?.name ||
+            "Walk-in Customer";
+
+        const status = sale.status || "UNKNOWN";
+
+        let statusClass = "status-unknown";
+
+        if (status === "PAID") {
+            statusClass = "status-paid";
+        } else if (status === "PARTIALLY_PAID") {
+            statusClass = "status-partial";
+        } else if (status === "PENDING") {
+            statusClass = "status-pending";
+        }
+
+        const saleNumber = sale.saleNumber || "N/A";
+        const totalAmount = Number(sale.totalAmount || 0).toLocaleString();
+
+        row.innerHTML = `
+            <td>${escapeHtml(customerName)}</td>
+            <td>${escapeHtml(saleNumber)}</td>
+            <td>₦${totalAmount}</td>
+            <td>
+                <span class="status ${statusClass}">
+                    ${escapeHtml(status)}
+                </span>
+            </td>
+            <td>
+                <button class="open-button" type="button">
+                    Open
+                </button>
+            </td>
+        `;
+
+        row.querySelector(".open-button").addEventListener(
+            "click",
+            () => openSale(sale.id)
+        );
+
+        table.appendChild(row);
+    });
+}
+
+// =========================
+// SUMMARY
+// =========================
+
+function updateSummary(sales) {
+    document.getElementById("queueCount").textContent = sales.length;
+
+    document.getElementById("paidCount").textContent =
+        sales.filter(sale => sale.status === "PAID").length;
+
+    const total = sales.reduce(
+        (sum, sale) => sum + Number(sale.totalAmount || 0),
+        0
+    );
+
+    document.getElementById("queueTotal").textContent =
+        "₦" + total.toLocaleString();
+}
+
+// =========================
+// OPEN SALE
+// =========================
+
+async function openSale(saleId) {
+    try {
+        const saleNumber = getSaleNumberFromQueue(saleId);
+
+        const sale = await apiRequest(
+            `${API_BASE}/sales/number/${encodeURIComponent(saleNumber)}`
+        );
+
+        currentSale = sale;
+        displaySale(sale);
+
+    } catch (error) {
+        console.error("Open sale error:", error);
+        showMessage(error.message || "Failed to load sale.");
+    }
+}
+
+function getSaleNumberFromQueue(saleId) {
+    const sale = goodsReleaseSales.find(
+        item => String(item.id) === String(saleId)
+    );
+
+    if (!sale) {
+        throw new Error(
+            "Sale no longer exists in queue. Please refresh the queue."
+        );
+    }
+
+    if (!sale.saleNumber) {
+        throw new Error("Sale number was not found.");
+    }
+
+    return sale.saleNumber;
+}
+
+// =========================
+// DISPLAY SALE DETAILS
+// =========================
+
+function displaySale(data) {
+    document.getElementById("displaySaleNumber").textContent =
+        data.saleNumber || "N/A";
+
+    document.getElementById("customerName").textContent =
+        data.customerName ||
+        data.Customer?.name ||
+        data.customer?.name ||
+        "Walk-in Customer";
+
+    document.getElementById("customerId").textContent =
+        data.customerId ?? "Walk-in Customer";
+
+    document.getElementById("branchId").textContent =
+        data.branchId ?? "N/A";
+
+    document.getElementById("salespersonId").textContent =
+        data.salespersonId ?? "N/A";
+
+    document.getElementById("saleStatus").textContent =
+        data.status || "UNKNOWN";
+
+    document.getElementById("totalAmount").textContent =
+        Number(data.totalAmount || 0).toLocaleString();
+
+    const table = document.getElementById("itemsTable");
+    table.innerHTML = "";
+
+    const items = data.SaleItems || data.saleItems || data.items || [];
+
+    if (Array.isArray(items) && items.length) {
+        items.forEach(item => {
+            const row = document.createElement("tr");
+
+            const quantity = Number(item.quantity || 0);
+            const unitPrice = Number(item.unitPrice || 0);
+            const totalPrice = Number(
+                item.totalPrice ?? quantity * unitPrice
+            );
+
+            row.innerHTML = `
+                <td>${escapeHtml(item.Product?.productNumber ?? item.product?.productNumber ?? item.productNumber ?? "N/A")}</td>
+                <td>${escapeHtml(quantity)}</td>
+                <td>₦${unitPrice.toLocaleString()}</td>
+                <td>₦${totalPrice.toLocaleString()}</td>
+            `;
+
+            table.appendChild(row);
+        });
+    } else {
+        table.innerHTML = `
+            <tr>
+                <td colspan="4" class="empty-message">
+                    No sale items found.
+                </td>
+            </tr>
+        `;
+    }
+
+    document.getElementById("saleSection").style.display = "block";
+
+    hideMessage();
+
+    const releaseButton = document.getElementById("releaseButton");
+    releaseButton.disabled = false;
+    releaseButton.textContent = "Release Goods";
+
+    document.getElementById("saleSection").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+}
+
+// =========================
+// CLOSE SALE
+// =========================
+
+function closeSale() {
+    currentSale = null;
+    document.getElementById("saleSection").style.display = "none";
+    hideMessage();
+}
+
+// =========================
+// RELEASE GOODS
+// =========================
+
+async function releaseGoods() {
+    if (!currentSale) {
+        showMessage("Please open a sale first.");
+        return;
+    }
+
+    const releasedBy = Number(
+        document.getElementById("releasedBy").value
+    );
+
+    const note = document.getElementById("note").value.trim();
+
+    if (!Number.isInteger(releasedBy) || releasedBy <= 0) {
+        showMessage("Enter a valid released-by user ID.");
+        return;
+    }
+
+    const releaseButton = document.getElementById("releaseButton");
+
+    releaseButton.disabled = true;
+    releaseButton.textContent = "Releasing...";
+
+    try {
+        await apiRequest(`${API_BASE}/goods-release`, {
+            method: "POST",
+            body: JSON.stringify({
+                saleId: currentSale.id,
+                releasedBy,
+                note: note || null
+            })
+        });
+
+        showMessage("Goods released successfully.");
+
+        currentSale = null;
+
+        document.getElementById("saleSection").style.display = "none";
+        document.getElementById("releasedBy").value = "";
+        document.getElementById("note").value = "";
+
+        await loadGoodsReleaseQueue();
+
+    } catch (error) {
+        console.error("Release goods error:", error);
+        showMessage(error.message || "Goods release failed.");
+
+    } finally {
+        releaseButton.disabled = false;
+        releaseButton.textContent = "Release Goods";
+    }
+}
+
+// =========================
+// MESSAGE HELPERS
+// =========================
+
+function showMessage(message) {
+    const element = document.getElementById("message");
+    element.textContent = message;
+    element.style.display = "block";
+}
+
+function hideMessage() {
+    const element = document.getElementById("message");
+    element.textContent = "";
+    element.style.display = "none";
+}
+
+// =========================
+// HTML ESCAPING
+// =========================
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// =========================
+// START PAGE
+// =========================
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!getToken()) {
+        redirectToLogin();
+        return;
+    }
+
+    loadGoodsReleaseQueue();
+});
+
+</script>
+
+</body>
+</html>

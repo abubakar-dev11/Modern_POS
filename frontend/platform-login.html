@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern POS | Platform Admin Login</title>
+<link rel="stylesheet" href="css/pos.css">
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f1f5f9;font-family:Arial,sans-serif;color:#172033}
+.login-card{width:min(420px,calc(100% - 40px));box-sizing:border-box;background:white;padding:32px;border-radius:18px;box-shadow:0 12px 40px #0f172a12}
+.logo{width:48px;height:48px;border-radius:14px;background:#172554;color:white;display:grid;place-items:center;font-size:24px;font-weight:bold}
+h1{font-size:25px;margin:20px 0 8px}.muted{color:#64748b;font-size:14px;line-height:1.6}
+label{display:block;font-weight:600;font-size:14px;margin:18px 0 7px}
+input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px}
+button{width:100%;margin-top:22px;padding:13px;border:0;border-radius:9px;background:#1d4ed8;color:white;font-size:15px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}.error{color:#b91c1c;font-size:14px;margin-top:14px}.hint{margin-top:20px;font-size:12px;color:#64748b}
+</style>
+</head>
+<body>
+<div class="login-card">
+    <div class="logo">M</div>
+    <h1>Platform Admin</h1>
+    <p class="muted">Sign in to manage Modern POS businesses and customer feedback.</p>
+
+    <form id="loginForm">
+        <label for="email">Admin email</label>
+        <input id="email" type="email" autocomplete="username" required>
+
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+
+        <button id="loginButton" type="submit">Sign In</button>
+        <div id="error" class="error" role="alert"></div>
+    </form>
+
+    <p class="hint">Platform administrators only. This is separate from the normal POS login.</p>
+</div>
+
+<script>
+const API = "http://127.0.0.1:3000/api";
+
+if (localStorage.getItem("platformToken")) {
+    window.location.replace("platform-dashboard.html");
+}
+
+document.getElementById("loginForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const button = document.getElementById("loginButton");
+    const error = document.getElementById("error");
+    error.textContent = "";
+    button.disabled = true;
+    button.textContent = "Signing in...";
+
+    try {
+        const response = await fetch(`${API}/platform-auth/login`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                email: document.getElementById("email").value.trim(),
+                password: document.getElementById("password").value
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.token) {
+            throw new Error(data.message || "Login failed.");
+        }
+
+        localStorage.setItem("platformToken", data.token);
+
+        if (data.admin) {
+            localStorage.setItem("platformAdmin", JSON.stringify(data.admin));
+        }
+
+        window.location.href = "platform-dashboard.html";
+    } catch (err) {
+        error.textContent = err.message || "Could not connect to the server.";
+    } finally {
+        button.disabled = false;
+        button.textContent = "Sign In";
+    }
+});
+</script>
+</body>
+</html>

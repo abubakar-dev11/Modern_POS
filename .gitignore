@@ -1,0 +1,38 @@
+﻿# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Databases and backups
+*.sqlite
+*.sqlite3
+*.db
+*.bak
+**/backups/
+**/*backup*
+**/*before-*
+
+# Logs
+*.log
+npm-debug.log*
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Local database maintenance scripts
+backend/migrations/
+backend/scripts/
+backend/fixCustomerPhoneIndex.js
+backend/fix_product_uniqueness.js
+backend/migrate-business-scope.js
+backend/migrate-product-numbers.js
+backend/migrate_sales_business.js
+backend/resetSales.js
+
+# Product uploads are kept locally for now
+backend/uploads/

@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Modern POS - Sales</title>
+
+    <link rel="stylesheet" href="css/pos.css">
+
+    <style>
+        /* =====================================================
+           SALES PAGE
+        ===================================================== */
+
+        .sales-page {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        .sales-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .sales-page-title h1 {
+            margin: 0 0 6px;
+            font-size: 27px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .sales-page-title p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .sales-status {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px 14px;
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .sales-status-dot {
+            width: 8px;
+            height: 8px;
+            flex-shrink: 0;
+            background: #10b981;
+            border-radius: 50%;
+        }
+
+        /* =====================================================
+           CARDS
+        ===================================================== */
+
+        .sales-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            margin-bottom: 22px;
+            overflow: visible;
+        }
+
+        .sales-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 18px 22px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .sales-card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sales-card-number {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: #f3f4f6;
+            color: #1f2937;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .sales-card-header h2 {
+            margin: 0;
+            font-size: 17px;
+            color: #111827;
+        }
+
+        .sales-card-header p {
+            margin: 4px 0 0;
+            color: #6b7280;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .sales-card-body {
+            padding: 22px;
+        }
+
+        /* =====================================================
+           CUSTOMER INFORMATION
+        ===================================================== */
+
+        .customer-grid {
+            display: grid;
+            grid-template-columns: minmax(230px, 2fr) repeat(3, minmax(130px, 1fr));
+            gap: 16px;
+            align-items: start;
+        }
+
+        .form-group {
+            min-width: 0;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: #374151;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            min-width: 0;
+            height: 42px;
+            padding: 0 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            background: #ffffff;
+            color: #111827;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: #6b7280;
+            box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.10);
+        }
+
+        .form-control::placeholder {
+            color: #9ca3af;
+        }
+
+        .customer-search-area {
+            position: relative;
+        }
+
+        .customer-results {
+            display: none;
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            z-index: 100;
+            max-height: 240px;
+            overflow-y: auto;
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .customer-result-item {
+            padding: 11px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .customer-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .customer-result-item:hover {
+            background: #f9fafb;
+        }
+
+        .customer-result-name {
+            color: #111827;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .customer-result-phone {
+            margin-top: 4px;
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .customer-results-message {
+            padding: 12px;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .selected-customer {
+            display: none;
+            margin-top: 8px;
+            padding: 10px 12px;
+            border: 1px solid #bbf7d0;
+            border-radius: 7px;
+            background: #f0fdf4;
+            color: #166534;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        /* =====================================================
+           BUTTONS
+        ===================================================== */
+
+        .sales-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 41px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 7px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .sales-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .sales-btn-primary {
+            background: #1f2937;
+            color: #ffffff;
+        }
+
+        .sales-btn-primary:hover:not(:disabled) {
+            background: #374151;
+        }
+
+        .sales-btn-success {
+            background: #0b7a3b;
+            color: #ffffff;
+        }
+
+        .sales-btn-success:hover:not(:disabled) {
+            background: #096632;
+        }
+
+        .sales-btn-danger {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+        }
+
+        .sales-btn-danger:hover:not(:disabled) {
+            background: #fee2e2;
+        }
+
+        .new-customer-button {
+            width: 100%;
+            min-height: 42px;
+        }
+
+        /* =====================================================
+           NEW CUSTOMER FORM
+        ===================================================== */
+
+        .new-customer-form {
+            display: none;
+            margin-top: 22px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 9px;
+            background: #f9fafb;
+        }
+
+        .new-customer-heading {
+            margin: 0 0 16px;
+            color: #111827;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .new-customer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .new-customer-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        /* =====================================================
+           PRODUCT SEARCH
+        ===================================================== */
+
+        .product-search-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .product-search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .product-search {
+            width: 100%;
+            height: 45px;
+            padding: 0 15px 0 42px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            background: #f9fafb;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .product-search:focus {
+            background: #ffffff;
+            border-color: #6b7280;
+            box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.10);
+        }
+
+        /* =====================================================
+           PRODUCT GRID
+        ===================================================== */
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 16px;
+        }
+
+        .product-card {
+            min-width: 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 9px;
+            background: #ffffff;
+            overflow: hidden;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .product-card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.06);
+        }
+
+        .product-image,
+        .no-image {
+            width: 100%;
+            height: 145px;
+            display: block;
+            background: #f3f4f6;
+        }
+
+        .product-image {
+            object-fit: contain;
+            padding: 10px;
+        }
+
+        .no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .product-info {
+            padding: 14px;
+        }
+
+        .product-name {
+            min-height: 40px;
+            margin-bottom: 8px;
+            color: #111827;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+        }
+
+        .product-sku {
+            margin-bottom: 8px;
+            color: #9ca3af;
+            font-size: 11px;
+            overflow-wrap: anywhere;
+        }
+
+        .product-price {
+            margin-bottom: 7px;
+            color: #111827;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .product-stock {
+            margin-bottom: 13px;
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .product-stock.stock-empty {
+            color: #b91c1c;
+        }
+
+        .quantity-input {
+            width: 100%;
+            height: 38px;
+            padding: 0 10px;
+            margin-bottom: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .quantity-input:focus {
+            outline: none;
+            border-color: #6b7280;
+        }
+
+        .add-button {
+            width: 100%;
+            min-height: 38px;
+            border: none;
+            border-radius: 7px;
+            background: #1f2937;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .add-button:hover:not(:disabled) {
+            background: #374151;
+        }
+
+        .add-button:disabled {
+            background: #d1d5db;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
+        /* =====================================================
+           CART TABLE
+        ===================================================== */
+
+        .cart-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .cart-table {
+            width: 100%;
+            min-width: 650px;
+            border-collapse: collapse;
+        }
+
+        .cart-table th {
+            padding: 13px 15px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        .cart-table td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #374151;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .cart-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .cart-product-name {
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .remove-button {
+            padding: 7px 10px;
+            border: 1px solid #fecaca;
+            border-radius: 6px;
+            background: #fef2f2;
+            color: #b91c1c;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .remove-button:hover {
+            background: #fee2e2;
+        }
+
+        .empty {
+            padding: 32px 20px;
+            color: #6b7280;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* =====================================================
+           SUMMARY
+        ===================================================== */
+
+        .sale-summary {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .summary-box {
+            width: 330px;
+            max-width: 100%;
+            padding: 18px;
+            border: 1px solid #e5e7eb;
+            border-radius: 9px;
+            background: #f9fafb;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 5px 0;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+            padding-top: 14px;
+            border-top: 1px solid #e5e7eb;
+            color: #111827;
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .sale-action {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 18px;
+        }
+
+        .sale-button {
+            min-width: 220px;
+            min-height: 46px;
+            padding: 0 24px;
+            border: none;
+            border-radius: 7px;
+            background: #0b7a3b;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .sale-button:hover:not(:disabled) {
+            background: #096632;
+        }
+
+        .sale-button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        /* =====================================================
+           MESSAGE
+        ===================================================== */
+
+        .message {
+            display: none;
+            margin-top: 15px;
+            padding: 12px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            background: #f9fafb;
+            color: #374151;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .message.message-success {
+            border-color: #bbf7d0;
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .message.message-error {
+            border-color: #fecaca;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .loading {
+            grid-column: 1 / -1;
+            padding: 45px 20px;
+            color: #6b7280;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 1100px) {
+            .customer-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+            }
+        }
+
+        @media (max-width: 700px) {
+            .sales-page-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .sales-page-title h1 {
+                font-size: 24px;
+            }
+
+            .customer-grid,
+            .new-customer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sales-card-body {
+                padding: 16px;
+            }
+
+            .sales-card-header {
+                padding: 16px;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            .product-image,
+            .no-image {
+                height: 115px;
+            }
+
+            .product-info {
+                padding: 10px;
+            }
+
+            .product-name {
+                font-size: 13px;
+            }
+
+            .product-price {
+                font-size: 16px;
+            }
+
+            .sale-summary {
+                justify-content: stretch;
+            }
+
+            .summary-box {
+                width: 100%;
+            }
+
+            .sale-action {
+                justify-content: stretch;
+            }
+
+            .sale-button {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .new-customer-actions {
+                flex-direction: column;
+            }
+
+            .new-customer-actions button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="pos-app">
+
+    <aside id="posSidebar" class="pos-sidebar"></aside>
+
+    <main class="pos-main">
+
+        <header id="posTopbar" class="pos-topbar"></header>
+
+        <div class="pos-content">
+            <div class="sales-page">
+
+                <!-- PAGE HEADER -->
+                <div class="sales-page-header">
+                    <div class="sales-page-title">
+                        <h1>Sales</h1>
+                        <p>Create a customer sale and send it to the cashier queue.</p>
+                    </div>
+
+                    <div class="sales-status">
+                        <span class="sales-status-dot"></span>
+                        Salesperson Mode
+                    </div>
+                </div>
+
+                <!-- SALE INFORMATION -->
+                <section class="sales-card">
+                    <div class="sales-card-header">
+                        <div class="sales-card-title">
+                            <div class="sales-card-number">01</div>
+                            <div>
+                                <h2>Sale Information</h2>
+                                <p>Enter customer and branch information</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sales-card-body">
+                        <div class="customer-grid">
+
+                            <div class="form-group customer-search-area">
+                                <label for="customerSearch">Customer</label>
+
+                                <input
+                                    type="text"
+                                    id="customerSearch"
+                                    class="form-control"
+                                    placeholder="Search by name or phone..."
+                                    autocomplete="off"
+                                    oninput="searchCustomers()"
+                                >
+
+                                <div id="customerResults" class="customer-results"></div>
+
+                                <div id="selectedCustomer" class="selected-customer"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="newCustomerButton">New Customer</label>
+                                <button
+                                    type="button"
+                                    id="newCustomerButton"
+                                    class="sales-btn sales-btn-primary new-customer-button"
+                                    onclick="openNewCustomerForm()"
+                                >
+                                    + New Customer
+                                </button>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="salespersonId">Salesperson ID</label>
+                                <input
+                                    type="number"
+                                    id="salespersonId"
+                                    class="form-control"
+                                    value="1"
+                                    min="1"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="branchId">Branch ID</label>
+                                <input
+                                    type="number"
+                                    id="branchId"
+                                    class="form-control"
+                                    value="1"
+                                    min="1"
+                                >
+                            </div>
+
+                        </div>
+
+                        <!-- NEW CUSTOMER FORM -->
+                        <div id="newCustomerForm" class="new-customer-form">
+                            <h3 class="new-customer-heading">Create New Customer</h3>
+
+                            <div class="new-customer-grid">
+                                <div class="form-group">
+                                    <label for="newCustomerName">Name</label>
+                                    <input
+                                        type="text"
+                                        id="newCustomerName"
+                                        class="form-control"
+                                        placeholder="Customer name"
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="newCustomerPhone">Phone</label>
+                                    <input
+                                        type="text"
+                                        id="newCustomerPhone"
+                                        class="form-control"
+                                        placeholder="Phone number"
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="newCustomerEmail">Email</label>
+                                    <input
+                                        type="email"
+                                        id="newCustomerEmail"
+                                        class="form-control"
+                                        placeholder="Optional"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="new-customer-actions">
+                                <button
+                                    type="button"
+                                    id="createCustomerButton"
+                                    class="sales-btn sales-btn-success"
+                                    onclick="createNewCustomer()"
+                                >
+                                    CREATE CUSTOMER
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="sales-btn sales-btn-danger"
+                                    onclick="closeNewCustomerForm()"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PRODUCTS -->
+                <section class="sales-card">
+                    <div class="sales-card-header">
+                        <div class="sales-card-title">
+                            <div class="sales-card-number">02</div>
+                            <div>
+                                <h2>Select Products</h2>
+                                <p>Search and add products to the customer sale</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sales-card-body">
+                        <div class="product-search-wrapper">
+                            <span class="product-search-icon" aria-hidden="true">⌕</span>
+                            <input
+                                type="text"
+                                id="productSearch"
+                                class="product-search"
+                                placeholder="Search product by name or SKU..."
+                                oninput="filterProducts()"
+                            >
+                        </div>
+
+                        <div id="productsGrid" class="products-grid">
+                            <div class="loading">Loading products...</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SALE ITEMS -->
+                <section class="sales-card">
+                    <div class="sales-card-header">
+                        <div class="sales-card-title">
+                            <div class="sales-card-number">03</div>
+                            <div>
+                                <h2>Sale Items</h2>
+                                <p>Review products before sending the sale to the cashier</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sales-card-body">
+                        <div class="cart-wrapper">
+                            <table class="cart-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th>Total</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itemsTable"></tbody>
+                            </table>
+                        </div>
+
+                        <div id="emptyCart" class="empty">
+                            No products added yet.
+                        </div>
+
+                        <div class="sale-summary">
+                            <div class="summary-box">
+                                <div class="summary-row">
+                                    <span>Total Quantity</span>
+                                    <span id="summaryItems">0</span>
+                                </div>
+
+                                <div class="summary-total">
+                                    <span>Total</span>
+                                    <span>₦<span id="totalAmount">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sale-action">
+                            <button
+                                type="button"
+                                id="createSaleButton"
+                                class="sale-button"
+                                onclick="createSale()"
+                            >
+                                CREATE SALE
+                            </button>
+                        </div>
+
+                        <div id="message" class="message" role="status" aria-live="polite"></div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // =========================================================
+    // DATA
+    // =========================================================
+
+    let products = [];
+    let items = [];
+    let selectedCustomer = null;
+    let customerSearchRequest = 0;
+
+    const API_BASE = "http://127.0.0.1:3000/api";
+    function getAuthHeaders() {
+        const token = localStorage.getItem("posToken");
+        if (!token) {
+        alert("Please log in again.");
+        window.location.href = "login.html";
+        return null;
+    }
+    return {
+        Authorization: `Bearer ${token}`
+    };
+}
+    // =========================================================
+    // SAFE HTML / FORMAT HELPERS
+    // =========================================================
+
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function formatMoney(value) {
+        return Number(value || 0).toLocaleString("en-NG", {
+            maximumFractionDigits: 2
+        });
+    }
+
+    function showMessage(text, type = "info") {
+        const message = document.getElementById("message");
+
+        message.textContent = text;
+        message.style.display = "block";
+        message.className = "message";
+
+        if (type === "success") {
+            message.classList.add("message-success");
+        } else if (type === "error") {
+            message.classList.add("message-error");
+        }
+    }
+
+    // =========================================================
+    // CUSTOMER SEARCH
+    // =========================================================
+    async function searchCustomers() {
+    const searchInput = document.getElementById("customerSearch");
+    const results = document.getElementById("customerResults");
+    const selected = document.getElementById("selectedCustomer");
+
+    const search = searchInput.value.trim();
+    const requestId = ++customerSearchRequest;
+
+    selectedCustomer = null;
+    selected.style.display = "none";
+    selected.innerHTML = "";
+
+    if (!search) {
+        results.innerHTML = "";
+        results.style.display = "none";
+        return;
+    }
+
+    const headers = getAuthHeaders();
+
+    if (!headers) return;
+
+    results.innerHTML = `
+        <div class="customer-results-message">
+            Searching customers...
+        </div>
+    `;
+    results.style.display = "block";
+
+    try {
+        const response = await fetch(`${API_BASE}/customers`, {
+            method: "GET",
+            headers
+        });
+
+        const data = await response.json();
+
+        if (response.status === 401) {
+            localStorage.removeItem("posToken");
+            localStorage.removeItem("posUser");
+
+            alert("Your session has expired. Please log in again.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(data.message || "Failed to load customers");
+        }
+
+        if (requestId !== customerSearchRequest) return;
+
+        const allCustomers = Array.isArray(data)
+            ? data
+            : Array.isArray(data.customers)
+                ? data.customers
+                : Array.isArray(data.data)
+                    ? data.data
+                    : [];
+
+        const query = search.toLowerCase();
+
+        const matchingCustomers = allCustomers.filter(customer => {
+            const name = String(customer.name || "").toLowerCase();
+            const phone = String(customer.phone || "").toLowerCase();
+
+            return name.includes(query) || phone.includes(query);
+        });
+
+        results.innerHTML = "";
+
+        if (matchingCustomers.length === 0) {
+            results.innerHTML = `
+                <div class="customer-results-message">
+                    No customer found.
+                </div>
+            `;
+            results.style.display = "block";
+            return;
+        }
+
+        matchingCustomers.forEach(customer => {
+            const customerItem = document.createElement("div");
+            customerItem.className = "customer-result-item";
+
+            const name = document.createElement("div");
+            name.className = "customer-result-name";
+            name.textContent = customer.name || "Unnamed customer";
+
+            const phone = document.createElement("div");
+            phone.className = "customer-result-phone";
+            phone.textContent = customer.phone || "No phone number";
+
+            customerItem.append(name, phone);
+
+            customerItem.addEventListener("click", () => {
+                selectCustomer(customer);
+            });
+
+            results.appendChild(customerItem);
+        });
+
+        results.style.display = "block";
+
+    } catch (error) {
+        console.error("Customer search error:", error);
+
+        if (requestId !== customerSearchRequest) return;
+
+        results.innerHTML = `
+            <div class="customer-results-message">
+                ${escapeHtml(error.message || "Could not load customers.")}
+            </div>
+        `;
+        results.style.display = "block";
+    }
+}
+
+
+    // =========================================================
+    // SELECT CUSTOMER
+    // =========================================================
+
+    function selectCustomer(customer) {
+        selectedCustomer = customer;
+
+        const searchInput = document.getElementById("customerSearch");
+        const results = document.getElementById("customerResults");
+        const selected = document.getElementById("selectedCustomer");
+
+        searchInput.value = customer.name || "";
+        results.innerHTML = "";
+        results.style.display = "none";
+
+        selected.textContent =
+            `Selected: ${customer.name || "Unnamed customer"}` +
+            (customer.phone ? ` — ${customer.phone}` : "");
+
+        selected.style.display = "block";
+    }
+
+    // =========================================================
+    // OPEN / CLOSE NEW CUSTOMER FORM
+    // =========================================================
+
+    function openNewCustomerForm() {
+        const form = document.getElementById("newCustomerForm");
+
+        form.style.display = "block";
+
+        document.getElementById("newCustomerName").focus();
+    }
+
+    function closeNewCustomerForm() {
+        document.getElementById("newCustomerForm").style.display = "none";
+        document.getElementById("newCustomerName").value = "";
+        document.getElementById("newCustomerPhone").value = "";
+        document.getElementById("newCustomerEmail").value = "";
+
+        const createButton = document.getElementById("createCustomerButton");
+        createButton.disabled = false;
+        createButton.textContent = "CREATE CUSTOMER";
+    }
+
+    // =========================================================
+    // CREATE NEW CUSTOMER
+    // =========================================================
+
+async function createNewCustomer() {
+    const name = document.getElementById("newCustomerName").value.trim();
+    const phone = document.getElementById("newCustomerPhone").value.trim();
+    const email = document.getElementById("newCustomerEmail").value.trim();
+    const createButton = document.getElementById("createCustomerButton");
+
+    // Only customer name is required.
+    if (!name) {
+        alert("Customer name is required.");
+        document.getElementById("newCustomerName").focus();
+        return;
+    }
+
+    const authHeaders = getAuthHeaders();
+    if (!authHeaders) return;
+
+    createButton.disabled = true;
+    createButton.textContent = "CREATING...";
+
+    try {
+        const response = await fetch(`${API_BASE}/customers`, {
+            method: "POST",
+            headers: {
+                ...authHeaders,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name,
+                phone: phone || null,
+                email: email || null
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.status === 401) {
+            localStorage.removeItem("posToken");
+            localStorage.removeItem("posUser");
+
+            alert("Your session has expired. Please log in again.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        if (!response.ok) {
+            alert(data.message || "Failed to create customer.");
+            return;
+        }
+
+        const customer = data.customer || data.data;
+
+        if (!customer || !(customer.id || customer.customerId)) {
+            console.log("Create customer response:", data);
+            alert("Customer was created, but the response did not contain its details.");
+            return;
+        }
+
+        selectCustomer(customer);
+        closeNewCustomerForm();
+
+        alert("Customer created successfully.");
+
+    } catch (error) {
+        console.error("Create customer error:", error);
+        alert("Failed to create customer. Check the server connection.");
+    } finally {
+        createButton.disabled = false;
+        createButton.textContent = "CREATE CUSTOMER";
+    }
+}
+
+    // =========================================================
+    // LOAD PRODUCTS
+    // =========================================================
+
+    async function loadProducts() {
+    const grid = document.getElementById("productsGrid");
+
+    grid.innerHTML = `
+        <div class="loading">Loading products...</div>
+    `;
+
+    const headers = getAuthHeaders();
+
+    if (!headers) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/products`, {
+            method: "GET",
+            headers
+        });
+
+        if (response.status === 401) {
+            localStorage.removeItem("posToken");
+            localStorage.removeItem("posUser");
+
+            alert("Your session has expired. Please log in again.");
+            window.location.href = "login.html";
+            return;
+        }
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Failed to load products"
+            );
+        }
+
+        if (Array.isArray(data)) {
+            products = data;
+        } else if (Array.isArray(data.products)) {
+            products = data.products;
+        } else if (Array.isArray(data.data)) {
+            products = data.data;
+        } else {
+            products = [];
+        }
+
+        filterProducts();
+
+    } catch (error) {
+        console.error("Load products error:", error);
+
+        grid.innerHTML = `
+            <div class="empty">
+                ${escapeHtml(
+                    error.message || "Failed to load products."
+                )}
+            </div>
+        `;
+    }
+}
+    // =========================================================
+    // DISPLAY PRODUCTS
+    // =========================================================
+
+    function displayProducts(productList = products) {
+        const grid = document.getElementById("productsGrid");
+        grid.innerHTML = "";
+
+        if (productList.length === 0) {
+            grid.innerHTML = `
+                <div class="empty">No products found.</div>
+            `;
+            return;
+        }
+
+        productList.forEach(product => {
+            const stock = Number(product.stockQuantity || 0);
+            const price = Number(product.sellingPrice || 0);
+
+            const card = document.createElement("div");
+            card.className = "product-card";
+
+            let imageHTML = "";
+
+            if (product.imageUrl) {
+                const imagePath = String(product.imageUrl);
+
+                const imageURL = /^https?:\/\//i.test(imagePath)
+                    ? imagePath
+                    : `http://127.0.0.1:3000${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
+
+                imageHTML = `
+                    <img
+                        class="product-image"
+                        src="${escapeHtml(imageURL)}"
+                        alt="${escapeHtml(product.name)}"
+                        loading="lazy"
+                        onerror="this.outerHTML='<div class=&quot;no-image&quot;>Image unavailable</div>'"
+                    >
+                `;
+            } else {
+                imageHTML = `<div class="no-image">No Image</div>`;
+            }
+
+            card.innerHTML = `
+                ${imageHTML}
+
+                <div class="product-info">
+                    <div class="product-name">
+                        ${escapeHtml(product.name || "Unnamed product")}
+                    </div>
+
+                    <div class="product-sku">
+                        SKU: ${escapeHtml(product.sku || "-")}
+                    </div>
+
+                    <div class="product-price">
+                        ₦${formatMoney(price)}
+                    </div>
+
+                    <div class="product-stock ${stock <= 0 ? "stock-empty" : ""}">
+                        Stock: ${stock}
+                    </div>
+
+                    <input
+                        type="number"
+                        class="quantity-input"
+                        id="qty-${Number(product.id)}"
+                        value="1"
+                        min="1"
+                        max="${stock}"
+                        aria-label="Quantity for ${escapeHtml(product.name)}"
+                        ${stock <= 0 ? "disabled" : ""}
+                    >
+
+                    <button
+                        type="button"
+                        class="add-button"
+                        onclick="addProductToCart(${Number(product.id)})"
+                        ${stock <= 0 ? "disabled" : ""}
+                    >
+                        ${stock <= 0 ? "Out of Stock" : "Add to Cart"}
+                    </button>
+                </div>
+            `;
+
+            grid.appendChild(card);
+        });
+    }
+
+    // =========================================================
+    // SEARCH PRODUCTS
+    // =========================================================
+
+    function filterProducts() {
+        const search = document
+            .getElementById("productSearch")
+            .value
+            .toLowerCase()
+            .trim();
+
+        const filtered = products.filter(product => {
+            const name = String(product.name || "").toLowerCase();
+            const sku = String(product.sku || "").toLowerCase();
+
+            return name.includes(search) || sku.includes(search);
+        });
+
+        displayProducts(filtered);
+    }
+
+    // =========================================================
+    // ADD PRODUCT TO CART
+    // =========================================================
+
+    function addProductToCart(productId) {
+        const product = products.find(
+            p => Number(p.id) === Number(productId)
+        );
+
+        if (!product) {
+            alert("Product not found");
+            return;
+        }
+
+        const quantityInput = document.getElementById(`qty-${productId}`);
+        const quantity = Number(quantityInput.value);
+        const stock = Number(product.stockQuantity || 0);
+        const unitPrice = Number(product.sellingPrice || 0);
+
+        if (!Number.isInteger(quantity) || quantity <= 0) {
+            alert("Enter a valid whole-number quantity");
+            return;
+        }
+
+        if (quantity > stock) {
+            alert("Quantity is greater than available stock");
+            return;
+        }
+
+        const existingItem = items.find(
+            item => Number(item.productId) === Number(productId)
+        );
+
+        if (existingItem) {
+            const newQuantity = existingItem.quantity + quantity;
+
+            if (newQuantity > stock) {
+                alert("Total quantity is greater than available stock");
+                return;
+            }
+
+            existingItem.quantity = newQuantity;
+            existingItem.totalPrice = existingItem.unitPrice * newQuantity;
+        } else {
+            items.push({
+                productId: Number(product.id),
+                productName: product.name,
+                quantity,
+                unitPrice,
+                totalPrice: unitPrice * quantity
+            });
+        }
+
+        displayItems();
+    }
+
+    // =========================================================
+    // DISPLAY CART
+    // =========================================================
+
+    function displayItems() {
+        const table = document.getElementById("itemsTable");
+        const emptyCart = document.getElementById("emptyCart");
+
+        table.innerHTML = "";
+
+        let total = 0;
+        let itemCount = 0;
+
+        emptyCart.style.display = items.length === 0 ? "block" : "none";
+
+        items.forEach((item, index) => {
+            total += Number(item.totalPrice);
+            itemCount += Number(item.quantity);
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>
+                    <span class="cart-product-name">
+                        ${escapeHtml(item.productName)}
+                    </span>
+                </td>
+
+                <td>${item.quantity}</td>
+
+                <td>₦${formatMoney(item.unitPrice)}</td>
+
+                <td>
+                    <strong>₦${formatMoney(item.totalPrice)}</strong>
+                </td>
+
+                <td>
+                    <button
+                        type="button"
+                        class="remove-button"
+                        onclick="removeItem(${index})"
+                    >
+                        Remove
+                    </button>
+                </td>
+            `;
+
+            table.appendChild(row);
+        });
+
+        document.getElementById("totalAmount").textContent = formatMoney(total);
+        document.getElementById("summaryItems").textContent = itemCount;
+    }
+
+    // =========================================================
+    // REMOVE ITEM
+    // =========================================================
+
+    function removeItem(index) {
+        if (index < 0 || index >= items.length) {
+            return;
+        }
+
+        items.splice(index, 1);
+        displayItems();
+    }
+
+    // =========================================================
+    // CREATE SALE
+    // =========================================================
+
+    async function createSale() {
+        if (items.length === 0) {
+            alert("Add at least one product");
+            return;
+        }
+        const customerId = selectedCustomer?.id ?? selectedCustomer?.customerId;
+        if (!selectedCustomer || !customerId) {
+            alert("Please select a customer");
+            return;}
+
+        const branchId = Number(document.getElementById("branchId").value);
+        const salespersonId = Number(document.getElementById("salespersonId").value);
+
+        if (!Number.isInteger(branchId) || branchId <= 0) {
+            alert("Enter a valid Branch ID");
+            return;
+        }
+
+        if (!Number.isInteger(salespersonId) || salespersonId <= 0) {
+            alert("Enter a valid Salesperson ID");
+            return;
+        }
+
+        // Recheck the current cart against the products' stock values.
+        for (const item of items) {
+            const product = products.find(
+                p => Number(p.id) === Number(item.productId)
+            );
+
+            if (!product) {
+                alert(`Product ${item.productName} is no longer available in the product list.`);
+                return;
+            }
+
+            if (item.quantity > Number(product.stockQuantity || 0)) {
+                alert(`Insufficient stock for ${item.productName}. Refresh products and try again.`);
+                return;
+            }
+        }
+
+        const saleData = {
+            customerId: Number(customerId),
+            customerName: selectedCustomer.name,
+            branchId,
+            salespersonId,
+            discount: 0,
+            items: items.map(item => ({
+                productId: item.productId,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                totalPrice: item.totalPrice
+            }))
+        };
+
+        const message = document.getElementById("message");
+        const createSaleButton = document.getElementById("createSaleButton");
+
+        createSaleButton.disabled = true;
+        createSaleButton.textContent = "CREATING SALE...";
+
+        showMessage("Creating sale...");
+
+        try {
+        const authHeaders = getAuthHeaders();
+        if (!authHeaders) {
+            createSaleButton.disabled = false;
+            createSaleButton.textContent = "CREATE SALE";
+            return;}
+
+        const response = await fetch(`${API_BASE}/sales`, {
+            method: "POST",
+            headers: {
+                ...authHeaders,
+                "Content-Type": "application/json"
+                },
+            body: JSON.stringify(saleData)
+            });
+
+
+            const data = await response.json();
+
+            console.log("Create sale response:", data);
+
+            if (!response.ok) {
+                showMessage(data.message || "Failed to create sale", "error");
+                return;
+            }
+
+            const saleNumber = data.sale?.saleNumber;
+
+            if (!saleNumber) {
+                showMessage(
+                    "The server responded, but did not return the sale number. Check the backend response before creating another sale.",
+                    "error"
+                );
+                return;
+            }
+
+            showMessage(`Sale created successfully: ${saleNumber}`, "success");
+
+            // CLEAR CART
+            items = [];
+            displayItems();
+
+            // CLEAR PRODUCT SEARCH
+            document.getElementById("productSearch").value = "";
+
+            // CLEAR CUSTOMER SELECTION
+            selectedCustomer = null;
+            customerSearchRequest++;
+
+            document.getElementById("customerSearch").value = "";
+            document.getElementById("customerResults").innerHTML = "";
+            document.getElementById("customerResults").style.display = "none";
+            document.getElementById("selectedCustomer").innerHTML = "";
+            document.getElementById("selectedCustomer").style.display = "none";
+
+            // RESET NEW CUSTOMER FORM
+            closeNewCustomerForm();
+
+            // RELOAD PRODUCTS
+            await loadProducts();
+        } catch (error) {
+            console.error("Create sale error:", error);
+            showMessage("Failed to create sale. Check the backend connection.", "error");
+        } finally {
+            createSaleButton.disabled = false;
+            createSaleButton.textContent = "CREATE SALE";
+        }
+    }
+
+    // =========================================================
+    // START
+    // =========================================================
+    document.addEventListener("DOMContentLoaded", () => {
+    // Get the authenticated user saved during login.
+    let user = null;
+
+    try {
+        user = JSON.parse(localStorage.getItem("posUser") || "null");
+    } catch (error) {
+        console.error("Could not read logged-in user:", error);
+    }
+
+    if (!user || !user.businessId) {
+        alert("Your login information is missing. Please log in again.");
+        window.location.href = "login.html";
+        return;
+    }
+
+    // Use the branch assigned to this user.
+    const branchInput = document.getElementById("branchId");
+
+    if (user.branchId) {
+        branchInput.value = Number(user.branchId);
+    } else {
+        showMessage(
+            "Your account has no assigned branch. Contact the administrator.",
+            "error"
+        );
+    }
+
+    // If the logged-in user is a salesperson, use their own ID.
+    const salespersonInput = document.getElementById("salespersonId");
+
+    if (String(user.role || "").toUpperCase() === "SALESPERSON") {
+        salespersonInput.value = Number(user.id);
+    }
+
+    console.log("Logged-in business:", user.businessId);
+    console.log("Assigned branch:", user.branchId);
+    console.log("Logged-in role:", user.role);
+
+    loadProducts();
+    displayItems();
+});
+
+</script>
+
+<!-- MASTER POS JAVASCRIPT -->
+<script src="js/pos-layout.js" defer></script>
+
+</body>
+</html>

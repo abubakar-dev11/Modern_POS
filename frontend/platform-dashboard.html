@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern POS | Platform Dashboard</title>
+<link rel="stylesheet" href="css/pos.css">
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f8fafc;
+    color: #172033;
+    font-family: Arial, sans-serif;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 230px;
+    background: #172554;
+    color: white;
+    padding: 25px 16px;
+    flex-shrink: 0;
+}
+
+.brand {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 8px 32px;
+}
+
+.nav a {
+    display: block;
+    color: #dbeafe;
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.nav a.active,
+.nav a:hover {
+    background: #1e40af;
+    color: white;
+}
+
+.main {
+    padding: 28px;
+    width: 100%;
+    min-width: 0;
+}
+
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+h1 {
+    font-size: 27px;
+    margin: 0 0 7px;
+}
+
+.muted {
+    color: #64748b;
+    font-size: 14px;
+}
+
+button {
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    background: #1d4ed8;
+    color: white;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.card,
+.panel {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    padding: 20px;
+}
+
+.card .label {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.number {
+    font-size: 30px;
+    font-weight: bold;
+    margin-top: 12px;
+}
+
+.panel {
+    overflow: hidden;
+}
+
+.panel h2 {
+    font-size: 18px;
+    margin: 0 0 16px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 850px;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 13px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 13px;
+}
+
+th {
+    color: #64748b;
+    background: #f8fafc;
+}
+
+td {
+    overflow-wrap: anywhere;
+}
+
+.status {
+    display: inline-block;
+    border-radius: 20px;
+    background: #dcfce7;
+    color: #166534;
+    padding: 5px 9px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.message {
+    margin: 10px 0;
+    color: #b91c1c;
+    font-size: 14px;
+}
+
+.notice {
+    margin: 0 0 18px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 13px;
+}
+
+.action-btn {
+    min-width: 100px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.action-btn.deactivate {
+    background: #dc2626;
+}
+
+.action-btn.activate {
+    background: #15803d;
+}
+
+@media (max-width: 900px) {
+    .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sidebar {
+        width: 185px;
+    }
+}
+
+@media (max-width: 600px) {
+    .layout {
+        display: block;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 16px;
+    }
+
+    .brand {
+        margin: 0 8px 12px;
+    }
+
+    .nav {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .nav a {
+        margin: 0;
+        padding: 9px;
+    }
+
+    .main {
+        padding: 18px 12px;
+    }
+
+    .cards {
+        gap: 10px;
+    }
+
+    .card {
+        padding: 14px;
+    }
+
+    .number {
+        font-size: 24px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">Modern POS</div>
+
+        <nav class="nav">
+            <a class="active" href="platform-dashboard.html">Dashboard</a>
+            <a href="platform-feedback.html">Feedback</a>
+            <a href="#" id="logout">Log out</a>
+        </nav>
+    </aside>
+
+    <main class="main">
+
+        <div class="top">
+            <div>
+                <h1>Platform Dashboard</h1>
+                <div class="muted">
+                    Manage registered businesses and feedback.
+                </div>
+            </div>
+
+            <button type="button" id="refresh">Refresh Data</button>
+        </div>
+
+        <div id="error" class="message" role="alert"></div>
+        <div id="success" role="status" style="color:#15803d;margin-bottom:12px;font-size:14px;"></div>
+
+        <div class="notice">
+            Deactivating a business does not delete its records.
+            Activate it again whenever access should be restored.
+        </div>
+
+        <section class="cards">
+
+            <div class="card">
+                <div class="label">Total Businesses</div>
+                <div class="number" id="total">—</div>
+            </div>
+
+            <div class="card">
+                <div class="label">Active Businesses</div>
+                <div class="number" id="active">—</div>
+            </div>
+
+            <div class="card">
+                <div class="label">Inactive Businesses</div>
+                <div class="number" id="inactive">—</div>
+            </div>
+
+            <div class="card">
+                <div class="label">Total Feedback</div>
+                <div class="number" id="feedbackCount">—</div>
+            </div>
+
+        </section>
+
+        <section class="panel">
+            <h2>Registered Businesses</h2>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Business</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Registered</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="businessRows">
+                        <tr>
+                            <td colspan="7">Loading businesses...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script>
+"use strict";
+
+const API = "http://127.0.0.1:3000/api";
+const token = localStorage.getItem("platformToken");
+
+if (!token) {
+    window.location.replace("platform-login.html");
+}
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[character]);
+}
+
+async function apiGet(path) {
+    const response = await fetch(`${API}${path}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem("platformToken");
+        localStorage.removeItem("platformAdmin");
+        window.location.replace("platform-login.html");
+        throw new Error("Your session has expired. Please sign in again.");
+    }
+
+    if (!response.ok) {
+        throw new Error(data.message || "Request failed.");
+    }
+
+    return data;
+}
+
+async function updateBusinessStatus(id, currentStatus, button) {
+    if (currentStatus !== "ACTIVE" && currentStatus !== "INACTIVE") {
+        document.getElementById("error").textContent =
+            "Unknown business status. Refresh the page and try again.";
+        return;
+    }
+
+    const nextStatus =
+        currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+
+    const action =
+        nextStatus === "INACTIVE" ? "deactivate" : "activate";
+
+    const businessRow = button.closest("tr");
+    const businessName = businessRow?.children[1]?.textContent || "this business";
+
+    const confirmed = window.confirm(
+        `Are you sure you want to ${action} "${businessName}"?\n\n` +
+        (nextStatus === "INACTIVE"
+            ? "The business records will not be deleted."
+            : "This will change the business status to ACTIVE.")
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    const error = document.getElementById("error");
+    const success = document.getElementById("success");
+
+    error.textContent = "";
+    success.textContent = "";
+    button.disabled = true;
+    button.textContent = "Processing...";
+
+    try {
+        const response = await fetch(
+            `${API}/platform/businesses/${encodeURIComponent(id)}/status`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    status: nextStatus
+                })
+            }
+        );
+
+        const data = await response.json().catch(() => ({}));
+
+        if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem("platformToken");
+            localStorage.removeItem("platformAdmin");
+            window.location.replace("platform-login.html");
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                data.message ||
+                `Failed to ${action} the business. Check the backend route.`
+            );
+        }
+
+        success.textContent =
+            data.message || `Business ${action}d successfully.`;
+
+        await loadDashboard();
+
+    } catch (err) {
+        error.textContent =
+            err.message || "Failed to update business status.";
+
+        button.disabled = false;
+        button.textContent =
+            currentStatus === "ACTIVE" ? "Deactivate" : "Activate";
+    }
+}
+
+async function loadDashboard() {
+    const error = document.getElementById("error");
+    const success = document.getElementById("success");
+    const rows = document.getElementById("businessRows");
+
+    error.textContent = "";
+    success.textContent = "";
+
+    try {
+        const [dashboard, businesses, feedback] = await Promise.all([
+            apiGet("/platform/dashboard"),
+            apiGet("/platform/businesses"),
+            apiGet("/feedback")
+        ]);
+
+        const summary = dashboard.dashboard || {};
+
+        document.getElementById("total").textContent =
+            summary.totalBusinesses ?? 0;
+
+        document.getElementById("active").textContent =
+            summary.activeBusinesses ?? 0;
+
+        document.getElementById("inactive").textContent =
+            summary.inactiveBusinesses ?? 0;
+
+        document.getElementById("feedbackCount").textContent =
+            feedback.total ?? (feedback.feedback || []).length;
+
+        const list = businesses.businesses || [];
+
+        if (!list.length) {
+            rows.innerHTML =
+                '<tr><td colspan="7">No businesses found.</td></tr>';
+            return;
+        }
+
+        rows.innerHTML = list.map(b => {
+            const status = String(b.status || "").toUpperCase();
+            const isActive = status === "ACTIVE";
+
+            return `
+                <tr>
+                    <td>${escapeHtml(b.id)}</td>
+                    <td>${escapeHtml(b.name)}</td>
+                    <td>${escapeHtml(b.email || "—")}</td>
+                    <td>${escapeHtml(b.phone || "—")}</td>
+                    <td>
+                        <span class="status ${isActive ? "" : "inactive"}">
+                            ${escapeHtml(status || "UNKNOWN")}
+                        </span>
+                    </td>
+                    <td>
+                        ${b.createdAt
+                            ? escapeHtml(
+                                new Date(b.createdAt).toLocaleDateString()
+                              )
+                            : "—"}
+                    </td>
+                    <td>
+                        ${
+                            status === "ACTIVE" || status === "INACTIVE"
+                            ? `<button
+                                type="button"
+                                class="action-btn ${isActive ? "deactivate" : "activate"}"
+                                data-business-id="${escapeHtml(b.id)}"
+                                data-status="${escapeHtml(status)}">
+                                ${isActive ? "Deactivate" : "Activate"}
+                              </button>`
+                            : '<span>Unknown status</span>'
+                        }
+                    </td>
+                </tr>
+            `;
+        }).join("");
+
+        rows.querySelectorAll(".action-btn").forEach(button => {
+            button.addEventListener("click", () => {
+                updateBusinessStatus(
+                    button.dataset.businessId,
+                    button.dataset.status,
+                    button
+                );
+            });
+        });
+
+    } catch (err) {
+        error.textContent = err.message || "Unable to load dashboard.";
+
+        rows.innerHTML =
+            '<tr><td colspan="7">Unable to load businesses.</td></tr>';
+    }
+}
+
+document.getElementById("refresh").addEventListener("click", loadDashboard);
+
+document.getElementById("logout").addEventListener("click", event => {
+    event.preventDefault();
+
+    localStorage.removeItem("platformToken");
+    localStorage.removeItem("platformAdmin");
+
+    window.location.href = "platform-login.html";
+});
+
+if (token) {
+    loadDashboard();
+}
+</script>
+
+</body>
+</html>

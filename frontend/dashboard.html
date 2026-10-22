@@ -1,0 +1,1400 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern POS - Dashboard</title>
+    <link rel="stylesheet" href="css/pos.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            width: 100%;
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        .pos-app {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+            background: #f3f4f6;
+        }
+
+        .pos-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 245px;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .pos-main {
+            flex: 1;
+            width: calc(100% - 245px);
+            min-width: 0;
+            min-height: 100vh;
+            margin-left: 245px;
+            background: #f3f4f6;
+        }
+
+        .pos-content {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            padding: 26px;
+            background: #f3f4f6;
+        }
+
+        .dashboard-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .dashboard-heading h1 {
+            margin: 0 0 8px;
+            font-size: 27px;
+            color: #172033;
+        }
+
+        .dashboard-heading p {
+            margin: 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .dashboard-date {
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            color: #475569;
+            font-size: 13px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .stat-card {
+            min-width: 0;
+            overflow: hidden;
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            border: 1px solid #e8edf4;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, .03);
+        }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 21px;
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .stat-card:nth-child(2) .stat-icon {
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .stat-card:nth-child(3) .stat-icon {
+            background: #f5f3ff;
+            color: #7c3aed;
+        }
+
+        .stat-card:nth-child(4) .stat-icon {
+            background: #fff7ed;
+            color: #ea580c;
+        }
+
+        .stat-value {
+            font-size: clamp(17px, 1.5vw, 25px);
+            line-height: 1.4;
+            font-weight: 700;
+            color: #172033;
+            white-space: nowrap;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-description {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+            gap: 22px;
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #e8edf4;
+            border-radius: 14px;
+            padding: 22px;
+            min-width: 0;
+            max-width: 100%;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, .03);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .panel-header h2 {
+            margin: 0;
+            font-size: 17px;
+            color: #172033;
+        }
+
+        .panel-subtitle {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .chart-filter {
+            max-width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dbe3ee;
+            border-radius: 8px;
+            background: white;
+            color: #334155;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .revenue-dot {
+            background: #2563eb;
+        }
+
+        .sales-dot {
+            background: #10b981;
+        }
+
+        .chart-container {
+            min-height: 270px;
+            max-width: 100%;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: stretch;
+            gap: 12px;
+            min-width: 420px;
+            height: 250px;
+            padding: 10px 5px 0;
+        }
+
+        .chart-column {
+            flex: 1;
+            min-width: 38px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .chart-values {
+            height: 25px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        .bar-pair {
+            width: 100%;
+            height: 190px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 5px;
+            border-bottom: 1px solid #e2e8f0;
+            background-image: linear-gradient(
+                to top,
+                transparent 24%,
+                #f1f5f9 25%,
+                transparent 25%,
+                transparent 49%,
+                #f1f5f9 50%,
+                transparent 50%,
+                transparent 74%,
+                #f1f5f9 75%,
+                transparent 75%
+            );
+        }
+
+        .chart-bar {
+            width: min(34%, 28px);
+            min-width: 8px;
+            border-radius: 5px 5px 0 0;
+            transition: height .25s ease;
+            min-height: 0;
+        }
+
+        .chart-bar.revenue {
+            background: #2563eb;
+        }
+
+        .chart-bar.sales {
+            background: #10b981;
+        }
+
+        .chart-bar.zero {
+            height: 2px !important;
+            opacity: .4;
+        }
+
+        .chart-date {
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            color: #64748b;
+            padding-top: 10px;
+            white-space: nowrap;
+        }
+
+        .chart-message {
+            text-align: center;
+            padding: 25px 10px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .chart-summary {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .chart-summary-item {
+            min-width: 0;
+            background: #f8fafc;
+            border-radius: 9px;
+            padding: 13px;
+        }
+
+        .chart-summary-label {
+            color: #64748b;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .chart-summary-value {
+            color: #172033;
+            font-size: 18px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 15px;
+            border: 1px solid #e8edf4;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #334155;
+            transition: .2s ease;
+        }
+
+        .quick-action:hover {
+            background: #f8fafc;
+            border-color: #bfdbfe;
+            transform: translateY(-1px);
+        }
+
+        .quick-action-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .quick-action strong {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .quick-action span {
+            display: block;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .transactions-panel {
+            margin-bottom: 20px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        .transactions-table th {
+            background: #f8fafc;
+            color: #64748b;
+            text-align: left;
+            padding: 13px 15px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            white-space: nowrap;
+        }
+
+        .transactions-table td {
+            padding: 15px;
+            border-bottom: 1px solid #edf1f6;
+            font-size: 13px;
+            color: #334155;
+        }
+
+        .transactions-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .transactions-table tbody tr:hover {
+            background: #fafcff;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-paid {
+            color: #047857;
+            background: #d1fae5;
+        }
+
+        .status-pending {
+            color: #b45309;
+            background: #fef3c7;
+        }
+
+        .status-partial {
+            color: #1d4ed8;
+            background: #dbeafe;
+        }
+
+        .status-cancelled {
+            color: #b91c1c;
+            background: #fee2e2;
+        }
+
+        .status-default {
+            color: #475569;
+            background: #e2e8f0;
+        }
+
+        .dashboard-message {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .dashboard-message.error {
+            color: #b91c1c;
+        }
+
+        .dashboard-message.success {
+            color: #047857;
+        }
+
+        .loading {
+            opacity: .65;
+        }
+
+        @media (max-width: 1100px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .dashboard-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        @media (max-width: 800px) {
+            .pos-sidebar {
+                width: 70px;
+            }
+
+            .pos-main {
+                margin-left: 70px;
+                width: calc(100% - 70px);
+            }
+        }
+
+        @media (max-width: 650px) {
+            .pos-content {
+                padding: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 18px;
+            }
+
+            .stat-value {
+                font-size: 21px;
+            }
+
+            .panel {
+                padding: 16px;
+            }
+
+            .dashboard-heading h1 {
+                font-size: 23px;
+            }
+
+            .chart-summary-value {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .pos-sidebar {
+                width: 0;
+                overflow: hidden;
+            }
+
+            .pos-main {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .pos-content {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="pos-app">
+
+    <aside id="posSidebar" class="pos-sidebar"></aside>
+
+    <main class="pos-main">
+
+        <header id="posTopbar" class="pos-topbar"></header>
+
+        <div class="pos-content">
+
+            <section class="dashboard-heading">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Welcome back! Here is your business overview.</p>
+                </div>
+
+                <div class="dashboard-date" id="dashboardDate">
+                    Loading date...
+                </div>
+            </section>
+
+            <section class="stats-grid">
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-label">Total Sales</div>
+                        <div class="stat-icon">▤</div>
+                    </div>
+                    <div class="stat-value" id="totalSales">0</div>
+                    <div class="stat-description">Recorded transactions</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-label">Total Revenue</div>
+                        <div class="stat-icon">₦</div>
+                    </div>
+                    <div class="stat-value" id="totalRevenue">₦0.00</div>
+                    <div class="stat-description">Revenue received</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-label">Total Products</div>
+                        <div class="stat-icon">▦</div>
+                    </div>
+                    <div class="stat-value" id="totalProducts">0</div>
+                    <div class="stat-description">Products in inventory</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-label">Low Stock</div>
+                        <div class="stat-icon">⚠</div>
+                    </div>
+                    <div class="stat-value" id="lowStock">0</div>
+                    <div class="stat-description">Products needing attention</div>
+                </div>
+
+            </section>
+
+            <section class="dashboard-grid">
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h2>Sales Overview</h2>
+                            <div class="panel-subtitle">
+                                Compare revenue and number of sales
+                            </div>
+                        </div>
+
+                        <select id="chartPeriod" class="chart-filter">
+                            <option value="today">Today</option>
+                            <option value="7days" selected>Last 7 Days</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <span class="legend-dot revenue-dot"></span>
+                            Revenue (₦)
+                        </div>
+
+                        <div class="legend-item">
+                            <span class="legend-dot sales-dot"></span>
+                            Number of Sales
+                        </div>
+                    </div>
+
+                    <div class="chart-container" id="chartContainer">
+                        <div class="chart-message">Loading sales chart...</div>
+                    </div>
+
+                    <div class="chart-summary">
+
+                        <div class="chart-summary-item">
+                            <div class="chart-summary-label">Period Sales</div>
+                            <div class="chart-summary-value" id="chartTotalSales">0</div>
+                        </div>
+
+                        <div class="chart-summary-item">
+                            <div class="chart-summary-label">Period Revenue</div>
+                            <div class="chart-summary-value" id="chartTotalRevenue">₦0.00</div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h2>Quick Actions</h2>
+                            <div class="panel-subtitle">Access common POS operations</div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions">
+
+                        <a href="sales.html" class="quick-action">
+                            <div class="quick-action-icon">＋</div>
+                            <div>
+                                <strong>Create New Sale</strong>
+                                <span>Start a new customer transaction</span>
+                            </div>
+                        </a>
+
+                        <a href="payment.html" class="quick-action">
+                            <div class="quick-action-icon">₦</div>
+                            <div>
+                                <strong>Verify Payment</strong>
+                                <span>Continue payment processing</span>
+                            </div>
+                        </a>
+
+                        <a href="products.html" class="quick-action">
+                            <div class="quick-action-icon">▦</div>
+                            <div>
+                                <strong>Manage Products</strong>
+                                <span>View and manage inventory</span>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+
+            </section>
+
+            <section class="panel transactions-panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Recent Transactions</h2>
+                        <div class="panel-subtitle">
+                            Latest sales recorded in your POS
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table class="transactions-table">
+
+                        <thead>
+                            <tr>
+                                <th>Sale Number</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="recentTransactions">
+                            <tr>
+                                <td colspan="5" style="text-align:center;">
+                                    Loading transactions...
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="dashboard-message" id="dashboardMessage"></div>
+
+            </section>
+
+        </div>
+    </main>
+</div>
+
+<script src="js/pos-layout.js"></script>
+
+<script>
+"use strict";
+
+// =========================================
+// API CONFIGURATION
+// =========================================
+
+const API_BASE_URL = "http://localhost:3000/api";
+
+const DASHBOARD_API =
+    `${API_BASE_URL}/sales/dashboard-summary`;
+
+const CHART_API =
+    `${API_BASE_URL}/sales/dashboard-chart`;
+
+const currencyFormatter = new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+});
+
+const numberFormatter = new Intl.NumberFormat("en-NG");
+
+// =========================================
+// JWT AUTHENTICATION
+// =========================================
+
+function getAuthToken() {
+    const token = localStorage.getItem("posToken");
+
+    if (!token) {
+        window.location.replace("login.html");
+
+        throw new Error(
+            "Your session is missing. Please log in again."
+        );
+    }
+
+    return token;
+}
+
+async function apiFetch(url, options = {}) {
+    const token = getAuthToken();
+
+    const headers = {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`
+    };
+
+    const response = await fetch(url, {
+        ...options,
+        headers
+    });
+
+    if (response.status === 401) {
+        localStorage.removeItem("posToken");
+        localStorage.removeItem("posUser");
+
+        window.location.replace("login.html");
+
+        throw new Error(
+            "Your session has expired. Please log in again."
+        );
+    }
+
+    return response;
+}
+
+// =========================================
+// GENERAL HELPERS
+// =========================================
+
+function formatCurrency(value) {
+    const amount = Number(value);
+
+    return currencyFormatter.format(
+        Number.isFinite(amount) ? amount : 0
+    );
+}
+
+function formatNumber(value) {
+    const number = Number(value);
+
+    return numberFormatter.format(
+        Number.isFinite(number) ? number : 0
+    );
+}
+
+function safeNumber(value) {
+    const number = Number(value);
+
+    return Number.isFinite(number) ? number : 0;
+}
+
+function formatDate(value) {
+    if (!value) return "—";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return String(value);
+    }
+
+    return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    });
+}
+
+function getStatusClass(status) {
+    const normalized = String(status || "")
+        .toUpperCase()
+        .replace(/[\s-]+/g, "_");
+
+    if (normalized === "PAID") {
+        return "status-paid";
+    }
+
+    if (["PENDING", "UNPAID"].includes(normalized)) {
+        return "status-pending";
+    }
+
+    if (["PARTIALLY_PAID", "PARTIAL"].includes(normalized)) {
+        return "status-partial";
+    }
+
+    if (["CANCELLED", "CANCELED", "VOID"].includes(normalized)) {
+        return "status-cancelled";
+    }
+
+    return "status-default";
+}
+
+function setDashboardMessage(message, type = "") {
+    const element = document.getElementById("dashboardMessage");
+
+    element.textContent = message;
+    element.className = "dashboard-message";
+
+    if (type) {
+        element.classList.add(type);
+    }
+}
+
+function setFirstAvailable(object, keys, fallback = 0) {
+    for (const key of keys) {
+        if (
+            object &&
+            object[key] !== undefined &&
+            object[key] !== null
+        ) {
+            return object[key];
+        }
+    }
+
+    return fallback;
+}
+
+// =========================================
+// RECENT TRANSACTIONS
+// =========================================
+
+function renderRecentTransactions(transactions) {
+    const tbody = document.getElementById("recentTransactions");
+
+    tbody.replaceChildren();
+
+    if (!Array.isArray(transactions) || transactions.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+
+        cell.colSpan = 5;
+        cell.textContent = "No transactions found.";
+        cell.style.textAlign = "center";
+
+        row.appendChild(cell);
+        tbody.appendChild(row);
+
+        return;
+    }
+
+    transactions.slice(0, 10).forEach(transaction => {
+        const row = document.createElement("tr");
+
+        const saleNumber = document.createElement("td");
+
+        saleNumber.textContent =
+            transaction.saleNumber ||
+            transaction.sale_number ||
+            (transaction.id ? `SALE-${transaction.id}` : "—");
+
+        const customer = document.createElement("td");
+
+        customer.textContent =
+            transaction.customerName ||
+            transaction.Customer?.name ||
+            transaction.customer?.name ||
+            transaction.customer?.fullName ||
+            transaction.customer_name ||
+            "Walk-in Customer";
+
+        const date = document.createElement("td");
+
+        date.textContent = formatDate(
+            transaction.createdAt ||
+            transaction.created_at ||
+            transaction.date
+        );
+
+        const amount = document.createElement("td");
+
+        amount.textContent = formatCurrency(
+            setFirstAvailable(
+                transaction,
+                ["totalAmount", "total_amount", "total", "amount"],
+                0
+            )
+        );
+
+        const status = document.createElement("td");
+        const badge = document.createElement("span");
+
+        badge.className =
+            "status-badge " + getStatusClass(transaction.status);
+
+        badge.textContent = String(
+            transaction.status || "UNKNOWN"
+        ).replace(/_/g, " ");
+
+        status.appendChild(badge);
+
+        row.append(saleNumber, customer, date, amount, status);
+        tbody.appendChild(row);
+    });
+}
+
+// =========================================
+// LOAD DASHBOARD SUMMARY
+// =========================================
+
+async function loadDashboard() {
+    setDashboardMessage("Loading dashboard...");
+
+    try {
+        const response = await apiFetch(DASHBOARD_API, {
+            headers: {
+                Accept: "application/json"
+            }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                result.message || "Could not load dashboard summary."
+            );
+        }
+
+        const data =
+            result.data && typeof result.data === "object"
+                ? result.data
+                : result;
+
+        document.getElementById("totalSales").textContent =
+            formatNumber(setFirstAvailable(
+                data,
+                [
+                    "totalSales",
+                    "salesCount",
+                    "totalTransactions",
+                    "total_sales"
+                ],
+                0
+            ));
+
+        document.getElementById("totalRevenue").textContent =
+            formatCurrency(setFirstAvailable(
+                data,
+                [
+                    "totalRevenue",
+                    "revenue",
+                    "totalAmount",
+                    "total_revenue"
+                ],
+                0
+            ));
+
+        document.getElementById("totalProducts").textContent =
+            formatNumber(setFirstAvailable(
+                data,
+                [
+                    "totalProducts",
+                    "productCount",
+                    "total_products"
+                ],
+                0
+            ));
+
+        document.getElementById("lowStock").textContent =
+            formatNumber(setFirstAvailable(
+                data,
+                [
+                    "lowStock",
+                    "lowStockCount",
+                    "low_stock"
+                ],
+                0
+            ));
+
+        const transactions =
+            data.recentTransactions ||
+            data.recentSales ||
+            data.transactions ||
+            data.sales ||
+            [];
+
+        renderRecentTransactions(transactions);
+
+        setDashboardMessage(
+            "Dashboard data loaded successfully.",
+            "success"
+        );
+
+    } catch (error) {
+        console.error("Dashboard loading error:", error);
+
+        setDashboardMessage(
+            error.message || "Could not load dashboard summary.",
+            "error"
+        );
+
+        const tbody = document.getElementById("recentTransactions");
+
+        tbody.replaceChildren();
+
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+
+        cell.colSpan = 5;
+        cell.textContent = "Unable to load transactions.";
+        cell.style.textAlign = "center";
+
+        row.appendChild(cell);
+        tbody.appendChild(row);
+    }
+}
+
+// =========================================
+// SALES CHART
+// =========================================
+
+function formatChartDate(value) {
+    if (!value) return "—";
+
+    const parts = String(value).split("-");
+    let date;
+
+    if (parts.length === 3 && parts[0].length === 4) {
+        date = new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2])
+        );
+    } else {
+        date = new Date(value);
+    }
+
+    if (Number.isNaN(date.getTime())) {
+        return String(value);
+    }
+
+    return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short"
+    });
+}
+
+function renderSalesChart(chartData) {
+    const container = document.getElementById("chartContainer");
+
+    container.replaceChildren();
+
+    if (!Array.isArray(chartData) || chartData.length === 0) {
+        const message = document.createElement("div");
+
+        message.className = "chart-message";
+        message.textContent =
+            "No sales data is available for this period.";
+
+        container.appendChild(message);
+
+        document.getElementById("chartTotalSales").textContent = "0";
+
+        document.getElementById("chartTotalRevenue").textContent =
+            formatCurrency(0);
+
+        return;
+    }
+
+    const rows = chartData.map(item => ({
+        date: item.date || item.day || item.label || "",
+
+        revenue: safeNumber(
+            item.revenue ??
+            item.totalRevenue ??
+            item.totalAmount ??
+            0
+        ),
+
+        salesCount: safeNumber(
+            item.salesCount ??
+            item.saleCount ??
+            item.count ??
+            0
+        )
+    }));
+
+    const maximumRevenue = Math.max(
+        0,
+        ...rows.map(item => item.revenue)
+    );
+
+    const maximumSales = Math.max(
+        0,
+        ...rows.map(item => item.salesCount)
+    );
+
+    const bars = document.createElement("div");
+
+    bars.className = "chart-bars";
+
+    let totalSales = 0;
+    let totalRevenue = 0;
+
+    rows.forEach(item => {
+        totalSales += item.salesCount;
+        totalRevenue += item.revenue;
+
+        const column = document.createElement("div");
+        column.className = "chart-column";
+
+        const values = document.createElement("div");
+        values.className = "chart-values";
+
+        const revenueValue = document.createElement("span");
+
+        revenueValue.textContent = item.revenue > 0
+            ? formatNumber(Math.round(item.revenue))
+            : "0";
+
+        const salesValue = document.createElement("span");
+
+        salesValue.textContent = String(item.salesCount);
+
+        values.append(revenueValue, salesValue);
+
+        const pair = document.createElement("div");
+
+        pair.className = "bar-pair";
+
+        const revenueBar = document.createElement("div");
+
+        revenueBar.className = "chart-bar revenue";
+
+        const salesBar = document.createElement("div");
+
+        salesBar.className = "chart-bar sales";
+
+        const revenueHeight = maximumRevenue > 0
+            ? (item.revenue / maximumRevenue) * 100
+            : 0;
+
+        const salesHeight = maximumSales > 0
+            ? (item.salesCount / maximumSales) * 100
+            : 0;
+
+        revenueBar.style.height = `${revenueHeight}%`;
+        salesBar.style.height = `${salesHeight}%`;
+
+        if (item.revenue <= 0) {
+            revenueBar.classList.add("zero");
+        }
+
+        if (item.salesCount <= 0) {
+            salesBar.classList.add("zero");
+        }
+
+        revenueBar.title =
+            `Revenue: ${formatCurrency(item.revenue)}`;
+
+        salesBar.title =
+            `Sales: ${formatNumber(item.salesCount)}`;
+
+        pair.append(revenueBar, salesBar);
+
+        const dateLabel = document.createElement("div");
+
+        dateLabel.className = "chart-date";
+        dateLabel.textContent = formatChartDate(item.date);
+
+        column.append(values, pair, dateLabel);
+        bars.appendChild(column);
+    });
+
+    container.appendChild(bars);
+
+    document.getElementById("chartTotalSales").textContent =
+        formatNumber(totalSales);
+
+    document.getElementById("chartTotalRevenue").textContent =
+        formatCurrency(totalRevenue);
+}
+
+// =========================================
+// LOAD SALES CHART WITH JWT
+// =========================================
+
+async function loadSalesChart() {
+    const period = document.getElementById("chartPeriod").value;
+    const container = document.getElementById("chartContainer");
+
+    container.classList.add("loading");
+
+    const message = document.createElement("div");
+
+    message.className = "chart-message";
+    message.textContent = "Loading sales chart...";
+
+    container.replaceChildren(message);
+
+    try {
+        const url =
+            `${CHART_API}?period=${encodeURIComponent(period)}`;
+
+        const response = await apiFetch(url, {
+            headers: {
+                Accept: "application/json"
+            }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                result.message || "Could not load the sales chart."
+            );
+        }
+
+        const data =
+            result.data && typeof result.data === "object"
+                ? result.data
+                : result;
+
+        renderSalesChart(
+            data.chartData ||
+            data.chart ||
+            []
+        );
+
+    } catch (error) {
+        console.error("Sales chart loading error:", error);
+
+        container.replaceChildren();
+
+        const errorMessage = document.createElement("div");
+
+        errorMessage.className = "chart-message";
+        errorMessage.textContent =
+            error.message || "Unable to load the sales chart.";
+
+        container.appendChild(errorMessage);
+
+        document.getElementById("chartTotalSales").textContent = "0";
+
+        document.getElementById("chartTotalRevenue").textContent =
+            formatCurrency(0);
+
+    } finally {
+        container.classList.remove("loading");
+    }
+}
+
+// =========================================
+// INITIALIZE DASHBOARD
+// =========================================
+
+function updateDashboardDate() {
+    document.getElementById("dashboardDate").textContent =
+        new Date().toLocaleDateString("en-GB", {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    updateDashboardDate();
+
+    if (typeof initPOSLayout === "function") {
+        initPOSLayout("Dashboard");
+    } else {
+        console.warn(
+            "Check js/pos-layout.js: initPOSLayout was not found."
+        );
+    }
+
+    document.getElementById("chartPeriod")
+        .addEventListener("change", loadSalesChart);
+
+    loadDashboard();
+    loadSalesChart();
+});
+</script>
+
+</body>
+</html>

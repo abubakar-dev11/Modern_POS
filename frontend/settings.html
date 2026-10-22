@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern POS - Settings</title>
+
+    <link rel="stylesheet" href="css/pos.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            color: #1e293b;
+        }
+
+        .settings-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .settings-heading h1 {
+            margin: 0 0 8px;
+            font-size: 27px;
+            color: #172033;
+        }
+
+        .settings-heading p {
+            margin: 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .settings-layout {
+            display: grid;
+            grid-template-columns: 220px minmax(0, 1fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .settings-nav,
+        .settings-card {
+            background: #fff;
+            border: 1px solid #e8edf4;
+            border-radius: 14px;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, .03);
+        }
+
+        .settings-nav {
+            padding: 12px;
+        }
+
+        .settings-nav button {
+            display: block;
+            width: 100%;
+            padding: 13px 14px;
+            border: none;
+            border-radius: 9px;
+            background: transparent;
+            color: #475569;
+            text-align: left;
+            font-size: 13px;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+
+        .settings-nav button:hover,
+        .settings-nav button.active {
+            background: #eff6ff;
+            color: #2563eb;
+            font-weight: 700;
+        }
+
+        .settings-card {
+            padding: 24px;
+            min-width: 0;
+        }
+
+        .settings-section {
+            display: none;
+        }
+
+        .settings-section.active {
+            display: block;
+        }
+
+        .section-heading {
+            padding-bottom: 18px;
+            margin-bottom: 22px;
+            border-bottom: 1px solid #edf1f6;
+        }
+
+        .section-heading h2 {
+            margin: 0 0 7px;
+            font-size: 18px;
+            color: #172033;
+        }
+
+        .section-heading p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            min-width: 0;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            display: block;
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #dbe3ee;
+            border-radius: 8px;
+            background: #fff;
+            color: #334155;
+            font: inherit;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .form-group textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
+        }
+
+        .form-help {
+            display: block;
+            margin-top: 7px;
+            color: #94a3b8;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .settings-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding-top: 22px;
+            margin-top: 25px;
+            border-top: 1px solid #edf1f6;
+        }
+
+        .btn {
+            padding: 11px 18px;
+            border: 1px solid #dbe3ee;
+            border-radius: 8px;
+            background: #fff;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+        .setting-note {
+            padding: 14px;
+            margin-bottom: 20px;
+            border: 1px solid #dbeafe;
+            border-radius: 9px;
+            background: #eff6ff;
+            color: #1e40af;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .settings-message {
+            display: none;
+            margin-top: 18px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .settings-message.success {
+            display: block;
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .settings-message.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .settings-message.info {
+            display: block;
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding: 17px 0;
+            border-bottom: 1px solid #edf1f6;
+        }
+
+        .toggle-row:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-title {
+            color: #334155;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .toggle-description {
+            margin-top: 5px;
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .toggle-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #2563eb;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 900px) {
+            .settings-layout {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .settings-nav {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 5px;
+            }
+
+            .settings-nav button {
+                margin: 0;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .pos-content {
+                padding: 15px;
+            }
+
+            .settings-heading h1 {
+                font-size: 23px;
+            }
+
+            .settings-card {
+                padding: 17px;
+            }
+
+            .form-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .form-group.full-width {
+                grid-column: auto;
+            }
+
+            .settings-nav {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="pos-app">
+
+    <aside id="posSidebar" class="pos-sidebar"></aside>
+
+    <main class="pos-main">
+        <header id="posTopbar" class="pos-topbar"></header>
+
+        <div class="pos-content">
+
+            <section class="settings-heading">
+                <div>
+                    <h1>Settings</h1>
+                    <p>Manage your business preferences and POS configuration.</p>
+                </div>
+            </section>
+
+            <div class="settings-layout">
+
+                <nav class="settings-nav" aria-label="Settings sections">
+                    <button type="button" class="active" data-section="business">
+                        🏢 Business Information
+                    </button>
+
+                    <button type="button" data-section="currency">
+                        ₦ Currency & Format
+                    </button>
+
+                    <button type="button" data-section="receipt">
+                        🧾 Receipt Settings
+                    </button>
+
+                    <button type="button" data-section="inventory">
+                        📦 Inventory Alerts
+                    </button>
+                </nav>
+
+                <div class="settings-card">
+
+                    <form id="settingsForm">
+
+                        <section class="settings-section active" id="section-business">
+                            <div class="section-heading">
+                                <h2>Business Information</h2>
+                                <p>Enter the basic information for your business.</p>
+                            </div>
+                            <div class="setting-note">
+                                Your business information and POS preferences are loaded
+                                from the database. Changes are saved to your own business account.
+                            </div>
+
+
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="businessName">Business Name</label>
+                                    <input type="text" id="businessName"
+                                           name="businessName"
+                                           placeholder="Enter business name">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="businessPhone">Phone Number</label>
+                                    <input type="tel" id="businessPhone"
+                                           name="businessPhone"
+                                           placeholder="e.g. 08012345678">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="businessEmail">Email Address</label>
+                                    <input type="email" id="businessEmail"
+                                           name="businessEmail"
+                                           placeholder="business@example.com">
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="businessAddress">Business Address</label>
+                                    <textarea id="businessAddress"
+                                              name="businessAddress"
+                                              placeholder="Enter business address"></textarea>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="settings-section" id="section-currency">
+                            <div class="section-heading">
+                                <h2>Currency & Format</h2>
+                                <p>Choose the currency and number format displayed by the interface.</p>
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="currency">Currency</label>
+                                    <select id="currency" name="currency">
+                                        <option value="NGN">NGN - Nigerian Naira (₦)</option>
+                                        <option value="USD">USD - US Dollar ($)</option>
+                                        <option value="GBP">GBP - British Pound (£)</option>
+                                        <option value="EUR">EUR - Euro (€)</option>
+                                    </select>
+                                    <span class="form-help">
+                                        Changing this preference does not convert existing prices.
+                                    </span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="decimalPlaces">Decimal Places</label>
+                                    <select id="decimalPlaces" name="decimalPlaces">
+                                        <option value="0">0 decimal places</option>
+                                        <option value="2" selected>2 decimal places</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="settings-section" id="section-receipt">
+                            <div class="section-heading">
+                                <h2>Receipt Settings</h2>
+                                <p>Configure the information shown on customer receipts.</p>
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="receiptName">Receipt Business Name</label>
+                                    <input type="text" id="receiptName"
+                                           name="receiptName"
+                                           placeholder="Name printed on receipt">
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="receiptAddress">Receipt Address</label>
+                                    <textarea id="receiptAddress"
+                                              name="receiptAddress"
+                                              placeholder="Address printed on receipt"></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="receiptPhone">Receipt Phone</label>
+                                    <input type="tel" id="receiptPhone"
+                                           name="receiptPhone"
+                                           placeholder="Phone printed on receipt">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="receiptFooter">Receipt Footer Message</label>
+                                    <input type="text" id="receiptFooter"
+                                           name="receiptFooter"
+                                           placeholder="Thank you for your patronage">
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="settings-section" id="section-inventory">
+                            <div class="section-heading">
+                                <h2>Inventory Alerts</h2>
+                                <p>Set a preferred stock threshold for low-stock warnings.</p>
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="lowStockThreshold">Low Stock Threshold</label>
+                                    <input type="number" id="lowStockThreshold"
+                                           name="lowStockThreshold"
+                                           min="0" step="1" value="5">
+                                    <span class="form-help">
+                                        Products at or below this quantity may need attention.
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="toggle-row">
+                                <div>
+                                    <div class="toggle-title">Enable Low Stock Alerts</div>
+                                    <div class="toggle-description">
+                                        Preference only until connected to the inventory backend.
+                                    </div>
+                                </div>
+
+                                <input type="checkbox" id="enableLowStockAlerts"
+                                       name="enableLowStockAlerts" checked>
+                            </div>
+                        </section>
+
+                        <div class="settings-message" id="settingsMessage"
+                             role="status" aria-live="polite"></div>
+
+                        <div class="settings-footer">
+                            <button type="button" class="btn" id="resetButton">
+                                Reset Form
+                            </button>
+
+                            <button type="submit" class="btn btn-primary">
+                                Save Preferences
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script src="js/pos-layout.js"></script>
+
+<script>
+"use strict";
+
+document.addEventListener("DOMContentLoaded", async function () {
+    const API_BASE_URL = "http://localhost:3000/api";
+    const currentUser = JSON.parse(
+    localStorage.getItem("posUser") || "null");
+
+    const BUSINESS_ID = Number(currentUser?.businessId);
+
+    if (!Number.isInteger(BUSINESS_ID) || BUSINESS_ID < 1) {
+    window.location.href = "login.html";
+    return;}
+
+    const BUSINESS_API = `${API_BASE_URL}/businesses/${BUSINESS_ID}`;
+    const SETTINGS_API = `${API_BASE_URL}/settings`;
+
+
+    if (typeof initPOSLayout === "function") {
+        initPOSLayout("Settings");
+    } else {
+        console.warn("initPOSLayout was not found.");
+    }
+
+    const navButtons = document.querySelectorAll("[data-section]");
+    const sections = document.querySelectorAll(".settings-section");
+    const form = document.getElementById("settingsForm");
+    const message = document.getElementById("settingsMessage");
+    const resetButton = document.getElementById("resetButton");
+    const saveButton = form.querySelector('[type="submit"]');
+
+    let originalBusiness = null;
+    let originalSettings = null;
+
+    function showMessage(type, text) {
+        message.className = `settings-message ${type}`;
+        message.textContent = text;
+    }
+
+    function clearMessage() {
+        message.className = "settings-message";
+        message.textContent = "";
+    }
+    async function requestJSON(url, options = {}) {
+    const token = localStorage.getItem("posToken");
+
+    if (!token) {
+        window.location.href = "login.html";
+        throw new Error("Authentication required. Please log in again.");
+    }
+
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {}),
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(
+                result.message || `Request failed (${response.status})`
+            );
+        }
+
+        return result;
+    }
+
+    function showSection(sectionName) {
+        navButtons.forEach(button => {
+            button.classList.toggle(
+                "active",
+                button.dataset.section === sectionName
+            );
+        });
+
+        sections.forEach(section => {
+            section.classList.toggle(
+                "active",
+                section.id === `section-${sectionName}`
+            );
+        });
+
+        clearMessage();
+    }
+
+    navButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            showSection(button.dataset.section);
+        });
+    });
+
+    function setBusinessFields(business) {
+        document.getElementById("businessName").value = business.name || "";
+        document.getElementById("businessPhone").value = business.phone || "";
+        document.getElementById("businessEmail").value = business.email || "";
+        document.getElementById("businessAddress").value =
+            business.address || "";
+    }
+
+    function setSettingsFields(settings) {
+        document.getElementById("currency").value =
+            settings.currency || "NGN";
+
+        document.getElementById("decimalPlaces").value =
+            String(settings.decimalPlaces ?? 2);
+
+        document.getElementById("receiptName").value =
+            settings.receiptName || "";
+
+        document.getElementById("receiptAddress").value =
+            settings.receiptAddress || "";
+
+        document.getElementById("receiptPhone").value =
+            settings.receiptPhone || "";
+
+        document.getElementById("receiptFooter").value =
+            settings.receiptFooter || "";
+
+        document.getElementById("lowStockThreshold").value =
+            String(settings.lowStockThreshold ?? 5);
+
+        document.getElementById("enableLowStockAlerts").checked =
+            settings.enableLowStockAlerts !== false;
+    }
+
+    function readBusinessFields() {
+        return {
+            name: document.getElementById("businessName").value.trim(),
+            phone: document.getElementById("businessPhone").value.trim(),
+            email: document.getElementById("businessEmail").value.trim(),
+            address: document.getElementById("businessAddress").value.trim()
+        };
+    }
+
+    function readSettingsFields() {
+        return {
+            currency: document.getElementById("currency").value,
+            decimalPlaces: Number(
+                document.getElementById("decimalPlaces").value
+            ),
+            receiptName: document.getElementById("receiptName").value.trim(),
+            receiptAddress: document.getElementById("receiptAddress").value.trim(),
+            receiptPhone: document.getElementById("receiptPhone").value.trim(),
+            receiptFooter: document.getElementById("receiptFooter").value.trim(),
+            lowStockThreshold: Number(
+                document.getElementById("lowStockThreshold").value
+            ),
+            enableLowStockAlerts:
+                document.getElementById("enableLowStockAlerts").checked
+        };
+    }
+
+    async function loadSettings() {
+        saveButton.disabled = true;
+        resetButton.disabled = true;
+        showMessage("info", "Loading settings from database...");
+
+        try {
+            const [businessResult, settingsResult] = await Promise.all([
+                requestJSON(BUSINESS_API),
+                requestJSON(SETTINGS_API)
+            ]);
+
+            originalBusiness = { ...businessResult.business };
+            originalSettings = { ...settingsResult.settings };
+
+            setBusinessFields(originalBusiness);
+            setSettingsFields(originalSettings);
+
+            showMessage("success", "Settings loaded successfully.");
+        } catch (error) {
+            console.error("Load settings error:", error);
+
+            showMessage(
+                "error",
+                `Could not load settings: ${error.message}. Check that your backend is running.`
+            );
+        } finally {
+            saveButton.disabled = false;
+            resetButton.disabled = false;
+        }
+    }
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        clearMessage();
+
+        const businessData = readBusinessFields();
+        const settingsData = readSettingsFields();
+
+        if (!businessData.name) {
+            showSection("business");
+            document.getElementById("businessName").focus();
+
+            showMessage("error", "Business name is required.");
+            return;
+        }
+
+        if (
+            !Number.isInteger(settingsData.lowStockThreshold) ||
+            settingsData.lowStockThreshold < 0
+        ) {
+            showSection("inventory");
+            document.getElementById("lowStockThreshold").focus();
+
+            showMessage(
+                "error",
+                "Low stock threshold must be a whole number of zero or more."
+            );
+            return;
+        }
+
+        saveButton.disabled = true;
+        resetButton.disabled = true;
+        saveButton.textContent = "Saving...";
+
+        try {
+            await requestJSON(BUSINESS_API, {
+                method: "PUT",
+                body: JSON.stringify(businessData)
+            });
+
+            try {
+                await requestJSON(SETTINGS_API, {
+                    method: "PUT",
+                    body: JSON.stringify(settingsData)
+                });
+            } catch (settingsError) {
+                originalBusiness = { ...businessData };
+
+                showMessage(
+                    "error",
+                    `Business information was saved, but POS preferences were not saved: ${settingsError.message}`
+                );
+                return;
+            }
+
+            originalBusiness = { ...businessData };
+            originalSettings = { ...settingsData };
+
+            showMessage("success", "All settings saved successfully.");
+        } catch (error) {
+            console.error("Save settings error:", error);
+
+            showMessage(
+                "error",
+                `Could not save business information: ${error.message}`
+            );
+        } finally {
+            saveButton.disabled = false;
+            resetButton.disabled = false;
+            saveButton.textContent = "Save Preferences";
+        }
+    });
+
+    resetButton.addEventListener("click", function () {
+        if (originalBusiness && originalSettings) {
+            setBusinessFields(originalBusiness);
+            setSettingsFields(originalSettings);
+            showMessage("info", "Form restored to the last loaded or saved values.");
+        } else {
+            form.reset();
+            showMessage("info", "Form fields have been reset.");
+        }
+
+        showSection("business");
+    });
+
+    await loadSettings();
+});
+</script>
+
+</body>
+</html>

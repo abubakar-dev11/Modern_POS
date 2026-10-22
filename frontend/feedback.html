@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern POS - Send Feedback</title>
+
+    <link rel="stylesheet" href="css/pos.css">
+
+    <style>
+        .feedback-page {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 28px;
+            min-width: 0;
+        }
+
+        .feedback-heading {
+            margin-bottom: 24px;
+        }
+
+        .feedback-heading h1 {
+            margin: 0 0 7px;
+            font-size: 28px;
+            color: #111827;
+        }
+
+        .feedback-heading p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .feedback-card {
+            width: 100%;
+            max-width: 1000px;
+            padding: 24px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .feedback-intro {
+            color: #6b7280;
+            line-height: 1.7;
+            margin: 0 0 24px;
+        }
+
+        .feedback-form-group {
+            margin-bottom: 20px;
+        }
+
+        .feedback-form-group > label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .feedback-form-group select,
+        .feedback-form-group textarea {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            background: #fff;
+            color: #111827;
+            font: inherit;
+            font-size: 14px;
+        }
+
+        .feedback-form-group select:focus,
+        .feedback-form-group textarea:focus {
+            outline: 2px solid #bfdbfe;
+            border-color: #2563eb;
+        }
+
+        .feedback-form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .feedback-hint {
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-top: 7px;
+        }
+
+        .feedback-stars {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback-stars input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+        }
+
+        .feedback-stars label {
+            margin: 0;
+            color: #cbd5e1;
+            font-size: 34px;
+            cursor: pointer;
+            line-height: 1.2;
+        }
+
+        .feedback-stars label.selected {
+            color: #f59e0b;
+        }
+
+        .feedback-stars input:focus-visible + label {
+            outline: 2px solid #2563eb;
+            outline-offset: 3px;
+        }
+
+        .feedback-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .feedback-submit,
+        .feedback-reset {
+            min-height: 42px;
+            padding: 10px 16px;
+            border-radius: 7px;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s ease;
+        }
+
+        .feedback-submit {
+            border: 1px solid #1f2937;
+            background: #1f2937;
+            color: #fff;
+        }
+
+        .feedback-submit:hover {
+            background: #374151;
+        }
+
+        .feedback-submit:disabled {
+            opacity: .6;
+            cursor: wait;
+        }
+
+        .feedback-reset {
+            border: 1px solid #d1d5db;
+            background: #fff;
+            color: #374151;
+        }
+
+        .feedback-reset:hover {
+            background: #f9fafb;
+        }
+
+        .feedback-result {
+            display: none;
+            padding: 13px 15px;
+            border-radius: 7px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .feedback-result.success {
+            display: block;
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .feedback-result.error {
+            display: block;
+            color: #991b1b;
+            background: #fee2e2;
+        }
+
+        @media (max-width: 800px) {
+            .feedback-page {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .feedback-page {
+                padding: 12px;
+            }
+
+            .feedback-heading h1 {
+                font-size: 23px;
+            }
+
+            .feedback-card {
+                padding: 16px;
+            }
+
+            .feedback-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .feedback-submit,
+            .feedback-reset {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="pos-app">
+
+        <aside id="posSidebar" class="pos-sidebar"></aside>
+
+        <div class="pos-main">
+
+            <header id="posTopbar" class="pos-topbar"></header>
+
+            <main class="pos-content">
+                <div class="feedback-page">
+
+                    <div class="feedback-heading">
+                        <h1>Send Feedback</h1>
+                        <p>Help us improve Modern POS for your business.</p>
+                    </div>
+
+                    <section class="feedback-card">
+
+                        <p class="feedback-intro">
+                            Have a suggestion, found a problem, or want us to add a feature?
+                            Tell us about it. Your feedback helps us make the system better.
+                        </p>
+
+                        <div
+                            id="feedbackResult"
+                            class="feedback-result"
+                            role="status"
+                            aria-live="polite"
+                        ></div>
+
+                        <form id="feedbackForm">
+
+                            <div class="feedback-form-group">
+                                <label for="feedbackType">
+                                    What is your feedback about?
+                                </label>
+
+                                <select id="feedbackType" required>
+                                    <option value="SUGGESTION">Suggestion</option>
+                                    <option value="BUG">Report a problem</option>
+                                    <option value="FEATURE">Request a new feature</option>
+                                    <option value="RATING">Rate your experience</option>
+                                </select>
+                            </div>
+
+                            <div class="feedback-form-group">
+                                <label>How would you rate Modern POS? (Optional)</label>
+
+                                <div class="feedback-stars" id="feedbackStars">
+                                    <input type="radio" id="star1" name="rating" value="1">
+                                    <label for="star1" data-value="1" aria-label="1 star">★</label>
+
+                                    <input type="radio" id="star2" name="rating" value="2">
+                                    <label for="star2" data-value="2" aria-label="2 stars">★</label>
+
+                                    <input type="radio" id="star3" name="rating" value="3">
+                                    <label for="star3" data-value="3" aria-label="3 stars">★</label>
+
+                                    <input type="radio" id="star4" name="rating" value="4">
+                                    <label for="star4" data-value="4" aria-label="4 stars">★</label>
+
+                                    <input type="radio" id="star5" name="rating" value="5">
+                                    <label for="star5" data-value="5" aria-label="5 stars">★</label>
+                                </div>
+
+                                <div class="feedback-hint">
+                                    Choose from 1 to 5 stars, or leave it blank.
+                                </div>
+                            </div>
+
+                            <div class="feedback-form-group">
+                                <label for="feedbackMessage">Your message</label>
+
+                                <textarea
+                                    id="feedbackMessage"
+                                    maxlength="3000"
+                                    minlength="3"
+                                    placeholder="Tell us what you think or explain the problem..."
+                                    required
+                                ></textarea>
+
+                                <div class="feedback-hint">
+                                    Please do not include passwords or private payment details.
+                                </div>
+                            </div>
+
+                            <div class="feedback-actions">
+                                <button
+                                    type="submit"
+                                    class="feedback-submit"
+                                    id="submitFeedback"
+                                >
+                                    Submit Feedback
+                                </button>
+
+                                <button type="reset" class="feedback-reset">
+                                    Clear Form
+                                </button>
+                            </div>
+
+                        </form>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/pos-layout.js"></script>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:3000/api";
+
+        const form = document.getElementById("feedbackForm");
+        const result = document.getElementById("feedbackResult");
+        const submitButton = document.getElementById("submitFeedback");
+        const messageInput = document.getElementById("feedbackMessage");
+
+        function showResult(message, type) {
+            result.textContent = message;
+            result.className = "feedback-result " + type;
+        }
+
+        function updateStars() {
+            const selected = document.querySelector(
+                'input[name="rating"]:checked'
+            );
+
+            const value = selected ? Number(selected.value) : 0;
+
+            document.querySelectorAll("#feedbackStars label").forEach(label => {
+                label.classList.toggle(
+                    "selected",
+                    Number(label.dataset.value) <= value
+                );
+            });
+        }
+
+        document.querySelectorAll('input[name="rating"]').forEach(input => {
+            input.addEventListener("change", updateStars);
+        });
+
+        form.addEventListener("reset", () => {
+            setTimeout(() => {
+                updateStars();
+                result.className = "feedback-result";
+                result.textContent = "";
+            }, 0);
+        });
+
+        form.addEventListener("submit", async event => {
+            event.preventDefault();
+
+            const token = localStorage.getItem("posToken");
+
+            if (!token) {
+                showResult(
+                    "Your POS session was not found. Please log in again.",
+                    "error"
+                );
+                return;
+            }
+
+            const message = messageInput.value.trim();
+
+            if (message.length < 3) {
+                showResult(
+                    "Please enter a longer feedback message.",
+                    "error"
+                );
+                return;
+            }
+
+            const selectedRating = document.querySelector(
+                'input[name="rating"]:checked'
+            );
+
+            const payload = {
+                type: document.getElementById("feedbackType").value,
+                message
+            };
+
+            if (selectedRating) {
+                payload.rating = Number(selectedRating.value);
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = "Submitting...";
+            result.className = "feedback-result";
+            result.textContent = "";
+
+            try {
+                const response = await fetch(`${API_BASE}/feedback`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.status === 401) {
+                    showResult(
+                        "Your login session has expired. Please log in again.",
+                        "error"
+                    );
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.message || "Could not submit feedback."
+                    );
+                }
+
+                showResult(
+                    "Thank you! Your feedback has been submitted successfully.",
+                    "success"
+                );
+
+                form.reset();
+
+            } catch (error) {
+                showResult(
+                    error.message ||
+                    "Could not connect to the server. Please try again.",
+                    "error"
+                );
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = "Submit Feedback";
+            }
+        });
+    </script>
+</body>
+</html>

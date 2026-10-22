@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern POS - Payment</title>
+    <link rel="stylesheet" href="css/pos.css">
+
+    <style>
+        .payment-page {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .payment-page-header h1 {
+            margin: 0;
+            font-size: 27px;
+            font-weight: 750;
+            color: #111827;
+        }
+
+        .payment-page-header p {
+            margin-top: 7px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .payment-section {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, .035);
+            min-width: 0;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .section-heading h2 {
+            margin: 0;
+            color: #111827;
+            font-size: 19px;
+        }
+
+        .section-heading p {
+            margin: 6px 0 0;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .heading-left {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .heading-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .payment-page button {
+            font: inherit;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 10px 16px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+        }
+
+        .btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .queue-tools {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .queue-search {
+            position: relative;
+            width: 280px;
+            max-width: 100%;
+        }
+
+        .queue-search span {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .queue-search input {
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 42px;
+            padding: 10px 12px 10px 38px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .queue-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .queue-table,
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .queue-table th,
+        .queue-table td,
+        .items-table th,
+        .items-table td {
+            padding: 14px 13px;
+            border-bottom: 1px solid #edf0f4;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .queue-table th,
+        .items-table th {
+            background: #f9fafb;
+            color: #6b7280;
+            font-size: 11px;
+            font-weight: 750;
+            text-transform: uppercase;
+        }
+
+        .queue-table td,
+        .items-table td {
+            color: #374151;
+            font-size: 13px;
+        }
+
+        .queue-table tbody tr:hover,
+        .items-table tbody tr:hover {
+            background: #fafcff;
+        }
+
+        .customer-name {
+            color: #111827 !important;
+            font-weight: 650;
+        }
+
+        .sale-number {
+            color: #1d4ed8 !important;
+            font-weight: 750;
+        }
+
+        .amount-cell {
+            color: #111827 !important;
+            font-weight: 700;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .status-pending {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .status-partial {
+            background: #f5f3ff;
+            color: #6d28d9;
+        }
+
+        .status-paid {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .status-default {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .open-payment-btn {
+            padding: 9px 13px;
+            border: none;
+            border-radius: 7px;
+            background: #111827;
+            color: #fff;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+        .open-payment-btn:hover {
+            background: #374151;
+        }
+
+        .empty-queue {
+            text-align: center !important;
+            padding: 35px 15px !important;
+            color: #6b7280 !important;
+            white-space: normal !important;
+        }
+
+        .queue-message,
+        .success-message,
+        .error-message {
+            margin-top: 15px;
+            padding: 13px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .queue-message,
+        .error-message {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .success-message {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+
+        #queueMessage:empty {
+            display: none;
+        }
+
+        .payment-panel {
+            display: none;
+            flex-direction: column;
+            gap: 22px;
+            scroll-margin-top: 20px;
+        }
+
+        .sale-info-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 13px;
+        }
+
+        .info-box {
+            min-width: 0;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fafbfc;
+        }
+
+        .info-label {
+            display: block;
+            margin-bottom: 9px;
+            color: #6b7280;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .info-value {
+            display: block;
+            overflow-wrap: anywhere;
+            color: #111827;
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .payment-summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .summary-box {
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 11px;
+            background: #fff;
+        }
+
+        .summary-box::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #2563eb;
+        }
+
+        .paid-summary::before {
+            background: #059669;
+        }
+
+        .balance-summary::before {
+            background: #d97706;
+        }
+
+        .summary-label {
+            margin-bottom: 10px;
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        .summary-value {
+            overflow-wrap: anywhere;
+            color: #111827;
+            font-size: clamp(19px, 2vw, 25px);
+            font-weight: 800;
+        }
+
+        .summary-caption {
+            margin-top: 7px;
+            color: #9ca3af;
+            font-size: 11px;
+        }
+
+        .payment-form {
+            max-width: 620px;
+        }
+
+        .payment-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 17px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            color: #374151;
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .form-control {
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 45px;
+            padding: 11px 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            outline: none;
+            background: #fff;
+            color: #111827;
+            font-size: 13px;
+        }
+
+        .form-control:focus {
+            border-color: #2563eb;
+        }
+
+        .amount-hint {
+            color: #6b7280;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .payment-actions {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            margin-top: 21px;
+            flex-wrap: wrap;
+        }
+
+        .back-button {
+            min-height: 42px;
+            padding: 10px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: #fff;
+            color: #374151;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 1150px) {
+            .sale-info-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 850px) {
+            .payment-section {
+                padding: 19px;
+            }
+
+            .sale-info-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .payment-section {
+                padding: 15px;
+            }
+
+            .queue-tools {
+                width: 100%;
+                align-items: stretch;
+            }
+
+            .queue-search {
+                width: 100%;
+                flex: 1 1 100%;
+            }
+
+            .refresh-btn {
+                width: 100%;
+            }
+
+            .payment-summary,
+            .payment-form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sale-info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .payment-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .payment-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="pos-app">
+
+        <aside id="posSidebar" class="pos-sidebar"></aside>
+
+        <main class="pos-main">
+
+            <header id="posTopbar" class="pos-topbar"></header>
+
+            <div class="pos-content">
+
+                <div class="payment-page">
+
+                    <div class="payment-page-header">
+                        <h1>Payment</h1>
+                        <p>Review sales, verify payments, and manage outstanding balances.</p>
+                    </div>
+
+                    <section class="payment-section">
+
+                        <div class="section-heading">
+
+                            <div class="heading-left">
+                                <div class="heading-icon">₦</div>
+                                <div>
+                                    <h2>Cashier Queue</h2>
+                                    <p>Select a sale waiting for payment.</p>
+                                </div>
+                            </div>
+
+                            <div class="queue-tools">
+
+                                <div class="queue-search">
+                                    <span>⌕</span>
+                                    <input
+                                        type="search"
+                                        id="queueSearch"
+                                        placeholder="Search customer or sale number..."
+                                        aria-label="Search cashier queue"
+                                    >
+                                </div>
+
+                                <button
+                                    type="button"
+                                    class="btn btn-secondary refresh-btn"
+                                    id="refreshQueueBtn"
+                                    onclick="loadCashierQueue()"
+                                >
+                                    ↻ Refresh Queue
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <div class="queue-table-wrapper">
+                            <table class="queue-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Sale Number</th>
+                                        <th>Total Amount</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="queueTable">
+                                    <tr>
+                                        <td colspan="5" class="empty-queue">
+                                            Loading cashier queue...
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                        <div id="queueMessage"></div>
+
+                    </section>
+
+                    <section id="paymentPanel" class="payment-panel">
+
+                        <section class="payment-section">
+
+                            <div class="section-heading">
+                                <div class="heading-left">
+                                    <div class="heading-icon">▤</div>
+                                    <div>
+                                        <h2>Sale Information</h2>
+                                        <p>Review the sale details before processing payment.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="sale-info-grid">
+
+                                <div class="info-box">
+                                    <span class="info-label">Sale Number</span>
+                                    <span id="saleNumber" class="info-value">-</span>
+                                </div>
+
+                                <div class="info-box">
+                                    <span class="info-label">Customer</span>
+                                    <span id="customerName" class="info-value">-</span>
+                                </div>
+
+                                <div class="info-box">
+                                    <span class="info-label">Branch</span>
+                                    <span id="branchId" class="info-value">-</span>
+                                </div>
+
+                                <div class="info-box">
+                                    <span class="info-label">Salesperson</span>
+                                    <span id="salespersonId" class="info-value">-</span>
+                                </div>
+
+                                <div class="info-box">
+                                    <span class="info-label">Status</span>
+                                    <span id="saleStatus" class="info-value">-</span>
+                                </div>
+
+                            </div>
+
+                            <div class="payment-summary">
+
+                                <div class="summary-box">
+                                    <div class="summary-label">Total Amount</div>
+                                    <div id="totalAmount" class="summary-value">₦0.00</div>
+                                    <div class="summary-caption">Total value of this sale</div>
+                                </div>
+
+                                <div class="summary-box paid-summary">
+                                    <div class="summary-label">Already Paid</div>
+                                    <div id="alreadyPaid" class="summary-value">₦0.00</div>
+                                    <div class="summary-caption">Payments recorded for this sale</div>
+                                </div>
+
+                                <div class="summary-box balance-summary">
+                                    <div class="summary-label">Outstanding Balance</div>
+                                    <div id="balanceAmount" class="summary-value">₦0.00</div>
+                                    <div class="summary-caption">Amount remaining to be paid</div>
+                                </div>
+
+                            </div>
+
+                        </section>
+
+                        <section class="payment-section">
+
+                            <div class="section-heading">
+                                <div class="heading-left">
+                                    <div class="heading-icon">▦</div>
+                                    <div>
+                                        <h2>Sale Items</h2>
+                                        <p>Check the products included in this transaction.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="queue-table-wrapper">
+                                <table class="items-table">
+
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Price</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody id="saleItems">
+                                        <tr>
+                                            <td colspan="4" class="empty-queue">
+                                                Select a sale to view its items.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                        </section>
+
+                        <section class="payment-section">
+
+                            <div class="section-heading">
+                                <div class="heading-left">
+                                    <div class="heading-icon">✓</div>
+                                    <div>
+                                        <h2>Process Payment</h2>
+                                        <p>Verify the amount and record the customer's payment.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="payment-form">
+
+                                <div class="payment-form-grid">
+
+                                    <div class="form-group">
+                                        <label for="paymentMethod">Payment Method</label>
+
+                                        <select id="paymentMethod" class="form-control">
+                                            <option value="CASH">Cash</option>
+                                            <option value="TRANSFER">Bank Transfer</option>
+                                            <option value="POS">POS Terminal</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="amountPaid">Amount to Pay (₦)</label>
+
+                                        <input
+                                            type="number"
+                                            id="amountPaid"
+                                            class="form-control"
+                                            min="0.01"
+                                            step="0.01"
+                                            placeholder="Enter amount paid"
+                                        >
+
+                                        <span class="amount-hint">
+                                            The outstanding balance is entered automatically.
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                                <div class="payment-actions">
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary"
+                                        id="confirmPaymentBtn"
+                                        onclick="confirmPayment()"
+                                    >
+                                        ✓ Confirm Payment
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="back-button"
+                                        onclick="closePayment()"
+                                    >
+                                        ← Back to Queue
+                                    </button>
+
+                                </div>
+
+                                <div
+                                    id="paymentMessage"
+                                    role="status"
+                                    aria-live="polite"
+                                ></div>
+
+                            </div>
+
+                        </section>
+
+                    </section>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <script src="js/pos-layout.js"></script>
+
+    <script>
+        let currentSale = null;
+        let cashierQueueSales = [];
+
+        const API_BASE = "http://127.0.0.1:3000/api";
+
+        if (typeof initPOSLayout === "function") {
+            initPOSLayout("Payment");
+        }
+
+        // =========================================
+        // AUTHENTICATION AND API HELPER
+        // =========================================
+
+        function getAuthToken() {
+            const token = localStorage.getItem("posToken");
+
+            if (!token) {
+                window.location.replace("login.html");
+                throw new Error("Your session is missing. Please log in again.");
+            }
+
+            return token;
+        }
+
+        async function apiFetch(endpoint, options = {}) {
+            const token = getAuthToken();
+
+            const headers = {
+                ...(options.headers || {}),
+                Authorization: `Bearer ${token}`
+            };
+
+            if (options.body && !headers["Content-Type"]) {
+                headers["Content-Type"] = "application/json";
+            }
+
+            const response = await fetch(`${API_BASE}${endpoint}`, {
+                ...options,
+                headers
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem("posToken");
+                localStorage.removeItem("posUser");
+
+                window.location.replace("login.html");
+
+                throw new Error(
+                    "Your session has expired. Please log in again."
+                );
+            }
+
+            return response;
+        }
+
+        async function readResponse(response) {
+            const text = await response.text();
+
+            if (!text) {
+                return {};
+            }
+
+            try {
+                return JSON.parse(text);
+            } catch {
+                throw new Error("The server returned an invalid response.");
+            }
+        }
+
+        // =========================================
+        // HELPERS
+        // =========================================
+
+        function formatCurrency(amount) {
+            return "₦" + Number(amount || 0).toLocaleString("en-NG", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function showPaymentMessage(message, type = "success") {
+            const element = document.getElementById("paymentMessage");
+
+            element.className =
+                type === "success"
+                    ? "success-message"
+                    : "error-message";
+
+            element.textContent = message;
+        }
+
+        function getCustomerName(sale) {
+            return sale.customerName ||
+                sale.Customer?.name ||
+                sale.customer?.name ||
+                "Walk-in Customer";
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case "PENDING":
+                    return "status-badge status-pending";
+
+                case "PARTIALLY_PAID":
+                    return "status-badge status-partial";
+
+                case "PAID":
+                    return "status-badge status-paid";
+
+                default:
+                    return "status-badge status-default";
+            }
+        }
+
+        function getSalePayments(sale) {
+            if (Array.isArray(sale.Payments)) {
+                return sale.Payments;
+            }
+
+            if (Array.isArray(sale.payments)) {
+                return sale.payments;
+            }
+
+            return [];
+        }
+
+        function getTotalPaid(sale) {
+            return getSalePayments(sale).reduce((sum, payment) => {
+                return sum + Number(payment.amount || 0);
+            }, 0);
+        }
+
+        // =========================================
+        // LOAD CASHIER QUEUE
+        // =========================================
+
+        async function loadCashierQueue() {
+            const table = document.getElementById("queueTable");
+            const message = document.getElementById("queueMessage");
+            const refreshButton = document.getElementById("refreshQueueBtn");
+
+            table.innerHTML = `
+                <tr>
+                    <td colspan="5" class="empty-queue">
+                        Loading cashier queue...
+                    </td>
+                </tr>
+            `;
+
+            message.textContent = "";
+            message.className = "";
+
+            refreshButton.disabled = true;
+            refreshButton.textContent = "Loading...";
+
+            try {
+                const response = await apiFetch("/sales/cashier-queue");
+                const sales = await readResponse(response);
+
+                if (!response.ok) {
+                    throw new Error(
+                        sales.message || "Failed to load cashier queue."
+                    );
+                }
+
+                if (!Array.isArray(sales)) {
+                    throw new Error(
+                        "The cashier queue response is invalid."
+                    );
+                }
+
+                cashierQueueSales = sales;
+                renderCashierQueue();
+
+            } catch (error) {
+                console.error("Cashier queue error:", error);
+
+                cashierQueueSales = [];
+
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-queue">
+                            Failed to load cashier queue.
+                        </td>
+                    </tr>
+                `;
+
+                message.className = "queue-message";
+                message.textContent = error.message;
+
+            } finally {
+                refreshButton.disabled = false;
+                refreshButton.textContent = "↻ Refresh Queue";
+            }
+        }
+
+        // =========================================
+        // RENDER AND SEARCH QUEUE
+        // =========================================
+
+        function renderCashierQueue() {
+            const table = document.getElementById("queueTable");
+
+            const searchValue = document
+                .getElementById("queueSearch")
+                .value
+                .trim()
+                .toLowerCase();
+
+            const filteredSales = cashierQueueSales.filter(sale => {
+                const customer = getCustomerName(sale).toLowerCase();
+                const saleNumber = String(sale.saleNumber || "").toLowerCase();
+                const status = String(sale.status || "").toLowerCase();
+
+                return customer.includes(searchValue) ||
+                    saleNumber.includes(searchValue) ||
+                    status.includes(searchValue);
+            });
+
+            table.innerHTML = "";
+
+            if (filteredSales.length === 0) {
+                const emptyMessage = searchValue
+                    ? "No sales match your search."
+                    : "No sales waiting for payment.";
+
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-queue">
+                            ${escapeHtml(emptyMessage)}
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            filteredSales.forEach(sale => {
+                const row = document.createElement("tr");
+
+                const customerName = getCustomerName(sale);
+                const saleNumber = String(sale.saleNumber || "");
+                const status = String(sale.status || "PENDING");
+
+                row.innerHTML = `
+                    <td class="customer-name">
+                        ${escapeHtml(customerName)}
+                    </td>
+
+                    <td class="sale-number">
+                        ${escapeHtml(saleNumber || "-")}
+                    </td>
+
+                    <td class="amount-cell">
+                        ${formatCurrency(sale.totalAmount)}
+                    </td>
+
+                    <td>
+                        <span class="${getStatusClass(status)}">
+                            ${escapeHtml(status.replace(/_/g, " "))}
+                        </span>
+                    </td>
+
+                    <td>
+                        <button
+                            type="button"
+                            class="open-payment-btn"
+                        >
+                            PAYMENT →
+                        </button>
+                    </td>
+                `;
+
+                row.querySelector(".open-payment-btn")
+                    .addEventListener("click", () => {
+                        openPayment(saleNumber);
+                    });
+
+                table.appendChild(row);
+            });
+        }
+
+        document
+            .getElementById("queueSearch")
+            .addEventListener("input", renderCashierQueue);
+
+        // =========================================
+        // OPEN PAYMENT
+        // =========================================
+
+        function openPayment(saleNumber) {
+            window.location.href =
+                "payment.html?sale=" +
+                encodeURIComponent(saleNumber);
+        }
+
+        // =========================================
+        // LOAD SALE DETAILS
+        // =========================================
+
+        async function loadSale(saleNumber) {
+            try {
+                const response = await apiFetch(
+                    `/sales/number/${encodeURIComponent(saleNumber)}`
+                );
+
+                const data = await readResponse(response);
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.message || "Failed to load sale."
+                    );
+                }
+
+                const sale = data.sale || data;
+
+                currentSale = sale;
+
+                document.getElementById("saleNumber").textContent =
+                    sale.saleNumber || saleNumber || "-";
+
+                document.getElementById("customerName").textContent =
+                    getCustomerName(sale);
+
+                document.getElementById("branchId").textContent =
+                    sale.branchId ?? "-";
+
+                document.getElementById("salespersonId").textContent =
+                    sale.salespersonId ?? "-";
+
+                document.getElementById("saleStatus").textContent =
+                    sale.status || "-";
+
+                const total = Number(sale.totalAmount || 0);
+                const alreadyPaid = getTotalPaid(sale);
+                const balance = Math.max(total - alreadyPaid, 0);
+
+                document.getElementById("totalAmount").textContent =
+                    formatCurrency(total);
+
+                document.getElementById("alreadyPaid").textContent =
+                    formatCurrency(alreadyPaid);
+
+                document.getElementById("balanceAmount").textContent =
+                    formatCurrency(balance);
+
+                const amountInput =
+                    document.getElementById("amountPaid");
+
+                amountInput.value = balance > 0 ? balance : "";
+                amountInput.max = balance;
+                amountInput.disabled = balance <= 0;
+
+                document.getElementById("confirmPaymentBtn").disabled =
+                    balance <= 0;
+
+                if (balance <= 0) {
+                    showPaymentMessage(
+                        "This sale has no outstanding balance.",
+                        "success"
+                    );
+                } else {
+                    document.getElementById("paymentMessage").textContent = "";
+                    document.getElementById("paymentMessage").className = "";
+                }
+
+                renderSaleItems(sale);
+
+                document.getElementById("paymentPanel").style.display = "flex";
+
+                document.getElementById("paymentPanel").scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+            } catch (error) {
+                console.error("Load sale error:", error);
+                alert(error.message);
+            }
+        }
+
+        // =========================================
+        // RENDER SALE ITEMS
+        // =========================================
+
+        function renderSaleItems(sale) {
+            const itemsTable = document.getElementById("saleItems");
+
+            const items = Array.isArray(sale.SaleItems)
+                ? sale.SaleItems
+                : Array.isArray(sale.saleItems)
+                    ? sale.saleItems
+                    : Array.isArray(sale.items)
+                        ? sale.items
+                        : [];
+
+            itemsTable.innerHTML = "";
+
+            if (items.length === 0) {
+                itemsTable.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty-queue">
+                            No sale items found.
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            items.forEach(item => {
+                const row = document.createElement("tr");
+
+                const productName =
+                    item.Product?.name ||
+                    item.product?.name ||
+                    item.productName ||
+                    "Unknown Product";
+
+                const quantity = Number(item.quantity || 0);
+                const unitPrice = Number(item.unitPrice || 0);
+
+                const totalPrice = item.totalPrice == null
+                    ? quantity * unitPrice
+                    : Number(item.totalPrice);
+
+                row.innerHTML = `
+                    <td>${escapeHtml(productName)}</td>
+                    <td>${quantity}</td>
+                    <td>${formatCurrency(unitPrice)}</td>
+                    <td class="amount-cell">
+                        ${formatCurrency(totalPrice)}
+                    </td>
+                `;
+
+                itemsTable.appendChild(row);
+            });
+        }
+
+        // =========================================
+        // CONFIRM PAYMENT
+        // =========================================
+
+        async function confirmPayment() {
+            if (!currentSale) {
+                showPaymentMessage(
+                    "Please select a sale first.",
+                    "error"
+                );
+                return;
+            }
+
+            const paymentMethod =
+                document.getElementById("paymentMethod").value;
+
+            const amountInput =
+                document.getElementById("amountPaid").value;
+
+            const amount = Number(amountInput);
+            const total = Number(currentSale.totalAmount || 0);
+            const alreadyPaid = getTotalPaid(currentSale);
+            const balance = Math.max(total - alreadyPaid, 0);
+
+            if (
+                amountInput === "" ||
+                !Number.isFinite(amount) ||
+                amount <= 0
+            ) {
+                showPaymentMessage(
+                    "Please enter a valid payment amount greater than zero.",
+                    "error"
+                );
+                return;
+            }
+
+            if (balance <= 0) {
+                showPaymentMessage(
+                    "This sale has already been fully paid.",
+                    "error"
+                );
+                return;
+            }
+
+            if (amount > balance) {
+                showPaymentMessage(
+                    "The payment amount cannot exceed the outstanding balance.",
+                    "error"
+                );
+                return;
+            }
+
+            const confirmButton =
+                document.getElementById("confirmPaymentBtn");
+
+            confirmButton.disabled = true;
+            confirmButton.textContent = "Processing...";
+
+            try {
+                const response = await apiFetch("/payments", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        saleId: currentSale.id,
+                        paymentMethod: paymentMethod,
+                        amount: amount
+                    })
+                });
+
+                const data = await readResponse(response);
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.message || "Payment failed."
+                    );
+                }
+
+                showPaymentMessage(
+                    "Payment recorded successfully.",
+                    "success"
+                );
+
+                await loadSale(currentSale.saleNumber);
+                await loadCashierQueue();
+
+            } catch (error) {
+                console.error("Payment error:", error);
+
+                showPaymentMessage(
+                    error.message || "Payment failed. Please try again.",
+                    "error"
+                );
+
+            } finally {
+                confirmButton.textContent = "✓ Confirm Payment";
+
+                if (!currentSale) {
+                    confirmButton.disabled = false;
+                } else {
+                    const latestTotal =
+                        Number(currentSale.totalAmount || 0);
+
+                    const latestPaid = getTotalPaid(currentSale);
+
+                    confirmButton.disabled =
+                        latestTotal - latestPaid <= 0;
+                }
+            }
+        }
+
+        // =========================================
+        // CLOSE PAYMENT PANEL
+        // =========================================
+
+        function closePayment() {
+            document.getElementById("paymentPanel").style.display = "none";
+
+            currentSale = null;
+
+            document.getElementById("paymentMessage").textContent = "";
+            document.getElementById("paymentMessage").className = "";
+
+            document.getElementById("amountPaid").value = "";
+            document.getElementById("amountPaid").disabled = false;
+
+            const params = new URLSearchParams(window.location.search);
+
+            if (params.has("sale")) {
+                window.location.href = "payment.html";
+                return;
+            }
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+
+        // =========================================
+        // INITIALIZE PAGE
+        // =========================================
+
+        loadCashierQueue();
+
+        const params = new URLSearchParams(window.location.search);
+        const saleNumber = params.get("sale");
+
+        if (saleNumber) {
+            loadSale(saleNumber);
+        }
+    </script>
+
+</body>
+</html>

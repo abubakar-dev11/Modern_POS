@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern POS | Feedback Management</title>
+<link rel="stylesheet" href="css/pos.css">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f8fafc;color:#172033;font-family:Arial,sans-serif}
+.layout{display:flex;min-height:100vh}.sidebar{width:230px;background:#172554;color:white;padding:25px 16px;flex-shrink:0}
+.brand{font-size:20px;font-weight:bold;margin:0 8px 32px}.nav a{display:block;color:#dbeafe;text-decoration:none;padding:12px;border-radius:8px;margin-bottom:6px;font-size:14px}
+.nav a.active,.nav a:hover{background:#1e40af}.main{padding:28px;width:100%;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+h1{font-size:27px;margin:0 0 7px}.muted{color:#64748b;font-size:14px}
+button,select{border:1px solid #cbd5e1;border-radius:8px;padding:9px 11px;background:white;color:#172033}
+button{cursor:pointer}button.primary{background:#1d4ed8;color:white;border-color:#1d4ed8}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.panel{background:white;border:1px solid #e2e8f0;border-radius:13px;overflow:hidden}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:800px}
+th,td{text-align:left;padding:13px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;vertical-align:top}
+th{color:#64748b;background:#f8fafc}
+.message-cell{white-space:pre-wrap;overflow-wrap:anywhere;max-width:360px}
+.notice{margin:12px 0;font-size:14px;color:#166534}.error{color:#b91c1c}
+.status-select{max-width:145px}.empty{text-align:center;padding:30px;color:#64748b}
+@media(max-width:700px){.layout{display:block}.sidebar{width:100%;padding:16px}.brand{margin:0 8px 12px}.nav{display:flex;gap:5px;flex-wrap:wrap}.nav a{margin:0;padding:9px}.main{padding:18px 12px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+    <div class="brand">Modern POS</div>
+    <nav class="nav">
+        <a href="platform-dashboard.html">Dashboard</a>
+        <a class="active" href="platform-feedback.html">Feedback</a>
+        <a href="#" id="logout">Log out</a>
+    </nav>
+</aside>
+
+<main class="main">
+    <div class="top">
+        <div>
+            <h1>Feedback Management</h1>
+            <div class="muted">Review suggestions, bug reports, ratings, and feature requests.</div>
+        </div>
+        <button id="refresh">Refresh</button>
+    </div>
+
+    <div class="filters">
+        <select id="statusFilter" aria-label="Filter by status">
+            <option value="">All statuses</option>
+            <option value="NEW">New</option>
+            <option value="REVIEWING">Reviewing</option>
+            <option value="RESOLVED">Resolved</option>
+        </select>
+        <select id="typeFilter" aria-label="Filter by type">
+            <option value="">All types</option>
+            <option value="SUGGESTION">Suggestion</option>
+            <option value="BUG">Bug</option>
+            <option value="RATING">Rating</option>
+            <option value="FEATURE">Feature</option>
+        </select>
+        <button id="apply" class="primary">Apply Filters</button>
+    </div>
+
+    <div id="notice" class="notice" role="status"></div>
+    <div id="error" class="notice error" role="alert"></div>
+
+    <section class="panel">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Business ID</th><th>Type</th><th>Message</th><th>Rating</th><th>Date</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody id="feedbackRows">
+                    <tr><td colspan="8" class="empty">Loading feedback...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</div>
+
+<script>
+const API = "http://127.0.0.1:3000/api";
+const token = localStorage.getItem("platformToken");
+
+if (!token) window.location.replace("platform-login.html");
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    }[c]));
+}
+
+async function request(path, options = {}) {
+    const response = await fetch(`${API}${path}`, {
+        ...options,
+        headers: {
+            Authorization: `Bearer ${token}`,
+            ...(options.body ? {"Content-Type": "application/json"} : {}),
+            ...(options.headers || {})
+        }
+    });
+
+    const data = await response.json();
+
+    if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem("platformToken");
+        localStorage.removeItem("platformAdmin");
+        window.location.replace("platform-login.html");
+        throw new Error("Please sign in again.");
+    }
+
+    if (!response.ok) throw new Error(data.message || "Request failed.");
+    return data;
+}
+
+async function loadFeedback() {
+    const error = document.getElementById("error");
+    const notice = document.getElementById("notice");
+    const rows = document.getElementById("feedbackRows");
+    error.textContent = "";
+    notice.textContent = "";
+    rows.innerHTML = '<tr><td colspan="8" class="empty">Loading feedback...</td></tr>';
+
+    const params = new URLSearchParams();
+    const status = document.getElementById("statusFilter").value;
+    const type = document.getElementById("typeFilter").value;
+    if (status) params.set("status", status);
+    if (type) params.set("type", type);
+
+    try {
+        const data = await request(`/feedback${params.toString() ? "?" + params.toString() : ""}`);
+        const list = data.feedback || [];
+
+        if (!list.length) {
+            rows.innerHTML = '<tr><td colspan="8" class="empty">No feedback found.</td></tr>';
+            notice.textContent = "Feedback records: 0";
+            return;
+        }
+
+        rows.innerHTML = list.map(item => `
+            <tr>
+                <td>${escapeHtml(item.id)}</td>
+                <td>${escapeHtml(item.Business?.name || `Business ${item.businessId ?? "—"}`)}</td>
+                <td>${escapeHtml(item.type)}</td>
+                <td class="message-cell">${escapeHtml(item.message)}</td>
+                <td>${item.rating == null ? "—" : escapeHtml(item.rating) + " / 5"}</td>
+                <td>${item.createdAt ? escapeHtml(new Date(item.createdAt).toLocaleString()) : "—"}</td>
+                <td>
+                    <select class="status-select" id="status-${Number(item.id)}" aria-label="Status for feedback ${Number(item.id)}">
+                        ${["NEW","REVIEWING","RESOLVED"].map(s => `<option value="${s}" ${item.status === s ? "selected" : ""}>${s}</option>`).join("")}
+                    </select>
+                </td>
+                <td><button class="primary save-status" data-id="${Number(item.id)}">Save</button></td>
+            </tr>
+        `).join("");
+
+        notice.textContent = `Feedback records: ${data.total ?? list.length}`;
+    } catch (err) {
+        rows.innerHTML = '<tr><td colspan="8" class="empty">Unable to load feedback.</td></tr>';
+        error.textContent = err.message || "Unable to load feedback.";
+    }
+}
+
+document.getElementById("feedbackRows").addEventListener("click", async event => {
+    const button = event.target.closest(".save-status");
+    if (!button) return;
+
+    const id = Number(button.dataset.id);
+    if (!Number.isInteger(id) || id <= 0) return;
+
+    const status = document.getElementById(`status-${id}`).value;
+    button.disabled = true;
+    button.textContent = "Saving...";
+    document.getElementById("error").textContent = "";
+    document.getElementById("notice").textContent = "";
+
+    try {
+        const data = await request(`/feedback/${id}/status`, {
+            method: "PATCH",
+            body: JSON.stringify({status})
+        });
+        document.getElementById("notice").textContent = data.message || "Status updated successfully.";
+        await loadFeedback();
+    } catch (err) {
+        document.getElementById("error").textContent = err.message || "Could not update status.";
+        button.disabled = false;
+        button.textContent = "Save";
+    }
+});
+
+document.getElementById("refresh").addEventListener("click", loadFeedback);
+document.getElementById("apply").addEventListener("click", loadFeedback);
+document.getElementById("logout").addEventListener("click", event => {
+    event.preventDefault();
+    localStorage.removeItem("platformToken");
+    localStorage.removeItem("platformAdmin");
+    window.location.href = "platform-login.html";
+});
+
+loadFeedback();
+</script>
+</body>
+</html>

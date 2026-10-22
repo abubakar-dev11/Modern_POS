@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Users Management | Modern POS</title>
+<link rel="stylesheet" href="css/pos.css">
+<style>
+.permission-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:15px 0}
+.permission-item{display:flex;align-items:center;gap:9px;padding:10px;border:1px solid var(--border);border-radius:7px;font-size:13px}
+.permission-item input{width:16px;height:16px}
+.permission-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.permission-actions,.user-actions{display:flex;gap:7px;flex-wrap:wrap}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:2000;padding:20px;overflow:auto}
+.modal.open{display:block}
+.modal-content{background:white;max-width:760px;margin:35px auto;padding:22px;border-radius:10px}
+.modal-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.modal-header h2{margin:0;font-size:20px}
+.pos-message.error{background:#fee2e2;color:#991b1b}
+.pos-message.success{background:#dcfce7;color:#166534}
+.summary-number{font-size:25px;font-weight:bold}
+.summary-label{font-size:13px;color:var(--muted)}
+.user-actions .pos-btn{padding:8px 10px;font-size:12px}
+@media(max-width:600px){.modal-content{padding:15px;margin:10px auto}}
+</style>
+</head>
+<body>
+
+<div class="pos-app">
+    <aside id="posSidebar" class="pos-sidebar"></aside>
+
+    <main class="pos-main">
+        <header id="posTopbar" class="pos-topbar"></header>
+
+        <div class="pos-content">
+            <div class="pos-page-header">
+                <div>
+                    <h1 class="pos-page-title">Users Management</h1>
+                    <p class="pos-page-description">Manage team members and their page access.</p>
+                </div>
+                <button class="pos-btn pos-btn-primary" type="button" onclick="loadUsers()">Refresh</button>
+            </div>
+
+            <div id="message" class="pos-message" hidden></div>
+
+            <div class="pos-stat-grid">
+                <div class="pos-stat-card">
+                    <div class="pos-stat-label">Total Users</div>
+                    <div id="totalUsers" class="summary-number">0</div>
+                </div>
+                <div class="pos-stat-card">
+                    <div class="pos-stat-label">Active Users</div>
+                    <div id="activeUsers" class="summary-number">0</div>
+                </div>
+                <div class="pos-stat-card">
+                    <div class="pos-stat-label">Inactive Users</div>
+                    <div id="inactiveUsers" class="summary-number">0</div>
+                </div>
+            </div>
+
+            <section class="pos-card">
+                <h2 class="pos-card-title">Create New User</h2>
+
+                <form id="createUserForm">
+                    <div class="pos-form-grid">
+                        <div class="pos-form-group">
+                            <label class="pos-form-label" for="name">Full Name</label>
+                            <input class="pos-input" id="name" name="name" required autocomplete="name">
+                        </div>
+
+                        <div class="pos-form-group">
+                            <label class="pos-form-label" for="email">Email</label>
+                            <input class="pos-input" id="email" name="email" type="email" required autocomplete="email">
+                        </div>
+
+                        <div class="pos-form-group">
+                            <label class="pos-form-label" for="password">Temporary Password</label>
+                            <input class="pos-input" id="password" name="password" type="password" minlength="8" required autocomplete="new-password">
+                        </div>
+
+                        <div class="pos-form-group">
+                            <label class="pos-form-label" for="role">Role</label>
+                            <select class="pos-select" id="role" name="role" required>
+                                <option value="CASHIER">Cashier</option>
+                                <option value="SALESPERSON">Salesperson</option>
+                                <option value="MANAGER">Manager</option>
+                            </select>
+                        </div>
+
+                        <div class="pos-form-group">
+                            <label class="pos-form-label" for="branchId">Branch</label>
+                            <select class="pos-select" id="branchId" name="branchId" required>
+                                <option value="">Loading branches...</option>
+                            </select>
+                            <div id="branchHint" class="hint">Loading branches...</div>
+                        </div>
+                    </div>
+
+                    <div class="pos-card" style="margin-top:18px;background:#f9fafb">
+                        <div class="permission-head">
+                            <div>
+                                <h3 style="margin:0">Page Access</h3>
+                                <p class="pos-page-description">Choose the pages this user can access.</p>
+                            </div>
+                            <div class="permission-actions">
+                                <button class="pos-btn pos-btn-primary" type="button" onclick="selectAllCreatePages(true)">Select All</button>
+                                <button class="pos-btn" type="button" onclick="selectAllCreatePages(false)">Clear All</button>
+                            </div>
+                        </div>
+                        <div id="createPermissions" class="permission-grid"></div>
+                        <div class="hint">
+                            Select the pages this user can access. Page access is controlled
+                            by these permissions, not by the user's job role.
+                            Users Management and Settings are reserved for Admin.
+                        </div>
+                    </div>
+
+                    <button id="createButton" class="pos-btn pos-btn-success" type="submit" disabled>Create User</button>
+                </form>
+            </section>
+
+            <section class="pos-card">
+                <h2 class="pos-card-title">Team Members</h2>
+
+                <div class="pos-form-group">
+                    <label class="pos-form-label" for="userSearch">Search Users</label>
+                    <input class="pos-input" id="userSearch" placeholder="Search name, email or role..." autocomplete="off">
+                    <div id="userCount" class="hint">Loading users...</div>
+                </div>
+
+                <div class="pos-table-wrapper">
+                    <table class="pos-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Branch</th>
+                                <th>Status</th>
+                                <th>Page Access</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr><td colspan="7" class="pos-loading">Loading users...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<div id="permissionsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h2>Edit Page Permissions</h2>
+                <div id="editUserLabel" class="hint"></div>
+            </div>
+            <button class="pos-btn" type="button" onclick="closePermissionsModal()">Close</button>
+        </div>
+
+        <div id="editPermissionMessage" class="pos-message" hidden></div>
+        <div id="editPermissions" class="permission-grid"></div>
+        <p class="hint">
+            Choose any pages for this user, regardless of their job role.
+            Users Management and Settings are reserved for Admin.
+        </p>
+        <div class="permission-actions">
+            <button class="pos-btn" type="button" onclick="selectAllEditPages(true)">Select All Allowed</button>
+            <button class="pos-btn" type="button" onclick="selectAllEditPages(false)">Clear All</button>
+            <button id="savePermissionsButton" class="pos-btn pos-btn-success" type="button" onclick="savePermissions()">Save Permissions</button>
+        </div>
+    </div>
+</div>
+
+<div id="passwordModal" class="modal">
+    <div class="modal-content" style="max-width:460px">
+        <div class="modal-header">
+            <h2>Reset User Password</h2>
+            <button class="pos-btn" type="button" onclick="closePasswordModal()">Close</button>
+        </div>
+        <div id="passwordMessage" class="pos-message" hidden></div>
+        <form id="resetPasswordForm">
+            <input type="hidden" id="resetUserId">
+            <div class="pos-form-group">
+                <label class="pos-form-label" for="newPassword">New Temporary Password</label>
+                <input class="pos-input" id="newPassword" type="password" minlength="8" required autocomplete="new-password">
+            </div>
+            <button class="pos-btn pos-btn-success" type="submit">Reset Password</button>
+        </form>
+    </div>
+</div>
+
+<script src="js/pos-layout.js"></script>
+<script>
+"use strict";
+
+const API_BASE_URL = "http://localhost:3000/api";
+const USERS_API = `${API_BASE_URL}/users`;
+const BRANCHES_API = `${API_BASE_URL}/branches`;
+
+const PAGE_LIST = [
+    {page:"dashboard.html",label:"Dashboard"},
+    {page:"sales.html",label:"Sales"},
+    {page:"payment.html",label:"Payment"},
+    {page:"products.html",label:"Products"},
+    {page:"categories.html",label:"Categories"},
+    {page:"inventory.html",label:"Inventory"},
+    {page:"customers.html",label:"Customers"},
+    {page:"receipt.html",label:"Receipt"},
+    {page:"receipt-queue.html",label:"Receipt Queue"},
+    {page:"cashier-queue.html",label:"Cashier Queue"},
+    {page:"goods-release.html",label:"Goods Release"},
+    {page:"daily-transactions.html",label:"Daily Transactions"},
+    {page:"users.html",label:"Users Management"},
+    {page:"settings.html",label:"Settings"},
+    {page:"feedback.html",label:"Send Feedback"}
+];
+const ADMIN_ONLY_PAGES = [
+    "users.html",
+    "settings.html"];
+
+let users = [];
+let branches = [];
+let branchesLoaded = false;
+let editingUserId = null;
+
+function getAuthToken() {
+    return localStorage.getItem("posToken");
+}
+
+async function apiFetch(url, options={}) {
+    const token = getAuthToken();
+    if (!token) throw new Error("Authentication token missing. Please log in again.");
+
+    const headers = {...(options.headers || {}), Authorization:`Bearer ${token}`};
+    if (options.body && !headers["Content-Type"]) headers["Content-Type"]="application/json";
+
+    const response = await fetch(url,{...options,headers});
+    const raw = await response.text();
+    let data={};
+    try { data=raw ? JSON.parse(raw) : {}; }
+    catch { data={message:raw || "Unexpected server response."}; }
+
+    if (!response.ok) throw new Error(data.message || data.error || `Request failed (${response.status})`);
+    return data;
+}
+
+function unwrapList(data,key) {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data[key])) return data[key];
+    if (Array.isArray(data.data)) return data.data;
+    if (data.data && Array.isArray(data.data[key])) return data.data[key];
+    return [];
+}
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g,c=>({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+}
+
+function showMessage(message,type="success",id="message") {
+    const el=document.getElementById(id);
+    if (!el) return;
+    el.hidden=false;
+    el.textContent=message;
+    el.className=`pos-message ${type}`;
+}
+
+function hideMessage(id) {
+    const el=document.getElementById(id);
+    if (el) { el.hidden=true; el.textContent=""; }
+}
+
+function getRole(user) {
+    return String(user.role || user.userRole || "").toUpperCase();
+}
+
+function parsePermissions(value) {
+    if (Array.isArray(value)) return value;
+    if (typeof value==="string") {
+        try {
+            const parsed=JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : null;
+        } catch {}
+    }
+    return null;
+}
+function buildPermissionCheckboxes(containerId, role, selected = null) {
+    const container = document.getElementById(containerId);
+
+    if (!container) return;
+
+    const isAdmin = role === "ADMIN";
+
+    // All pages are available regardless of job role,
+    // except sensitive system pages for non-admin users.
+    const selectablePages = PAGE_LIST.filter(item =>
+        isAdmin || !ADMIN_ONLY_PAGES.includes(item.page)
+    );
+
+    const selectedPagesSet = new Set(
+        selected === null
+            ? selectablePages.map(item => item.page)
+            : selected
+    );
+
+    container.innerHTML = PAGE_LIST.map(item => {
+        const allowed =
+            isAdmin || !ADMIN_ONLY_PAGES.includes(item.page);
+
+        const checked =
+            allowed && selectedPagesSet.has(item.page);
+
+        return `
+            <label class="permission-item">
+                <input
+                    type="checkbox"
+                    value="${item.page}"
+                    ${checked ? "checked" : ""}
+                    ${allowed ? "" : "disabled"}
+                >
+                <span>${escapeHTML(item.label)}</span>
+            </label>
+        `;
+    }).join("");
+}
+function selectedPages(containerId) {
+    return [...document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`)].map(el=>el.value);
+}
+
+function selectAllCreatePages(value) {
+    document.querySelectorAll("#createPermissions input:not(:disabled)").forEach(el=>el.checked=value);
+}
+
+function selectAllEditPages(value) {
+    document.querySelectorAll("#editPermissions input:not(:disabled)").forEach(el=>el.checked=value);
+}
+
+function updateCreatePermissionOptions() {
+    buildPermissionCheckboxes("createPermissions",document.getElementById("role").value);
+}
+
+async function loadBranches() {
+    const select=document.getElementById("branchId");
+    const hint=document.getElementById("branchHint");
+
+    try {
+        const data=await apiFetch(BRANCHES_API);
+        branches=unwrapList(data,"branches");
+        select.innerHTML='<option value="">Select branch</option>';
+
+        branches.forEach(branch=>{
+            const id=branch.id;
+            const name=branch.name || branch.branchName || branch.branch_name || branch.code;
+            if (id==null || !name) return;
+
+            const option=document.createElement("option");
+            option.value=id;
+            option.textContent=name;
+            select.appendChild(option);
+        });
+
+        branchesLoaded=select.options.length>1;
+        hint.textContent=branchesLoaded ? "Choose the user's branch." : "No branches were returned.";
+        document.getElementById("createButton").disabled=!branchesLoaded;
+    } catch(error) {
+        select.innerHTML='<option value="">Could not load branches</option>';
+        hint.textContent=error.message;
+        branchesLoaded=false;
+        document.getElementById("createButton").disabled=true;
+    }
+}
+
+function branchName(user) {
+    if (user.branch && typeof user.branch==="object") {
+        return user.branch.name || user.branch.branchName || `Branch ${user.branchId || ""}`;
+    }
+    const branch=branches.find(b=>String(b.id)===String(user.branchId));
+    return branch ? (branch.name || branch.branchName || branch.branch_name || `Branch ${branch.id}`) : (user.branchId ? `Branch ${user.branchId}` : "—");
+}
+
+async function loadUsers() {
+    const body=document.getElementById("usersTableBody");
+    body.innerHTML='<tr><td colspan="7" class="pos-loading">Loading users...</td></tr>';
+
+    try {
+        const data=await apiFetch(USERS_API);
+        users=unwrapList(data,"users");
+        renderUsers();
+    } catch(error) {
+        body.innerHTML=`<tr><td colspan="7">${escapeHTML(error.message)}</td></tr>`;
+        showMessage(error.message,"error");
+    }
+}
+
+function renderUsers() {
+    const query=document.getElementById("userSearch").value.trim().toLowerCase();
+    const filtered=users.filter(user=>[user.name,user.fullName,user.email,user.role,user.status,user.branchId]
+        .some(value=>String(value || "").toLowerCase().includes(query)));
+
+    const active=users.filter(user=>String(user.status).toUpperCase()==="ACTIVE").length;
+    document.getElementById("totalUsers").textContent=users.length;
+    document.getElementById("activeUsers").textContent=active;
+    document.getElementById("inactiveUsers").textContent=users.length-active;
+    document.getElementById("userCount").textContent=`${filtered.length} user(s)`;
+
+    if (!filtered.length) {
+        document.getElementById("usersTableBody").innerHTML='<tr><td colspan="7" class="pos-empty">No users found.</td></tr>';
+        return;
+    }
+
+    document.getElementById("usersTableBody").innerHTML=filtered.map(user=>{
+        const role=getRole(user);
+        const status=String(user.status || "ACTIVE").toUpperCase();
+        const isAdmin=role==="ADMIN";
+        const permissions=parsePermissions(user.pagePermissions);
+        const accessLabel=isAdmin ? "All pages" : permissions===null ? "Role defaults" : `${permissions.length} page(s)`;
+
+        return `<tr>
+            <td>${escapeHTML(user.name || user.fullName || "—")}</td>
+            <td>${escapeHTML(user.email || "—")}</td>
+            <td>${escapeHTML(role)}</td>
+            <td>${escapeHTML(branchName(user))}</td>
+            <td><span class="pos-status ${status==="ACTIVE"?"pos-status-paid":"pos-status-danger"}">${escapeHTML(status)}</span></td>
+            <td>${escapeHTML(accessLabel)}</td>
+            <td><div class="user-actions">
+                ${!isAdmin ? `<button class="pos-btn pos-btn-primary" onclick="openPermissionsModal(${Number(user.id)})">Edit Pages</button>` : ""}
+                <button class="pos-btn ${status==="ACTIVE"?"pos-btn-danger":"pos-btn-success"}" onclick="changeUserStatus(${Number(user.id)},'${status==="ACTIVE"?"INACTIVE":"ACTIVE"}')">${status==="ACTIVE"?"Deactivate":"Activate"}</button>
+                <button class="pos-btn" onclick="openPasswordModal(${Number(user.id)})">Reset Password</button>
+            </div></td>
+        </tr>`;
+    }).join("");
+}
+
+async function createUser(event) {
+    event.preventDefault();
+    hideMessage("message");
+
+    if (!branchesLoaded) return showMessage("No branch is available. Refresh and try again.","error");
+
+    const role=document.getElementById("role").value;
+    const permissions=selectedPages("createPermissions");
+    const payload={
+        name:document.getElementById("name").value.trim(),
+        email:document.getElementById("email").value.trim(),
+        password:document.getElementById("password").value,
+        role,
+        branchId:Number(document.getElementById("branchId").value),
+        pagePermissions:permissions
+    };
+
+    if (!payload.branchId) return showMessage("Please select a branch.","error");
+    if (!permissions.length) return showMessage("Select at least one page for this user.","error");
+
+    const button=document.getElementById("createButton");
+    button.disabled=true;
+
+    try {
+        const result=await apiFetch(USERS_API,{method:"POST",body:JSON.stringify(payload)});
+        const created=result.user || result.data || result;
+        const userId=created.id || created.user?.id;
+
+        // Compatibility with the existing endpoint that saves permissions.
+        if (userId) {
+            await apiFetch(`${USERS_API}/${userId}/permissions`,{
+                method:"PATCH",
+                body:JSON.stringify({pagePermissions:permissions})
+            });
+        }
+
+        document.getElementById("createUserForm").reset();
+        document.getElementById("role").value="CASHIER";
+        updateCreatePermissionOptions();
+        showMessage("User created and page permissions saved.","success");
+        await loadUsers();
+    } catch(error) {
+        showMessage(error.message,"error");
+    } finally {
+        button.disabled=!branchesLoaded;
+    }
+}
+
+async function changeUserStatus(userId,status) {
+    if (!confirm(`Are you sure you want to set this user to ${status}?`)) return;
+
+    try {
+        await apiFetch(`${USERS_API}/${userId}/status`,{
+            method:"PATCH",
+            body:JSON.stringify({status})
+        });
+        showMessage(`User status updated to ${status}.`);
+        await loadUsers();
+    } catch(error) {
+        showMessage(error.message,"error");
+    }
+}
+function openPermissionsModal(userId) {
+    const user = users.find(
+        item => Number(item.id) === Number(userId)
+    );
+
+    if (!user) {
+        return showMessage("User not found.", "error");
+    }
+
+    const role = getRole(user);
+
+    if (role === "ADMIN") {
+        return showMessage("Admin accounts retain full access.");
+    }
+
+    editingUserId = Number(userId);
+
+    const permissions = parsePermissions(user.pagePermissions);
+
+    document.getElementById("editUserLabel").textContent =
+        `${user.name || user.email} — ${role}`;
+
+    buildPermissionCheckboxes(
+        "editPermissions",
+        role,
+        permissions
+    );
+
+    hideMessage("editPermissionMessage");
+
+    document.getElementById("permissionsModal").classList.add("open");
+}
+function closePermissionsModal() {
+    document.getElementById("permissionsModal").classList.remove("open");
+    editingUserId=null;
+}
+async function savePermissions() {
+    if (!editingUserId) return;
+
+    const user = users.find(
+        item => Number(item.id) === editingUserId
+    );
+
+    if (!user) return;
+
+    const role = getRole(user);
+    const permissions = selectedPages("editPermissions");
+
+    const forbiddenPages = permissions.filter(page =>
+        ADMIN_ONLY_PAGES.includes(page)
+    );
+
+    if (permissions.length === 0) {
+        return showMessage(
+            "Select at least one page.",
+            "error",
+            "editPermissionMessage"
+        );
+    }
+
+    if (role !== "ADMIN" && forbiddenPages.length > 0) {
+        return showMessage(
+            "Users Management and Settings are reserved for Admin.",
+            "error",
+            "editPermissionMessage"
+        );
+    }
+
+    const button = document.getElementById("savePermissionsButton");
+    button.disabled = true;
+
+    try {
+        const result = await apiFetch(
+            `${USERS_API}/${editingUserId}/permissions`,
+            {
+                method: "PATCH",
+                body: JSON.stringify({
+                    pagePermissions: permissions
+                })
+            }
+        );
+
+        const updated = result.user || result.data || result;
+
+        const index = users.findIndex(
+            item => Number(item.id) === editingUserId
+        );
+
+        if (index !== -1) {
+            users[index].pagePermissions =
+                updated.pagePermissions ?? permissions;
+        }
+
+        closePermissionsModal();
+
+        showMessage(
+            "Permissions updated. The user must log in again to refresh page access."
+        );
+
+        await loadUsers();
+
+    } catch (error) {
+        showMessage(
+            error.message,
+            "error",
+            "editPermissionMessage"
+        );
+    } finally {
+        button.disabled = false;
+    }
+}
+function openPasswordModal(userId) {
+    document.getElementById("resetUserId").value=userId;
+    document.getElementById("newPassword").value="";
+    hideMessage("passwordMessage");
+    document.getElementById("passwordModal").classList.add("open");
+}
+
+function closePasswordModal() {
+    document.getElementById("passwordModal").classList.remove("open");
+}
+
+async function resetPassword(event) {
+    event.preventDefault();
+    const userId=document.getElementById("resetUserId").value;
+    const password=document.getElementById("newPassword").value;
+
+    try {
+        await apiFetch(`${USERS_API}/${userId}/reset-password`,{
+            method:"PATCH",
+            body:JSON.stringify({password,newPassword:password})
+        });
+        closePasswordModal();
+        showMessage("Password reset successfully.");
+    } catch(error) {
+        showMessage(error.message,"error","passwordMessage");
+    }
+}
+
+document.getElementById("role").addEventListener("change",updateCreatePermissionOptions);
+document.getElementById("createUserForm").addEventListener("submit",createUser);
+document.getElementById("userSearch").addEventListener("input",renderUsers);
+document.getElementById("resetPasswordForm").addEventListener("submit",resetPassword);
+
+document.getElementById("permissionsModal").addEventListener("click",event=>{
+    if (event.target.id==="permissionsModal") closePermissionsModal();
+});
+document.getElementById("passwordModal").addEventListener("click",event=>{
+    if (event.target.id==="passwordModal") closePasswordModal();
+});
+
+updateCreatePermissionOptions();
+
+(async function initializeUsersPage(){
+    await loadBranches();
+    await loadUsers();
+})();
+</script>
+</body>
+</html>

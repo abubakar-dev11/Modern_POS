@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101828">
+    <title>Modern POS | Register Business</title>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --navy: #101828;
+            --text: #101828;
+            --muted: #667085;
+            --border: #e4e7ec;
+            --bg: #f5f7fb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 30px 18px;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        button, input {
+            font: inherit;
+        }
+
+        .layout {
+            width: 100%;
+            max-width: 1080px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 0.85fr 1.15fr;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(16, 24, 40, 0.10);
+        }
+
+        .brand {
+            padding: 42px;
+            color: white;
+            background:
+                radial-gradient(circle at 15% 85%,
+                    rgba(79,70,229,.55), transparent 42%),
+                linear-gradient(145deg, #101828, #172554 65%, #312e81);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 40px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .logo small {
+            display: block;
+            margin-top: 5px;
+            color: #c7d2fe;
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        .brand h1 {
+            font-size: clamp(30px, 4vw, 43px);
+            line-height: 1.15;
+            letter-spacing: -1px;
+            margin-bottom: 18px;
+        }
+
+        .brand p {
+            color: #cbd5e1;
+            font-size: 14px;
+            line-height: 1.9;
+        }
+
+        .features {
+            display: grid;
+            gap: 16px;
+            margin-top: 28px;
+            font-size: 13px;
+            color: #e2e8f0;
+        }
+
+        .brand-footer {
+            font-size: 12px;
+            color: #aebbd0;
+        }
+
+        .content {
+            padding: 42px clamp(24px, 4vw, 54px);
+        }
+
+        .eyebrow {
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            font-size: 30px;
+            letter-spacing: -.8px;
+            margin-bottom: 10px;
+        }
+
+        .intro {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            margin: 25px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eaecf0;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 17px 14px;
+        }
+
+        .field {
+            min-width: 0;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #344054;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        input {
+            width: 100%;
+            height: 47px;
+            padding: 0 13px;
+            border: 1px solid #d0d5dd;
+            border-radius: 9px;
+            outline: none;
+            font-size: 13px;
+            color: var(--text);
+            background: white;
+        }
+
+        input::placeholder {
+            color: #98a2b3;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79,70,229,.10);
+        }
+
+        .help {
+            display: block;
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .password-note {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .register-button {
+            width: 100%;
+            min-height: 50px;
+            margin-top: 25px;
+            padding: 13px 18px;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .register-button:hover:not(:disabled) {
+            background: var(--primary-dark);
+        }
+
+        .register-button:disabled {
+            opacity: .7;
+            cursor: wait;
+        }
+
+        #message {
+            display: none;
+            margin-top: 16px;
+            padding: 12px 14px;
+            border-radius: 9px;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        #message.error {
+            display: block;
+            color: #b42318;
+            background: #fef3f2;
+            border: 1px solid #fecdca;
+        }
+
+        #message.success {
+            display: block;
+            color: #067647;
+            background: #ecfdf3;
+            border: 1px solid #abefc6;
+        }
+
+        .signin {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        a {
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 12px;
+            }
+
+            .layout {
+                max-width: 520px;
+                grid-template-columns: 1fr;
+                border-radius: 17px;
+            }
+
+            .brand {
+                padding: 25px;
+                gap: 20px;
+            }
+
+            .brand h1 {
+                font-size: 29px;
+            }
+
+            .features {
+                display: none;
+            }
+
+            .brand-footer {
+                display: none;
+            }
+
+            .content {
+                padding: 30px 22px;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<main class="layout">
+    <section class="brand">
+        <div class="logo">
+            MODERN POS
+            <small>SMART RETAIL MANAGEMENT</small>
+        </div>
+
+        <div>
+            <h1>Bring your business into one place.</h1>
+            <p>
+                Create your business account to manage products,
+                sales, payments, stock and business records.
+            </p>
+
+            <div class="features">
+                <div>✓ Manage your products and inventory</div>
+                <div>✓ Record sales and customer payments</div>
+                <div>✓ Get your own business workspace</div>
+            </div>
+        </div>
+
+        <div class="brand-footer">
+            © <span id="year"></span> Modern POS
+        </div>
+    </section>
+
+    <section class="content">
+        <div class="eyebrow">Create your account</div>
+        <h2>Register your business</h2>
+        <p class="intro">
+            Enter your details below. Your business and first branch
+            will be created when registration succeeds.
+        </p>
+
+        <form id="registerForm">
+            <div class="section-title">Business details</div>
+
+            <div class="grid">
+                <div class="field full">
+                    <label for="businessName">Business name *</label>
+                    <input id="businessName" name="businessName"
+                           placeholder="e.g. Abubakar General Store"
+                           autocomplete="organization" required>
+                </div>
+
+                <div class="field">
+                    <label for="phone">Phone number</label>
+                    <input id="phone" name="phone" type="tel"
+                           placeholder="e.g. 08012345678"
+                           autocomplete="tel">
+                </div>
+
+                <div class="field">
+                    <label for="address">Business address</label>
+                    <input id="address" name="address"
+                           placeholder="Street or area"
+                           autocomplete="street-address">
+                </div>
+
+                <div class="field">
+                    <label for="branchName">First branch name</label>
+                    <input id="branchName" name="branchName"
+                           value="Main Branch"
+                           placeholder="Main Branch">
+                </div>
+
+                <div class="field">
+                    <label for="branchLocation">Branch location *</label>
+                    <input id="branchLocation" name="branchLocation"
+                           placeholder="e.g. Kano" required>
+                </div>
+            </div>
+
+            <div class="section-title">Business owner / Admin</div>
+
+            <div class="grid">
+                <div class="field full">
+                    <label for="ownerName">Full name *</label>
+                    <input id="ownerName" name="ownerName"
+                           placeholder="Your full name"
+                           autocomplete="name" required>
+                </div>
+
+                <div class="field full">
+                    <label for="email">Email address *</label>
+                    <input id="email" name="email" type="email"
+                           placeholder="you@example.com"
+                           autocomplete="email"
+                           autocapitalize="none"
+                           spellcheck="false" required>
+                </div>
+
+                <div class="field full">
+                    <label for="password">Create password *</label>
+                    <input id="password" name="password" type="password"
+                           placeholder="At least 12 characters"
+                           autocomplete="new-password"
+                           minlength="12" required>
+                    <span class="help">
+                        Use at least 12 characters. Choose a password
+                        that you do not use for another account.
+                    </span>
+                </div>
+
+                <div class="field full">
+                    <label for="confirmPassword">Confirm password *</label>
+                    <input id="confirmPassword" name="confirmPassword"
+                           type="password"
+                           placeholder="Enter the same password again"
+                           autocomplete="new-password"
+                           minlength="12" required>
+                </div>
+            </div>
+
+            <button class="register-button" id="registerButton" type="submit">
+                Create Business Account
+            </button>
+        </form>
+
+        <div id="message" role="status" aria-live="polite"></div>
+
+        <div class="signin">
+            Already have an account?
+            <a href="login.html">Sign in</a>
+        </div>
+    </section>
+</main>
+
+<script>
+    const API_BASE = "http://localhost:3000/api/auth";
+
+    const form = document.getElementById("registerForm");
+    const button = document.getElementById("registerButton");
+    const message = document.getElementById("message");
+
+    document.getElementById("year").textContent =
+        new Date().getFullYear();
+
+    function showMessage(text, type) {
+        message.textContent = text;
+        message.className = type;
+    }
+
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        message.textContent = "";
+        message.className = "";
+
+        const businessName =
+            document.getElementById("businessName").value.trim();
+        const ownerName =
+            document.getElementById("ownerName").value.trim();
+        const email =
+            document.getElementById("email").value.trim().toLowerCase();
+        const password =
+            document.getElementById("password").value;
+        const confirmPassword =
+            document.getElementById("confirmPassword").value;
+        const phone =
+            document.getElementById("phone").value.trim();
+        const address =
+            document.getElementById("address").value.trim();
+        const branchName =
+            document.getElementById("branchName").value.trim();
+        const branchLocation =
+            document.getElementById("branchLocation").value.trim();
+
+        if (password.length < 12) {
+            showMessage(
+                "Your password must be at least 12 characters.",
+                "error"
+            );
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showMessage(
+                "The passwords do not match. Please check them.",
+                "error"
+            );
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Creating your account...";
+
+        try {
+            const response = await fetch(
+                `${API_BASE}/register-business`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        businessName,
+                        ownerName,
+                        email,
+                        password,
+                        phone,
+                        address,
+                        branchName,
+                        branchLocation
+                    })
+                }
+            );
+
+            let result;
+
+            try {
+                result = await response.json();
+            } catch {
+                throw new Error(
+                    "The server returned an invalid response."
+                );
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    result.message || "Business registration failed."
+                );
+            }
+
+            if (!result.token || !result.user || !result.business) {
+                throw new Error(
+                    "Registration response is incomplete. Please contact support."
+                );
+            }
+
+            // Save the same session format used by login.html.
+            localStorage.setItem("posToken", result.token);
+            localStorage.setItem(
+                "posUser",
+                JSON.stringify(result.user)
+            );
+
+            showMessage(
+                "Your business was registered successfully. Opening your dashboard...",
+                "success"
+            );
+
+            button.textContent = "Registration successful";
+
+            window.setTimeout(function () {
+                window.location.href = "dashboard.html";
+            }, 900);
+
+        } catch (error) {
+            let errorMessage =
+                error.message || "Registration failed.";
+
+            if (error instanceof TypeError) {
+                errorMessage =
+                    "Cannot connect to the server. Check that the backend is running.";
+            }
+
+            showMessage(errorMessage, "error");
+
+            button.disabled = false;
+            button.textContent = "Create Business Account";
+        }
+    });
+</script>
+</body>
+</html>
+

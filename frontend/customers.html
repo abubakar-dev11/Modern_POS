@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern POS - Customers</title>
+    <link rel="stylesheet" href="css/pos.css">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f4f7fb;
+            --text: #172033;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --white: #fff;
+            --success: #15803d;
+            --danger: #dc2626;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+        }
+
+        .page {
+            max-width: 1400px;
+            margin: auto;
+            padding: 28px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        h1 { margin: 0 0 7px; font-size: 28px; }
+
+        .subtitle { color: var(--muted); margin: 0; }
+
+        .button {
+            border: 0;
+            border-radius: 9px;
+            padding: 11px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .primary { background: var(--primary); color: white; }
+        .secondary { background: #e8eef8; color: var(--text); }
+        .button:disabled { opacity: .6; cursor: not-allowed; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, .035);
+        }
+
+        .stat-label { color: var(--muted); font-size: 14px; }
+        .stat-value { font-size: 27px; font-weight: 700; margin-top: 9px; }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        input {
+            width: 100%;
+            min-width: 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 11px 12px;
+            font: inherit;
+            background: white;
+        }
+
+        input:focus {
+            outline: 2px solid #bfdbfe;
+            border-color: var(--primary);
+        }
+
+        .search { max-width: 380px; }
+
+        .table-wrap, .history-table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th, td {
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            color: var(--muted);
+            background: #f8fafc;
+            font-weight: 600;
+        }
+
+        tbody tr:hover { background: #fafcff; }
+
+        .status {
+            display: inline-block;
+            border-radius: 20px;
+            padding: 5px 9px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #dcfce7;
+            color: #166534;
+            white-space: nowrap;
+        }
+
+        .balance-due { color: var(--danger); font-weight: 700; }
+        .balance-clear { color: var(--success); font-weight: 600; }
+
+        .empty, .message {
+            padding: 18px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .error { color: var(--danger); }
+        .success { color: var(--success); }
+
+        .history-button {
+            background: #e8eef8;
+            color: #1d4ed8;
+            padding: 8px 11px;
+            white-space: nowrap;
+        }
+
+        .history-button:hover { background: #dbeafe; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(15, 23, 42, .55);
+            padding: 20px;
+            overflow-y: auto;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.open { display: flex; }
+
+        .modal-card {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 520px;
+            padding: 24px;
+        }
+
+        .history-card {
+            max-width: 1100px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 { margin: 0; font-size: 21px; }
+
+        .close {
+            border: 0;
+            background: transparent;
+            font-size: 25px;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        .form-grid { display: grid; gap: 15px; }
+
+        .field label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .optional-label {
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .history-summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .history-stat {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .history-stat-label {
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .history-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .history-table { width: 100%; min-width: 850px; border-collapse: collapse; }
+
+        .history-table th, .history-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .history-table th { background: #f8fafc; color: var(--muted); }
+
+        .history-status {
+            display: inline-block;
+            padding: 5px 8px;
+            border-radius: 20px;
+            background: #e2e8f0;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .history-customer {
+            color: var(--muted);
+            margin: -10px 0 20px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 700px) {
+            .page { padding: 16px; }
+            .stats, .history-summary { grid-template-columns: 1fr; }
+            .history-card { padding: 16px; }
+            h1 { font-size: 23px; }
+            .search { max-width: 100%; }
+        }
+    </style>
+</head>
+
+<body>
+<main class="page">
+    <header class="page-header">
+        <div>
+            <h1>Customers</h1>
+            <p class="subtitle">Manage customers, check balances, and view purchase history.</p>
+        </div>
+        <button class="button primary" id="openAddCustomer" type="button">
+            + Add Customer
+        </button>
+    </header>
+
+    <section class="stats">
+        <div class="card">
+            <div class="stat-label">Total Customers</div>
+            <div class="stat-value" id="totalCustomers">—</div>
+        </div>
+        <div class="card">
+            <div class="stat-label">Active Customers</div>
+            <div class="stat-value" id="activeCustomers">—</div>
+        </div>
+        <div class="card">
+            <div class="stat-label">Customers with Balance</div>
+            <div class="stat-value" id="customersWithBalance">—</div>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="toolbar">
+            <div>
+                <h2 style="margin:0 0 5px;">Customer List</h2>
+                <p class="subtitle">View contact details and purchase records.</p>
+            </div>
+            <input
+                class="search"
+                type="search"
+                id="searchInput"
+                placeholder="Search name, phone, or email..."
+                aria-label="Search customers"
+            >
+        </div>
+
+        <div id="pageMessage" class="message" aria-live="polite"></div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Address</th>
+                        <th>Status</th>
+                        <th>Balance</th>
+                        <th>Purchase History</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTableBody">
+                    <tr><td colspan="7" class="empty">Loading customers...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<!-- ADD CUSTOMER MODAL -->
+<div class="modal" id="customerModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2 id="modalTitle">Add Customer</h2>
+            <button class="close" id="closeModal" type="button" aria-label="Close">&times;</button>
+        </div>
+
+        <form id="customerForm">
+            <div class="form-grid">
+                <div class="field">
+                    <label for="customerName">Full Name *</label>
+                    <input id="customerName" name="name" required maxlength="120" autocomplete="name">
+                </div>
+
+                <div class="field">
+                    <label for="customerPhone">
+                        Phone Number <span class="optional-label">(Optional)</span>
+                    </label>
+                    <input
+                        id="customerPhone"
+                        name="phone"
+                        type="tel"
+                        maxlength="30"
+                        autocomplete="tel"
+                        placeholder="Enter phone number if available"
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="customerEmail">
+                        Email <span class="optional-label">(Optional)</span>
+                    </label>
+                    <input id="customerEmail" name="email" type="email" maxlength="120" autocomplete="email">
+                </div>
+
+                <div class="field">
+                    <label for="customerAddress">
+                        Address <span class="optional-label">(Optional)</span>
+                    </label>
+                    <input id="customerAddress" name="address" maxlength="250" autocomplete="street-address">
+                </div>
+            </div>
+
+            <div id="formMessage" class="message" aria-live="polite"></div>
+
+            <div class="form-actions">
+                <button type="button" class="button secondary" id="cancelModal">Cancel</button>
+                <button type="submit" class="button primary" id="saveCustomer">Save Customer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CUSTOMER PURCHASE HISTORY MODAL -->
+<div class="modal" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+    <div class="modal-card history-card">
+        <div class="modal-header">
+            <h2 id="historyTitle">Customer Purchase History</h2>
+            <button class="close" id="closeHistoryModal" type="button" aria-label="Close">&times;</button>
+        </div>
+
+        <p class="history-customer" id="historyCustomerName"></p>
+
+        <section class="history-summary">
+            <div class="history-stat">
+                <div class="history-stat-label">Total Purchases</div>
+                <div class="history-stat-value" id="historyTotalPurchases">₦0.00</div>
+            </div>
+            <div class="history-stat">
+                <div class="history-stat-label">Total Paid</div>
+                <div class="history-stat-value" id="historyTotalPaid">₦0.00</div>
+            </div>
+            <div class="history-stat">
+                <div class="history-stat-label">Outstanding Balance</div>
+                <div class="history-stat-value" id="historyOutstanding">₦0.00</div>
+            </div>
+        </section>
+
+        <div id="historyMessage" class="message" aria-live="polite">
+            Select a customer to view purchase history.
+        </div>
+
+        <div class="history-table-wrap">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Sale Number</th>
+                        <th>Date</th>
+                        <th>Total Amount</th>
+                        <th>Amount Paid</th>
+                        <th>Balance</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <tr><td colspan="6" class="empty">No purchase history loaded.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="button secondary" id="closeHistoryButton">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = "http://127.0.0.1:3000/api";
+    const CUSTOMERS_URL = `${API_BASE_URL}/customers`;
+
+    const tableBody = document.getElementById("customerTableBody");
+    const pageMessage = document.getElementById("pageMessage");
+    const searchInput = document.getElementById("searchInput");
+    const modal = document.getElementById("customerModal");
+    const historyModal = document.getElementById("historyModal");
+    const form = document.getElementById("customerForm");
+    const formMessage = document.getElementById("formMessage");
+    const saveButton = document.getElementById("saveCustomer");
+    const historyTableBody = document.getElementById("historyTableBody");
+    const historyMessage = document.getElementById("historyMessage");
+
+    let customers = [];
+    let balanceByCustomer = new Map();
+
+    // AUTHENTICATION
+    function getAuthToken() {
+        const token = localStorage.getItem("posToken");
+
+        if (!token) {
+            window.location.replace("login.html");
+            throw new Error("Your session is missing. Please log in again.");
+        }
+
+        return token;
+    }
+
+    async function apiFetch(url, options = {}) {
+        const token = getAuthToken();
+
+        const headers = {
+            ...(options.headers || {}),
+            Authorization: `Bearer ${token}`
+        };
+
+        const response = await fetch(url, { ...options, headers });
+
+        if (response.status === 401) {
+            localStorage.removeItem("posToken");
+            localStorage.removeItem("posUser");
+            window.location.replace("login.html");
+            throw new Error("Your session has expired. Please log in again.");
+        }
+
+        return response;
+    }
+
+    async function readResponse(response) {
+        const text = await response.text();
+        if (!text) return {};
+
+        try {
+            return JSON.parse(text);
+        } catch {
+            throw new Error("The server returned an invalid response.");
+        }
+    }
+
+    // HELPERS
+    function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, char => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[char]);
+    }
+
+    function formatMoney(value) {
+        const amount = Number(value);
+        return new Intl.NumberFormat("en-NG", {
+            style: "currency",
+            currency: "NGN",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(Number.isFinite(amount) ? amount : 0);
+    }
+
+    function getCustomerId(customer) {
+        return customer.id ?? customer.customerId;
+    }
+
+    function formatHistoryDate(value) {
+        if (!value) return "—";
+
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "—";
+
+        return date.toLocaleString("en-NG", {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    // ADD CUSTOMER MODAL
+    function showModal() {
+        form.reset();
+        formMessage.textContent = "";
+        formMessage.className = "message";
+        modal.classList.add("open");
+        document.getElementById("customerName").focus();
+    }
+
+    function hideModal() {
+        modal.classList.remove("open");
+    }
+
+    document.getElementById("openAddCustomer").addEventListener("click", showModal);
+    document.getElementById("closeModal").addEventListener("click", hideModal);
+    document.getElementById("cancelModal").addEventListener("click", hideModal);
+
+    modal.addEventListener("click", event => {
+        if (event.target === modal) hideModal();
+    });
+
+    // PURCHASE HISTORY MODAL
+    function closeHistoryModal() {
+        historyModal.classList.remove("open");
+    }
+
+    document.getElementById("closeHistoryModal").addEventListener("click", closeHistoryModal);
+    document.getElementById("closeHistoryButton").addEventListener("click", closeHistoryModal);
+
+    historyModal.addEventListener("click", event => {
+        if (event.target === historyModal) closeHistoryModal();
+    });
+
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+            hideModal();
+            closeHistoryModal();
+        }
+    });
+
+    // RENDER CUSTOMERS
+    function renderCustomers() {
+        const query = searchInput.value.trim().toLowerCase();
+
+        const filtered = customers.filter(customer => {
+            const searchable = [
+                customer.name,
+                customer.phone,
+                customer.email,
+                customer.address
+            ].join(" ").toLowerCase();
+
+            return searchable.includes(query);
+        });
+
+        document.getElementById("totalCustomers").textContent = customers.length;
+
+        document.getElementById("activeCustomers").textContent =
+            customers.filter(customer =>
+                String(customer.status || "ACTIVE").toUpperCase() === "ACTIVE"
+            ).length;
+
+        document.getElementById("customersWithBalance").textContent =
+            customers.filter(customer => {
+                const balance = balanceByCustomer.get(getCustomerId(customer));
+                return balance !== undefined && balance > 0;
+            }).length;
+
+        if (!filtered.length) {
+            tableBody.innerHTML = `
+                <tr><td colspan="7" class="empty">No customers found.</td></tr>
+            `;
+            return;
+        }
+
+        tableBody.innerHTML = filtered.map(customer => {
+            const id = getCustomerId(customer);
+            const balance = balanceByCustomer.get(id);
+            const balanceText = balance === undefined
+                ? "Unavailable"
+                : formatMoney(balance);
+            const balanceClass = balance === undefined
+                ? ""
+                : balance > 0 ? "balance-due" : "balance-clear";
+            const customerName = customer.name || "Customer";
+
+            return `
+                <tr>
+                    <td><strong>${escapeHtml(customerName)}</strong></td>
+                    <td>${escapeHtml(customer.phone || "—")}</td>
+                    <td>${escapeHtml(customer.email || "—")}</td>
+                    <td>${escapeHtml(customer.address || "—")}</td>
+                    <td><span class="status">${escapeHtml(customer.status || "ACTIVE")}</span></td>
+                    <td class="${balanceClass}">${escapeHtml(balanceText)}</td>
+                    <td>
+                        <button
+                            type="button"
+                            class="button history-button"
+                            data-history-id="${escapeHtml(id)}"
+                            data-history-name="${escapeHtml(customerName)}"
+                        >View History</button>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    // LOAD CUSTOMER BALANCES
+    async function loadBalances() {
+        balanceByCustomer = new Map();
+
+        await Promise.all(customers.map(async customer => {
+            const id = getCustomerId(customer);
+            if (!id) return;
+
+            try {
+                const response = await apiFetch(
+                    `${CUSTOMERS_URL}/${encodeURIComponent(id)}/balance`
+                );
+                const data = await readResponse(response);
+
+                if (!response.ok) {
+                    console.error(`Balance request failed for customer ${id}`, data);
+                    return;
+                }
+
+                const balance = Number(data.outstandingBalance);
+                if (Number.isFinite(balance)) {
+                    balanceByCustomer.set(id, balance);
+                }
+            } catch (error) {
+                console.error(`Could not load balance for customer ${id}:`, error);
+            }
+        }));
+    }
+
+    // LOAD CUSTOMERS
+    async function loadCustomers() {
+        tableBody.innerHTML = `
+            <tr><td colspan="7" class="empty">Loading customers...</td></tr>
+        `;
+        pageMessage.textContent = "Loading customer records...";
+        pageMessage.className = "message";
+
+        try {
+            const response = await apiFetch(CUSTOMERS_URL);
+            const data = await readResponse(response);
+
+            if (!response.ok) {
+                throw new Error(data.message || "Could not load customers.");
+            }
+
+            customers = Array.isArray(data)
+                ? data
+                : data.customers || data.data || [];
+
+            if (!Array.isArray(customers)) {
+                throw new Error("The customers API returned an unexpected response.");
+            }
+
+            await loadBalances();
+            renderCustomers();
+
+            const unavailable = customers.filter(customer =>
+                !balanceByCustomer.has(getCustomerId(customer))
+            ).length;
+
+            pageMessage.textContent = unavailable
+                ? `${customers.length} customer(s) loaded. Balance unavailable for ${unavailable} customer(s).`
+                : `${customers.length} customer(s) loaded. All balances updated.`;
+
+            pageMessage.className = unavailable ? "message" : "message success";
+        } catch (error) {
+            console.error("Load customers error:", error);
+
+            tableBody.innerHTML = `
+                <tr><td colspan="7" class="empty error">${escapeHtml(error.message)}</td></tr>
+            `;
+            pageMessage.textContent = error.message;
+            pageMessage.className = "message error";
+        }
+    }
+
+    // VIEW PURCHASE HISTORY
+    async function viewCustomerHistory(customerId, customerName) {
+        historyModal.classList.add("open");
+
+        document.getElementById("historyCustomerName").textContent = customerName;
+        document.getElementById("historyTotalPurchases").textContent = formatMoney(0);
+        document.getElementById("historyTotalPaid").textContent = formatMoney(0);
+        document.getElementById("historyOutstanding").textContent = formatMoney(0);
+
+        historyMessage.textContent = "Loading purchase history...";
+        historyMessage.className = "message";
+        historyTableBody.innerHTML = `
+            <tr><td colspan="6" class="empty">Loading purchase records...</td></tr>
+        `;
+
+        try {
+            const response = await apiFetch(
+                `${CUSTOMERS_URL}/${encodeURIComponent(customerId)}/purchase-history`
+            );
+            const data = await readResponse(response);
+
+            if (!response.ok) {
+                throw new Error(data.message || "Could not load purchase history.");
+            }
+
+            const history = Array.isArray(data.history) ? data.history : [];
+
+            const totalPurchases = history.reduce(
+                (sum, sale) => sum + Math.max(0, Number(sale.totalAmount) || 0),
+                0
+            );
+
+            const totalPaid = history.reduce(
+                (sum, sale) => sum + Math.max(0, Number(sale.totalPaid) || 0),
+                0
+            );
+
+            const outstanding = history.reduce((sum, sale) => {
+                const total = Math.max(0, Number(sale.totalAmount) || 0);
+                const paid = Math.max(0, Number(sale.totalPaid) || 0);
+                const balance = sale.outstandingBalance != null
+                    ? Number(sale.outstandingBalance)
+                    : Math.max(0, total - paid);
+
+                return sum + Math.max(
+                    0,
+                    Number.isFinite(balance) ? balance : total - paid
+                );
+            }, 0);
+
+            document.getElementById("historyTotalPurchases").textContent =
+                formatMoney(totalPurchases);
+            document.getElementById("historyTotalPaid").textContent =
+                formatMoney(totalPaid);
+            document.getElementById("historyOutstanding").textContent =
+                formatMoney(outstanding);
+
+            if (!history.length) {
+                historyTableBody.innerHTML = `
+                    <tr><td colspan="6" class="empty">No purchase history found for this customer.</td></tr>
+                `;
+                historyMessage.textContent = "This customer has no recorded purchases.";
+                historyMessage.className = "message";
+                return;
+            }
+
+            historyTableBody.innerHTML = history.map(sale => {
+                const total = Number(sale.totalAmount) || 0;
+                const paid = Number(sale.totalPaid) || 0;
+                const balance = sale.outstandingBalance != null
+                    ? Math.max(0, Number(sale.outstandingBalance) || 0)
+                    : Math.max(0, total - paid);
+
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(sale.saleNumber || "—")}</strong></td>
+                        <td>${escapeHtml(formatHistoryDate(sale.createdAt))}</td>
+                        <td>${escapeHtml(formatMoney(total))}</td>
+                        <td>${escapeHtml(formatMoney(paid))}</td>
+                        <td class="${balance > 0 ? "balance-due" : "balance-clear"}">
+                            ${escapeHtml(formatMoney(balance))}
+                        </td>
+                        <td><span class="history-status">${escapeHtml(sale.status || "UNKNOWN")}</span></td>
+                    </tr>
+                `;
+            }).join("");
+
+            historyMessage.textContent = `${history.length} purchase record(s) found.`;
+            historyMessage.className = "message success";
+        } catch (error) {
+            console.error("Purchase history error:", error);
+
+            historyTableBody.innerHTML = `
+                <tr><td colspan="6" class="empty error">${escapeHtml(error.message)}</td></tr>
+            `;
+            historyMessage.textContent = error.message;
+            historyMessage.className = "message error";
+        }
+    }
+
+    tableBody.addEventListener("click", event => {
+        const button = event.target.closest(".history-button");
+        if (!button) return;
+
+        const customerId = button.dataset.historyId;
+        const customerName = button.dataset.historyName || "Customer";
+
+        if (!customerId) {
+            pageMessage.textContent = "Customer ID is missing.";
+            pageMessage.className = "message error";
+            return;
+        }
+
+        viewCustomerHistory(customerId, customerName);
+    });
+
+    searchInput.addEventListener("input", renderCustomers);
+
+    // CREATE CUSTOMER: PHONE IS OPTIONAL
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        const payload = {
+            name: document.getElementById("customerName").value.trim(),
+            phone: document.getElementById("customerPhone").value.trim() || null,
+            email: document.getElementById("customerEmail").value.trim() || null,
+            address: document.getElementById("customerAddress").value.trim() || null
+        };
+
+        if (!payload.name) {
+            formMessage.textContent = "Customer name is required.";
+            formMessage.className = "message error";
+            document.getElementById("customerName").focus();
+            return;
+        }
+
+        saveButton.disabled = true;
+        saveButton.textContent = "Saving...";
+        formMessage.textContent = "";
+        formMessage.className = "message";
+
+        try {
+            const response = await apiFetch(CUSTOMERS_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await readResponse(response);
+
+            if (!response.ok) {
+                throw new Error(data.message || "Could not save customer.");
+            }
+
+            formMessage.textContent = "Customer saved successfully.";
+            formMessage.className = "message success";
+
+            await loadCustomers();
+            form.reset();
+
+            setTimeout(hideModal, 500);
+        } catch (error) {
+            console.error("Create customer error:", error);
+            formMessage.textContent = error.message;
+            formMessage.className = "message error";
+        } finally {
+            saveButton.disabled = false;
+            saveButton.textContent = "Save Customer";
+        }
+    });
+
+    // INITIAL LOAD
+    loadCustomers();
+</script>
+</body>
+</html>

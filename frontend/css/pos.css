@@ -1,0 +1,713 @@
+/* =========================================
+   MODERN POS - MASTER DESIGN SYSTEM
+   ========================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #1f2937;
+    --primary-dark: #111827;
+
+    --accent: #0b7a3b;
+    --accent-dark: #096632;
+
+    --background: #f3f4f6;
+    --surface: #ffffff;
+
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+
+    --danger: #c62828;
+    --warning: #d97706;
+    --success: #0b7a3b;
+
+    --sidebar-width: 245px;
+}
+
+/* =========================================
+   BODY
+   ========================================= */
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--background);
+    color: var(--text);
+}
+
+
+/* =========================================
+   APPLICATION LAYOUT
+   ========================================= */
+
+.pos-app {
+    min-height: 100vh;
+}
+
+
+/* =========================================
+   SIDEBAR
+   ========================================= */
+
+.pos-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: var(--sidebar-width);
+    height: 100vh;
+
+    background: var(--primary-dark);
+    color: white;
+
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+
+/* BRAND */
+
+.pos-brand {
+    padding: 22px 20px;
+
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.pos-brand-title {
+    margin: 0;
+
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.pos-brand-subtitle {
+    margin: 5px 0 0;
+
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+
+/* NAVIGATION */
+
+.pos-nav {
+    padding: 15px 10px 30px;
+}
+
+.pos-nav-section {
+    margin: 20px 10px 8px;
+
+    font-size: 11px;
+    font-weight: bold;
+
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+}
+
+.pos-nav-link {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 11px 12px;
+
+    margin-bottom: 3px;
+
+    color: #d1d5db;
+    text-decoration: none;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+
+    transition: 0.2s;
+}
+
+.pos-nav-link:hover {
+    background: #1f2937;
+    color: white;
+}
+
+.pos-nav-link.active {
+    background: #374151;
+    color: white;
+}
+
+.pos-nav-icon {
+    width: 22px;
+    text-align: center;
+    font-size: 16px;
+}
+
+
+/* =========================================
+   MAIN AREA
+   ========================================= */
+
+.pos-main {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+}
+
+
+/* =========================================
+   TOPBAR
+   ========================================= */
+
+.pos-topbar {
+    height: 68px;
+
+    background: var(--surface);
+
+    border-bottom: 1px solid var(--border);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 25px;
+
+    position: sticky;
+    top: 0;
+
+    z-index: 900;
+}
+
+.pos-topbar-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.pos-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.pos-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    font-size: 14px;
+}
+
+.pos-user-avatar {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 50%;
+
+    background: #e5e7eb;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-weight: bold;
+}
+
+
+/* =========================================
+   PAGE CONTENT
+   ========================================= */
+
+.pos-content {
+    padding: 25px;
+}
+
+.pos-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 22px;
+}
+
+.pos-page-title {
+    margin: 0;
+
+    font-size: 25px;
+}
+
+.pos-page-description {
+    margin: 5px 0 0;
+
+    color: var(--muted);
+    font-size: 14px;
+}
+
+
+/* =========================================
+   CARDS / SECTIONS
+   ========================================= */
+
+.pos-card {
+    background: var(--surface);
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    padding: 20px;
+
+    margin-bottom: 20px;
+}
+
+.pos-card-title {
+    margin: 0 0 18px;
+
+    font-size: 18px;
+}
+
+
+/* =========================================
+   STAT CARDS
+   ========================================= */
+
+.pos-stat-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(190px, 1fr));
+
+    gap: 18px;
+
+    margin-bottom: 20px;
+}
+
+.pos-stat-card {
+    background: white;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    padding: 18px;
+}
+
+.pos-stat-label {
+    color: var(--muted);
+
+    font-size: 13px;
+
+    margin-bottom: 8px;
+}
+
+.pos-stat-value {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+
+/* =========================================
+   FORMS
+   ========================================= */
+
+.pos-form-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(200px, 1fr));
+
+    gap: 16px;
+}
+
+.pos-form-group {
+    margin-bottom: 15px;
+}
+
+.pos-form-label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.pos-input,
+.pos-select {
+    width: 100%;
+
+    padding: 11px 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 7px;
+
+    background: white;
+
+    font-size: 14px;
+
+    outline: none;
+}
+
+.pos-input:focus,
+.pos-select:focus {
+    border-color: #6b7280;
+}
+
+
+/* =========================================
+   BUTTONS
+   ========================================= */
+
+.pos-btn {
+    border: none;
+
+    border-radius: 7px;
+
+    padding: 10px 16px;
+
+    font-size: 14px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.pos-btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.pos-btn-primary:hover {
+    background: #374151;
+}
+
+.pos-btn-success {
+    background: var(--accent);
+    color: white;
+}
+
+.pos-btn-success:hover {
+    background: var(--accent-dark);
+}
+
+.pos-btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.pos-btn-warning {
+    background: var(--warning);
+    color: white;
+}
+
+.pos-btn-block {
+    width: 100%;
+}
+
+
+/* =========================================
+   TABLE
+   ========================================= */
+
+.pos-table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+.pos-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 14px;
+}
+
+.pos-table th,
+.pos-table td {
+    padding: 12px;
+
+    border-bottom: 1px solid var(--border);
+
+    text-align: left;
+}
+
+.pos-table th {
+    background: #f9fafb;
+
+    font-weight: bold;
+
+    color: #374151;
+}
+
+.pos-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+
+/* =========================================
+   STATUS BADGES
+   ========================================= */
+
+.pos-status {
+    display: inline-block;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    font-weight: bold;
+}
+
+.pos-status-paid {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.pos-status-partial {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.pos-status-pending {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.pos-status-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+
+/* =========================================
+   MESSAGE
+   ========================================= */
+
+.pos-message {
+    padding: 12px;
+
+    margin-top: 15px;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+}
+
+
+/* =========================================
+   EMPTY / LOADING
+   ========================================= */
+
+.pos-empty {
+    text-align: center;
+
+    padding: 35px;
+
+    color: var(--muted);
+}
+
+.pos-loading {
+    text-align: center;
+
+    padding: 35px;
+
+    color: var(--muted);
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 800px) {
+
+    .pos-sidebar {
+        width: 70px;
+    }
+
+    .pos-brand-title {
+        font-size: 0;
+    }
+
+    .pos-brand-title::after {
+        content: "POS";
+
+        font-size: 18px;
+    }
+
+    .pos-brand-subtitle {
+        display: none;
+    }
+
+    .pos-nav-section {
+        display: none;
+    }
+
+    .pos-nav-link {
+        justify-content: center;
+    }
+
+    .pos-nav-link span:not(.pos-nav-icon) {
+        display: none;
+    }
+
+    .pos-nav-icon {
+        margin: 0;
+    }
+
+    .pos-main {
+        margin-left: 70px;
+    }
+
+    .pos-content {
+        padding: 15px;
+    }
+
+    .pos-topbar {
+        padding: 0 15px;
+    }
+
+    .pos-page-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+}
+
+
+/* =========================================
+   SMALL MOBILE
+   ========================================= */
+
+@media (max-width: 500px) {
+
+    .pos-sidebar {
+        width: 0;
+
+        overflow: hidden;
+    }
+
+    .pos-main {
+        margin-left: 0;
+    }
+
+    .pos-topbar {
+        height: 60px;
+    }
+
+    .pos-content {
+        padding: 12px;
+    }
+
+}
+/* =========================================
+   LAYOUT WIDTH AND BACKGROUND FIX
+   ========================================= */
+
+html {
+    min-height: 100%;
+    background: var(--background);
+}
+
+body {
+    min-height: 100vh;
+    width: 100%;
+    background: var(--background);
+    overflow-x: hidden;
+}
+
+.pos-app {
+    min-height: 100vh;
+    width: 100%;
+    background: var(--background);
+}
+
+.pos-sidebar {
+    width: var(--sidebar-width);
+}
+
+.pos-main {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    min-width: 0;
+    min-height: 100vh;
+    background: var(--background);
+}
+
+.pos-content {
+    width: 100%;
+    min-width: 0;
+}
+
+.pos-content > * {
+    max-width: 100%;
+    min-width: 0;
+}
+
+.pos-card,
+.pos-stat-card {
+    min-width: 0;
+}
+
+@media (max-width: 800px) {
+    .pos-sidebar {
+        width: 70px;
+    }
+
+    .pos-main {
+        margin-left: 70px;
+        width: calc(100% - 70px);
+    }
+}
+
+@media (max-width: 500px) {
+    .pos-sidebar {
+        width: 0;
+    }
+
+    .pos-main {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+/* Logged-in user details */
+.pos-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pos-user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pos-user-name {
+    font-weight: 600;
+}
+
+.pos-user-role {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.pos-logout-button {
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    background: white;
+    color: #b91c1c;
+    cursor: pointer;
+}
+
+.pos-logout-button:hover {
+    background: #fee2e2;
+}

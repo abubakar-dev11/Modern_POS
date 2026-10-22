@@ -1,0 +1,937 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern POS - Receipt</title>
+<link rel="stylesheet" href="css/pos.css">
+
+<style>
+.receipt-search-card,.receipt-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+.receipt-search-card{padding:20px;margin-bottom:24px}
+.search-title{margin:0 0 6px;font-size:18px;font-weight:700;color:#111827}
+.search-subtitle{margin:0 0 18px;color:#6b7280;font-size:14px}
+.search-box{display:flex;gap:10px}
+.search-box input,.email-input-box input{box-sizing:border-box;min-width:0;padding:12px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;outline:none;background:white}
+.search-box input{flex:1}
+.search-box input:focus,.email-input-box input:focus{border-color:#111827}
+.search-button,.action-button{border:none;border-radius:8px;padding:12px 18px;cursor:pointer;font-weight:600}
+.search-button{background:#111827;color:white}
+.search-button:disabled,.action-button:disabled{opacity:.55;cursor:not-allowed}
+.receipt-card{display:none;overflow:hidden}
+.receipt-header{padding:28px 30px;text-align:center;border-bottom:1px solid #e5e7eb}
+.receipt-logo{font-size:24px;font-weight:800;color:#111827;margin-bottom:5px}
+.receipt-title{margin:0;color:#6b7280;font-size:14px}
+.receipt-body{padding:30px}
+.sale-info-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:30px}
+.info-item{background:#f9fafb;border:1px solid #eef0f2;border-radius:10px;padding:14px;min-width:0}
+.info-label{display:block;font-size:12px;color:#6b7280;margin-bottom:5px}
+.info-value{display:block;font-size:14px;font-weight:600;color:#111827;overflow-wrap:anywhere}
+.section-title{margin:0 0 14px;font-size:16px;font-weight:700;color:#111827}
+.items-table-wrapper{overflow-x:auto}
+.items-table{width:100%;border-collapse:collapse;min-width:560px}
+.items-table th{background:#f9fafb;color:#6b7280;font-size:12px;font-weight:700;text-transform:uppercase;padding:13px 12px;border-bottom:1px solid #e5e7eb;text-align:left}
+.items-table td{padding:14px 12px;border-bottom:1px solid #eef0f2;font-size:14px;color:#374151}
+.items-table td:nth-child(2),.items-table th:nth-child(2){text-align:center}
+.items-table td:nth-child(3),.items-table th:nth-child(3),.items-table td:nth-child(4),.items-table th:nth-child(4){text-align:right}
+.receipt-summary{max-width:380px;margin:28px 0 0 auto}
+.summary-row{display:flex;justify-content:space-between;gap:20px;padding:8px 0;font-size:14px;color:#4b5563}
+.summary-row span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.summary-total{margin-top:8px;padding:14px 0;border-top:2px solid #111827;border-bottom:1px solid #e5e7eb;font-size:18px;font-weight:800;color:#111827}
+.summary-paid{color:#166534;font-weight:600}
+.summary-balance{color:#b45309;font-weight:600}
+.payment-status{display:flex;justify-content:center;margin-top:25px}
+.status-badge{display:inline-flex;align-items:center;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:700;background:#f3f4f6;color:#374151}
+.status-paid{background:#ecfdf5;color:#166534}
+.status-partial{background:#fffbeb;color:#92400e}
+.status-unpaid{background:#fef2f2;color:#b91c1c}
+.receipt-actions{margin-top:30px;padding-top:25px;border-top:1px solid #e5e7eb}
+.action-title{margin:0 0 14px;font-size:15px;font-weight:700;color:#111827}
+.action-buttons{display:flex;flex-wrap:wrap;gap:10px}
+.action-button{font-size:13px;background:#f3f4f6;color:#374151}
+.action-button:hover{opacity:.85}
+.print-button{width:100%;margin-bottom:14px;background:#111827;color:white;font-size:14px}
+.email-input-box{display:none;margin-bottom:14px;padding:16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px}
+.email-input-box label{display:block;margin-bottom:8px;font-size:13px;font-weight:700;color:#374151}
+.email-input-box input{width:100%}
+.email-actions{display:flex;gap:10px;margin-top:10px}
+.email-actions .action-button{flex:1}
+.message{display:none;padding:14px 16px;margin-bottom:20px;border-radius:8px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;font-size:14px;overflow-wrap:anywhere}
+.message.success{background:#ecfdf5;color:#166534;border-color:#bbf7d0}
+.message a{color:inherit;font-weight:700}
+@media(max-width:900px){.sale-info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){
+.search-box,.action-buttons,.email-actions{flex-direction:column}
+.search-button,.action-button{width:100%}
+.sale-info-grid{grid-template-columns:1fr}
+.receipt-body{padding:20px}
+.receipt-header{padding:22px 20px}
+}
+@media print{
+@page{margin:12mm}
+body{background:white!important}
+.pos-sidebar,.pos-topbar,.receipt-search-card,.page-header,.receipt-actions,.message{display:none!important}
+.pos-main{margin:0!important;width:100%!important}
+.pos-content{padding:0!important}
+.receipt-card{display:block!important;border:none;box-shadow:none;border-radius:0}
+.receipt-body{padding:18px 0}
+.sale-info-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.items-table{min-width:0}
+}
+</style>
+</head>
+
+<body>
+<div class="pos-app">
+    <aside id="posSidebar" class="pos-sidebar"></aside>
+
+    <main class="pos-main">
+        <header id="posTopbar" class="pos-topbar"></header>
+
+        <div class="pos-content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Receipt</h1>
+                    <p class="page-subtitle">View, print and share customer receipts.</p>
+                </div>
+            </div>
+
+            <div class="receipt-search-card">
+                <h2 class="search-title">Find Sale</h2>
+                <p class="search-subtitle">Enter a sale number to view its receipt.</p>
+                <form id="searchForm" class="search-box">
+                    <input id="saleNumber" type="text" placeholder="e.g. SALE-000006" autocomplete="off" required>
+                    <button id="searchButton" class="search-button" type="submit">Search</button>
+                </form>
+            </div>
+
+            <div id="message" class="message" role="alert" aria-live="polite"></div>
+
+            <section id="receipt" class="receipt-card">
+                <div class="receipt-header">
+                    <div id="receiptBusinessName" class="receipt-logo">MODERN POS</div>
+                    <p class="receipt-title">Sales Receipt</p>
+                </div>
+
+                <div class="receipt-body">
+                    <div class="sale-info-grid">
+                        <div class="info-item"><span class="info-label">Sale Number</span><span id="displaySaleNumber" class="info-value">-</span></div>
+                        <div class="info-item"><span class="info-label">Customer</span><span id="customerId" class="info-value">-</span></div>
+                        <div class="info-item"><span class="info-label">Email</span><span id="customerEmail" class="info-value">-</span></div>
+                        <div class="info-item"><span class="info-label">Phone</span><span id="customerPhone" class="info-value">-</span></div>
+                        <div class="info-item"><span class="info-label">Branch</span><span id="branchId" class="info-value">-</span></div>
+                        <div class="info-item"><span class="info-label">Salesperson</span><span id="salespersonId" class="info-value">-</span></div>
+                        <div class="info-item"><span class="info-label">Date</span><span id="saleDate" class="info-value">-</span></div>
+                    </div>
+
+                    <h2 class="section-title">Sale Items</h2>
+                    <div class="items-table-wrapper">
+                        <table class="items-table">
+                            <thead>
+                                <tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr>
+                            </thead>
+                            <tbody id="itemsTable"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="receipt-summary">
+                        <div class="summary-row"><span>Subtotal</span><span>₦<span id="subtotal">0.00</span></span></div>
+                        <div class="summary-row"><span>Discount</span><span>₦<span id="discount">0.00</span></span></div>
+                        <div class="summary-row summary-total"><span>Total</span><span>₦<span id="totalAmount">0.00</span></span></div>
+                        <div class="summary-row summary-paid"><span>Paid</span><span>₦<span id="totalPaid">0.00</span></span></div>
+                        <div class="summary-row summary-balance"><span>Balance</span><span>₦<span id="balance">0.00</span></span></div>
+                    </div>
+
+                    <div class="payment-status">
+                        <span id="status" class="status-badge">Payment Status: -</span>
+                    </div>
+
+                    <div class="receipt-actions">
+                        <button type="button" class="action-button print-button" id="printButton">Print Receipt</button>
+                        <h3 class="action-title">Digital Receipt</h3>
+
+                        <div id="emailInputBox" class="email-input-box">
+                            <label for="receiptEmail">Customer Email</label>
+                            <input type="email" id="receiptEmail" list="savedCustomerEmails" placeholder="Enter customer email" autocomplete="off">
+                            <datalist id="savedCustomerEmails"></datalist>
+                            <div class="email-actions">
+                                <button type="button" class="action-button" id="sendEmailButton">Send Email Receipt</button>
+                                <button type="button" class="action-button" id="cancelEmailButton">Cancel</button>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button type="button" class="action-button" id="emailButton">Email</button>
+                            <button type="button" class="action-button" id="smsButton">SMS</button>
+                            <button type="button" class="action-button" id="whatsappButton">WhatsApp</button>
+                            <button type="button" class="action-button" id="downloadButton">Save / Download</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<script src="js/pos-layout.js" defer></script>
+
+<script>
+"use strict";
+
+/* ==================================================
+   CONFIGURATION AND JWT AUTHENTICATION
+================================================== */
+
+const API_BASE = "http://127.0.0.1:3000/api";
+
+const $ = id => document.getElementById(id);
+
+let currentReceipt = null;
+let currentSaleNumber = null;
+let emailSearchTimeout = null;
+let emailRequestController = null;
+
+// Storage key ya bambanta da kowane business.
+function getSentReceiptStorageKey() {
+    let businessId = "default";
+
+    try {
+        const user = JSON.parse(
+            localStorage.getItem("posUser") || "{}"
+        );
+
+        if (user.businessId) {
+            businessId = user.businessId;
+        }
+    } catch (error) {
+        console.error("Could not read POS user:", error);
+    }
+
+    return `posSentReceiptQueue_${businessId}`;
+}
+
+// Adana receipt bayan aika shi cikin nasara.
+function markReceiptAsSent(saleNumber, method) {
+    const key = getSentReceiptStorageKey();
+    const normalizedSaleNumber = String(saleNumber || "")
+        .trim()
+        .toUpperCase();
+
+    if (!normalizedSaleNumber) {
+        throw new Error("Sale number is missing.");
+    }
+
+    let sentReceipts = [];
+
+    try {
+        sentReceipts = JSON.parse(
+            localStorage.getItem(key) || "[]"
+        );
+
+        if (!Array.isArray(sentReceipts)) {
+            sentReceipts = [];
+        }
+    } catch (error) {
+        sentReceipts = [];
+    }
+
+    // Kada a adana sale ɗaya sau biyu.
+    sentReceipts = sentReceipts.filter(item => {
+        const savedNumber = typeof item === "string"
+            ? item
+            : item.saleNumber;
+
+        return String(savedNumber || "").trim().toUpperCase()
+            !== normalizedSaleNumber;
+    });
+
+    sentReceipts.push({
+        saleNumber: normalizedSaleNumber,
+        method,
+        sentAt: new Date().toISOString()
+    });
+
+    localStorage.setItem(key, JSON.stringify(sentReceipts));
+}
+function getToken() {
+    return localStorage.getItem("posToken");
+}
+
+function loginRedirect() {
+    const returnTo = window.location.pathname + window.location.search;
+    window.location.href = "login.html?returnTo=" + encodeURIComponent(returnTo);
+}
+
+/*
+ * Use this helper for protected API requests.
+ * The JWT is sent using Authorization: Bearer <token>.
+ */
+async function apiFetch(path, options = {}) {
+    const token = getToken();
+
+    if (!token) {
+        loginRedirect();
+        throw new Error("Your login session is missing. Please log in.");
+    }
+
+    const headers = new Headers(options.headers || {});
+    headers.set("Authorization", "Bearer " + token);
+
+    const response = await fetch(API_BASE + path, {
+        ...options,
+        headers
+    });
+
+    if (response.status === 401 || response.status === 403) {
+        let serverMessage = "";
+
+        try {
+            const errorData = await response.clone().json();
+            serverMessage = errorData.message || "";
+        } catch (_) {}
+
+        /*
+         * A 401 usually means missing/invalid authentication.
+         * A 403 can also mean the user lacks permission.
+         */
+        if (response.status === 401) {
+            showMessage(
+                serverMessage || "Your session is invalid or expired. Please log in again.",
+                false,
+                true
+            );
+        } else {
+            showMessage(
+                serverMessage || "You do not have permission to perform this action."
+            );
+        }
+
+        throw new Error(serverMessage || "Authentication or permission error.");
+    }
+
+    return response;
+}
+
+async function readResponse(response) {
+    const contentType = response.headers.get("content-type") || "";
+
+    if (contentType.includes("application/json")) {
+        return response.json();
+    }
+
+    const text = await response.text();
+    return { message: text || "Unexpected server response." };
+}
+
+function showMessage(message, success = false, includeLoginLink = false) {
+    const element = $("message");
+    element.replaceChildren();
+
+    element.className = "message" + (success ? " success" : "");
+    element.appendChild(document.createTextNode(String(message)));
+
+    if (includeLoginLink) {
+        element.appendChild(document.createTextNode(" "));
+
+        const link = document.createElement("a");
+        link.href = "login.html";
+        link.textContent = "Go to login";
+        element.appendChild(link);
+    }
+
+    element.style.display = "block";
+}
+
+function hideMessage() {
+    $("message").style.display = "none";
+    $("message").replaceChildren();
+}
+
+function setText(id, value, fallback = "-") {
+    const element = $(id);
+    element.textContent =
+        value !== null && value !== undefined && String(value).trim() !== ""
+            ? String(value)
+            : fallback;
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function money(value) {
+    const number = Number(value);
+    return (Number.isFinite(number) ? number : 0).toLocaleString("en-NG", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function getCustomerName(receipt) {
+    return receipt.customerName ||
+        receipt.customer?.name ||
+        "Walk-in Customer";
+}
+
+function getPaymentStatus(receipt) {
+    return String(
+        receipt.paymentStatus ||
+        receipt.status ||
+        "UNKNOWN"
+    ).toUpperCase();
+}
+
+/* ==================================================
+   FIND SALE AND DISPLAY RECEIPT
+================================================== */
+
+async function findSale() {
+    const input = $("saleNumber");
+    let saleNumber = input.value.trim().toUpperCase();
+
+    if (!saleNumber) {
+        showMessage("Please enter a sale number.");
+        input.focus();
+        return;
+    }
+
+    if (!saleNumber.startsWith("SALE-")) {
+        saleNumber = "SALE-" + saleNumber;
+    }
+
+    input.value = saleNumber;
+
+    $("searchButton").disabled = true;
+    $("searchButton").textContent = "Searching...";
+    hideMessage();
+
+    try {
+        const response = await apiFetch(
+            "/receipts/" + encodeURIComponent(saleNumber)
+        );
+
+        const data = await readResponse(response);
+
+        if (!response.ok) {
+            $("receipt").style.display = "none";
+            showMessage(data.message || "Sale not found.");
+            return;
+        }
+
+        const receipt = data.receipt;
+
+        if (!receipt) {
+            $("receipt").style.display = "none";
+            showMessage("The server did not return receipt data.");
+            return;
+        }
+
+        currentReceipt = receipt;
+        currentSaleNumber = saleNumber;
+
+        renderReceipt(receipt, saleNumber);
+        cancelEmail();
+        hideMessage();
+
+    } catch (error) {
+        console.error("Receipt search error:", error);
+
+        if (!getToken()) return;
+
+        if ($("message").style.display !== "block") {
+            showMessage(
+                error.message || "Could not connect to the server. Check that the backend is running."
+            );
+        }
+    } finally {
+        $("searchButton").disabled = false;
+        $("searchButton").textContent = "Search";
+    }
+}
+
+function renderReceipt(receipt, searchedSaleNumber) {
+    setText(
+        "displaySaleNumber",
+        receipt.receiptNumber || receipt.saleNumber || searchedSaleNumber
+    );
+
+    setText("customerId", getCustomerName(receipt));
+    setText("customerEmail", receipt.customer?.email || receipt.customerEmail);
+    setText("customerPhone", receipt.customer?.phone || receipt.customerPhone);
+    setText("branchId", receipt.branch?.name || receipt.branchName);
+    setText("salespersonId", receipt.salesperson?.name || receipt.salespersonName);
+
+    const date = receipt.date || receipt.createdAt || receipt.saleDate;
+
+    setText(
+        "saleDate",
+        date && !Number.isNaN(new Date(date).getTime())
+            ? new Date(date).toLocaleString()
+            : "-"
+    );
+
+    const settings = receipt.settings || {};
+    const businessName =
+        receipt.business?.name ||
+        receipt.businessName ||
+        settings.receiptName;
+
+    setText("receiptBusinessName", businessName || "MODERN POS");
+
+    renderItems(receipt.items);
+
+    const subtotal = Number(receipt.subtotal ?? 0);
+    const discount = Number(receipt.discount ?? 0);
+    const total = Number(receipt.totalAmount ?? receipt.total ?? 0);
+    const paid = Number(receipt.totalPaid ?? receipt.amountPaid ?? 0);
+    const balance = Number(
+        receipt.balance ?? Math.max(0, total - paid)
+    );
+
+    setText("subtotal", money(subtotal));
+    setText("discount", money(discount));
+    setText("totalAmount", money(total));
+    setText("totalPaid", money(paid));
+    setText("balance", money(balance));
+
+    const statusElement = $("status");
+    const paymentStatus = getPaymentStatus(receipt);
+
+    statusElement.textContent = "Payment Status: " + paymentStatus;
+    statusElement.className = "status-badge";
+
+    if (paymentStatus === "PAID" || (total > 0 && balance <= 0)) {
+        statusElement.classList.add("status-paid");
+    } else if (
+        paymentStatus === "PARTIALLY_PAID" ||
+        paymentStatus === "PARTIAL" ||
+        paid > 0
+    ) {
+        statusElement.classList.add("status-partial");
+    } else if (
+        paymentStatus === "UNPAID" ||
+        paymentStatus === "PENDING"
+    ) {
+        statusElement.classList.add("status-unpaid");
+    }
+
+    $("receipt").style.display = "block";
+}
+
+function renderItems(items) {
+    const table = $("itemsTable");
+    table.replaceChildren();
+
+    if (!Array.isArray(items) || items.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+
+        cell.colSpan = 4;
+        cell.textContent = "No sale items were returned.";
+        cell.style.textAlign = "center";
+
+        row.appendChild(cell);
+        table.appendChild(row);
+        return;
+    }
+
+    for (const item of items) {
+        const row = document.createElement("tr");
+
+        const productName =
+            item.productName ||
+            item.product?.name ||
+            item.name ||
+            "-";
+
+        const quantity = Number(item.quantity ?? 0);
+        const unitPrice = Number(item.unitPrice ?? item.price ?? 0);
+        const totalPrice = Number(
+            item.totalPrice ?? item.total ?? quantity * unitPrice
+        );
+
+        const productCell = document.createElement("td");
+        productCell.textContent = productName;
+
+        const quantityCell = document.createElement("td");
+        quantityCell.textContent = String(quantity);
+
+        const unitPriceCell = document.createElement("td");
+        unitPriceCell.textContent = "₦" + money(unitPrice);
+
+        const totalCell = document.createElement("td");
+        totalCell.textContent = "₦" + money(totalPrice);
+
+        row.append(productCell, quantityCell, unitPriceCell, totalCell);
+        table.appendChild(row);
+    }
+}
+
+/* ==================================================
+   CUSTOMER EMAIL AUTOCOMPLETE
+================================================== */
+
+const receiptEmailInput = $("receiptEmail");
+const savedCustomerEmails = $("savedCustomerEmails");
+
+function openEmailInput() {
+    if (!currentReceipt) {
+        showMessage("Please search for a sale first.");
+        return;
+    }
+
+    $("emailInputBox").style.display = "block";
+
+    const savedEmail = $("customerEmail").textContent.trim();
+
+    receiptEmailInput.value =
+        savedEmail !== "-" ? savedEmail : "";
+
+    savedCustomerEmails.replaceChildren();
+
+    if (savedEmail && savedEmail !== "-") {
+        addEmailOption(savedEmail, savedEmail);
+    }
+
+    receiptEmailInput.focus();
+}
+
+function cancelEmail() {
+    $("emailInputBox").style.display = "none";
+    receiptEmailInput.value = "";
+    savedCustomerEmails.replaceChildren();
+
+    if (emailSearchTimeout) {
+        clearTimeout(emailSearchTimeout);
+        emailSearchTimeout = null;
+    }
+
+    if (emailRequestController) {
+        emailRequestController.abort();
+        emailRequestController = null;
+    }
+}
+
+function addEmailOption(email, label) {
+    const option = document.createElement("option");
+    option.value = email;
+    option.label = label || email;
+    savedCustomerEmails.appendChild(option);
+}
+
+receiptEmailInput.addEventListener("input", () => {
+    if (emailSearchTimeout) clearTimeout(emailSearchTimeout);
+
+    if (emailRequestController) {
+        emailRequestController.abort();
+        emailRequestController = null;
+    }
+
+    const search = receiptEmailInput.value.trim();
+    savedCustomerEmails.replaceChildren();
+
+    if (search.length < 2) return;
+
+    emailSearchTimeout = setTimeout(async () => {
+        const controller = new AbortController();
+        emailRequestController = controller;
+
+        try {
+            const response = await apiFetch(
+                "/customers?search=" + encodeURIComponent(search),
+                { signal: controller.signal }
+            );
+
+            const data = await readResponse(response);
+
+            if (!response.ok) return;
+
+            const customers = Array.isArray(data.customers)
+                ? data.customers
+                : Array.isArray(data)
+                    ? data
+                    : [];
+
+            const existing = new Set();
+
+            for (const customer of customers) {
+                if (!customer.email) continue;
+
+                const email = String(customer.email).trim();
+                const key = email.toLowerCase();
+
+                if (existing.has(key)) continue;
+                existing.add(key);
+
+                addEmailOption(
+                    email,
+                    customer.name
+                        ? customer.name + " - " + email
+                        : email
+                );
+            }
+        } catch (error) {
+            if (error.name !== "AbortError") {
+                console.error("Customer email search error:", error);
+            }
+        } finally {
+            if (emailRequestController === controller) {
+                emailRequestController = null;
+            }
+        }
+    }, 300);
+});
+
+/* ==================================================
+   SEND DIGITAL RECEIPT
+================================================== */
+
+async function sendReceipt(method) {
+    const saleNumber = currentSaleNumber;
+
+    if (!currentReceipt || !saleNumber) {
+        showMessage("Please search for a sale first.");
+        return;
+    }
+
+    let email = null;
+    let phone = null;
+
+    if (method === "EMAIL") {
+        email = receiptEmailInput.value.trim();
+
+        if (!email) {
+            showMessage("Please enter the customer email address.");
+            receiptEmailInput.focus();
+            return;
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showMessage("Please enter a valid email address.");
+            receiptEmailInput.focus();
+            return;
+        }
+    }
+
+    if (method === "SMS" || method === "WHATSAPP") {
+        const savedPhone = $("customerPhone").textContent.trim();
+
+        phone = prompt(
+            "Enter customer " +
+            (method === "WHATSAPP" ? "WhatsApp" : "phone") +
+            " number:",
+            savedPhone !== "-" ? savedPhone : ""
+        );
+
+        if (!phone || !phone.trim()) {
+            showMessage("A customer phone number is required.");
+            return;
+        }
+
+        phone = phone.trim();
+    }
+
+    const buttons = [
+        $("sendEmailButton"),
+        $("smsButton"),
+        $("whatsappButton")
+    ];
+
+    buttons.forEach(button => button.disabled = true);
+    hideMessage();
+
+    let sendSucceeded = false;
+
+    try {
+        const response = await apiFetch("/receipts/send", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                saleNumber,
+                method,
+                email,
+                phone
+            })
+        });
+
+        const data = await readResponse(response);
+
+        if (!response.ok || data.success === false) {
+            throw new Error(
+                data.message || "Failed to send receipt."
+            );
+        }
+
+        // Cire receipt daga queue a browser ɗin nan.
+        markReceiptAsSent(saleNumber, method);
+
+        sendSucceeded = true;
+
+        if (method === "EMAIL") {
+            cancelEmail();
+        }
+
+        showMessage(
+            "Receipt request succeeded. Returning to Receipt Queue...",
+            true
+        );
+
+    } catch (error) {
+        console.error("Digital receipt error:", error);
+
+        showMessage(
+            error.message || "Failed to send receipt."
+        );
+
+    } finally {
+        buttons.forEach(button => button.disabled = false);
+    }
+
+    // Komawa Receipt Queue ne kawai idan aika request ta yi nasara.
+    if (sendSucceeded) {
+        setTimeout(() => {
+            window.location.replace("receipt-queue.html");
+        }, 1500);
+    }
+}
+/* ==================================================
+   PRINT RECEIPT
+================================================== */
+
+function printReceipt() {
+    if (!currentReceipt) {
+        showMessage("Please search for a sale first.");
+        return;
+    }
+
+    window.print();
+}
+
+/* ==================================================
+   SAVE / DOWNLOAD RECEIPT AS HTML
+================================================== */
+
+function downloadReceipt() {
+    if (!currentReceipt) {
+        showMessage("Please search for a sale first.");
+        return;
+    }
+
+    const receiptElement = $("receipt");
+    const clonedReceipt = receiptElement.cloneNode(true);
+
+    clonedReceipt.style.display = "block";
+
+    const actions = clonedReceipt.querySelector(".receipt-actions");
+    if (actions) actions.remove();
+
+    const documentContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern POS Receipt - ${escapeHtml($("displaySaleNumber").textContent)}</title>
+<style>
+body{font-family:Arial,sans-serif;padding:24px;color:#111827;max-width:1000px;margin:auto}
+.receipt-header{text-align:center;padding:20px;border-bottom:1px solid #ddd}
+.receipt-logo{font-size:24px;font-weight:800}
+.receipt-title{color:#666}
+.sale-info-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:24px 0}
+.info-item{padding:10px;background:#f9fafb;border:1px solid #ddd;overflow-wrap:anywhere}
+.info-label{display:block;font-size:12px;color:#666;margin-bottom:5px}
+.info-value{font-weight:600}
+.items-table{width:100%;border-collapse:collapse}
+th,td{padding:10px;border-bottom:1px solid #ddd;text-align:left}
+th{background:#f5f5f5}
+td:nth-child(2),th:nth-child(2){text-align:center}
+td:nth-child(3),th:nth-child(3),td:nth-child(4),th:nth-child(4){text-align:right}
+.receipt-summary{max-width:380px;margin:25px 0 0 auto}
+.summary-row{display:flex;justify-content:space-between;gap:20px;padding:7px 0}
+.summary-total{font-weight:800;border-top:2px solid #111;padding-top:14px}
+.summary-paid{color:#166534}.summary-balance{color:#b45309}
+.payment-status{text-align:center;margin-top:20px}
+.status-badge{font-weight:700}
+@media(max-width:600px){body{padding:10px}.sale-info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{body{padding:0}.sale-info-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+${clonedReceipt.outerHTML}
+</body>
+</html>`;
+
+    const blob = new Blob([documentContent], {
+        type: "text/html;charset=utf-8"
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    const safeName = $("displaySaleNumber").textContent
+        .trim()
+        .replace(/[^a-zA-Z0-9_-]/g, "_");
+
+    link.href = url;
+    link.download = "Receipt-" + safeName + ".html";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ==================================================
+   EVENT LISTENERS
+================================================== */
+
+$("searchForm").addEventListener("submit", event => {
+    event.preventDefault();
+    findSale();
+});
+
+$("printButton").addEventListener("click", printReceipt);
+$("downloadButton").addEventListener("click", downloadReceipt);
+$("emailButton").addEventListener("click", openEmailInput);
+$("cancelEmailButton").addEventListener("click", cancelEmail);
+
+$("sendEmailButton").addEventListener("click", () => {
+    sendReceipt("EMAIL");
+});
+
+$("smsButton").addEventListener("click", () => {
+    sendReceipt("SMS");
+});
+
+$("whatsappButton").addEventListener("click", () => {
+    sendReceipt("WHATSAPP");
+});
+
+/* ==================================================
+   AUTO-LOAD SALE FROM RECEIPT QUEUE
+================================================== */
+
+const urlParams = new URLSearchParams(window.location.search);
+const saleFromQueue = urlParams.get("sale");
+
+if (!getToken()) {
+    showMessage(
+        "Please log in to view receipts.",
+        false,
+        true
+    );
+} else if (saleFromQueue) {
+    $("saleNumber").value = saleFromQueue;
+    findSale();
+}
+</script>
+</body>
+</html>

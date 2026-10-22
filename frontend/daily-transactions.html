@@ -1,0 +1,966 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern POS - Daily Transactions</title>
+    <link rel="stylesheet" href="css/pos.css">
+
+    <style>
+        .transaction-tools {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .transaction-tools .pos-input {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .detail-panel {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .detail-box {
+            padding: 16px;
+            border: 1px solid #e1e6ed;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .detail-label {
+            color: #687386;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .detail-value {
+            font-size: 20px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .balance-value {
+            color: #b45309;
+        }
+
+        .paid-value {
+            color: #15803d;
+        }
+
+        .detail-heading {
+            margin: 20px 0 12px;
+            font-size: 17px;
+        }
+
+        .detail-message {
+            margin-top: 12px;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .close-detail {
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .empty-detail {
+            padding: 14px;
+            color: #64748b;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+
+        .transaction-action {
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            background: #173f73;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .transaction-tools {
+                flex-direction: column;
+            }
+
+            .transaction-tools .pos-input {
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="pos-app">
+    <aside id="posSidebar" class="pos-sidebar"></aside>
+
+    <main class="pos-main">
+        <header id="posTopbar" class="pos-topbar"></header>
+
+        <div class="pos-content">
+
+            <div class="pos-page-header">
+                <div>
+                    <h1 class="pos-page-title">Daily Transactions</h1>
+                    <p class="pos-page-description">
+                        View payment transactions, outstanding balances and payment history.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="pos-btn pos-btn-primary"
+                    onclick="loadTransactions()">
+                    Refresh
+                </button>
+            </div>
+
+            <!-- FILTERS -->
+            <div class="pos-card">
+                <h2 class="pos-card-title">Transaction Filter</h2>
+
+                <div class="pos-form-grid">
+                    <div class="pos-form-group">
+                        <label class="pos-form-label" for="transactionDate">
+                            Transaction Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="transactionDate"
+                            class="pos-input">
+                    </div>
+
+                    <div
+                        class="pos-form-group"
+                        style="display:flex;align-items:end;gap:10px;flex-wrap:wrap;">
+
+                        <button
+                            type="button"
+                            class="pos-btn pos-btn-success"
+                            onclick="filterTransactions()">
+                            Search Transactions
+                        </button>
+
+                        <button
+                            type="button"
+                            class="pos-btn"
+                            onclick="clearDateFilter()">
+                            Today
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUMMARY -->
+            <div class="pos-stat-grid" id="summary"></div>
+
+            <!-- TRANSACTION HISTORY -->
+            <div class="pos-card">
+                <h2 class="pos-card-title">Transaction History</h2>
+
+                <div class="transaction-tools">
+                    <input
+                        type="search"
+                        id="transactionSearch"
+                        class="pos-input"
+                        placeholder="Search sale number, payment method or status..."
+                        autocomplete="off">
+                </div>
+
+                <div class="pos-table-wrapper">
+                    <table class="pos-table">
+                        <thead>
+                            <tr>
+                                <th>Sale Number</th>
+                                <th>Payment Method</th>
+                                <th>Amount</th>
+                                <th>Sale Status</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="transactionsTable">
+                            <tr>
+                                <td colspan="6" class="pos-loading">
+                                    Loading transactions...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="message" class="pos-message"></div>
+            </div>
+
+            <!-- SALE DETAILS -->
+            <div id="detailPanel" class="pos-card detail-panel">
+                <div class="detail-header">
+                    <div>
+                        <h2 class="pos-card-title" style="margin-bottom:5px;">
+                            Sale Payment Details
+                        </h2>
+                        <p id="detailSaleNumber" class="pos-page-description"></p>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="close-detail"
+                        onclick="closeSaleDetails()">
+                        Close Details
+                    </button>
+                </div>
+
+                <div id="detailContent">
+                    <p class="pos-loading">
+                        Select a sale to view its details.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script src="js/pos-layout.js"></script>
+
+<script>
+"use strict";
+
+const API_BASE = "http://127.0.0.1:3000/api";
+
+let allPayments = [];
+let filteredPayments = [];
+
+// =========================================
+// AUTHENTICATION
+// =========================================
+
+function getToken() {
+    return localStorage.getItem("posToken");
+}
+
+function redirectToLogin() {
+    window.location.href = "login.html";
+}
+
+async function apiRequest(url, options = {}) {
+    const token = getToken();
+
+    if (!token) {
+        redirectToLogin();
+        throw new Error("Authentication required. Please log in.");
+    }
+
+    const headers = {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`
+    };
+
+    if (options.body && !headers["Content-Type"]) {
+        headers["Content-Type"] = "application/json";
+    }
+
+    const response = await fetch(url, {
+        ...options,
+        headers
+    });
+
+    let data = {};
+
+    try {
+        data = await response.json();
+    } catch {
+        data = {};
+    }
+
+    if (response.status === 401) {
+        localStorage.removeItem("posToken");
+        localStorage.removeItem("posUser");
+        redirectToLogin();
+
+        throw new Error("Your session has expired. Please log in again.");
+    }
+
+    if (response.status === 403) {
+        throw new Error(
+            data.message || "You do not have permission to perform this action."
+        );
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            data.message || `Request failed (${response.status}).`
+        );
+    }
+
+    return data;
+}
+
+// =========================================
+// SAFE HTML
+// =========================================
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[character]);
+}
+
+// =========================================
+// FORMATTING
+// =========================================
+
+function formatMoney(value) {
+    return "₦" + (Number(value) || 0).toLocaleString("en-NG", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function formatDate(value) {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "-";
+
+    return date.toLocaleString("en-NG");
+}
+
+function getLocalDate(value) {
+    if (!value) return "";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "";
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+function getTodayDate() {
+    return getLocalDate(new Date());
+}
+
+// =========================================
+// PAYMENT HELPERS
+// =========================================
+
+function getSaleNumber(payment) {
+    return payment?.Sale?.saleNumber
+        || payment?.sale?.saleNumber
+        || payment?.saleNumber
+        || (payment?.saleId != null
+            ? "Sale #" + payment.saleId
+            : "Unknown Sale");
+}
+
+function getPaymentMethod(payment) {
+    return payment?.paymentMethod || payment?.method || "-";
+}
+
+function isSuccessfulPayment(payment) {
+    const status = String(payment?.status || "").toUpperCase();
+
+    return ["PAID", "SUCCESS", "COMPLETED"].includes(status);
+}
+
+function getSalePayments(sale) {
+    if (Array.isArray(sale?.Payments)) return sale.Payments;
+    if (Array.isArray(sale?.payments)) return sale.payments;
+    if (Array.isArray(sale?.paymentHistory)) return sale.paymentHistory;
+    if (Array.isArray(sale?.PaymentRecords)) return sale.PaymentRecords;
+
+    return [];
+}
+
+function getStatusClass(status) {
+    const normalized = String(status || "").toUpperCase();
+
+    if (["PAID", "SUCCESS", "COMPLETED"].includes(normalized)) {
+        return "pos-status-paid";
+    }
+
+    if (["PARTIALLY_PAID", "PARTIAL"].includes(normalized)) {
+        return "pos-status-partial";
+    }
+
+    if (["FAILED", "CANCELLED", "REJECTED"].includes(normalized)) {
+        return "pos-status-danger";
+    }
+
+    return "pos-status-pending";
+}
+
+// =========================================
+// DETERMINE SALE STATUS
+// =========================================
+
+function determineSaleStatus(data) {
+    // Prefer the status calculated by the backend.
+    const suppliedStatus =
+        data?.saleStatus ||
+        data?.Sale?.saleStatus ||
+        data?.sale?.saleStatus ||
+        data?.Sale?.status ||
+        data?.sale?.status;
+
+    if (suppliedStatus) {
+        return String(suppliedStatus).toUpperCase();
+    }
+
+    const totalAmount = Number(
+        data?.totalAmount ??
+        data?.Sale?.totalAmount ??
+        data?.sale?.totalAmount
+    );
+
+    const totalPaid = Number(data?.totalPaid);
+    const balance = Number(data?.balance);
+
+    if (
+        Number.isFinite(totalAmount) &&
+        Number.isFinite(totalPaid) &&
+        totalAmount > 0
+    ) {
+        if (totalPaid >= totalAmount) return "PAID";
+        if (totalPaid > 0) return "PARTIALLY_PAID";
+        return "UNPAID";
+    }
+
+    if (
+        Number.isFinite(totalAmount) &&
+        Number.isFinite(balance) &&
+        totalAmount > 0
+    ) {
+        if (balance <= 0) return "PAID";
+        if (balance < totalAmount) return "PARTIALLY_PAID";
+        return "UNPAID";
+    }
+
+    // Do not assume a PAID payment means the entire sale is paid.
+    return "UNKNOWN";
+}
+
+// =========================================
+// LOAD PAYMENT HISTORY
+// =========================================
+
+async function loadTransactions() {
+    const table = document.getElementById("transactionsTable");
+    const message = document.getElementById("message");
+
+    table.innerHTML = `
+        <tr>
+            <td colspan="6" class="pos-loading">
+                Loading transactions...
+            </td>
+        </tr>
+    `;
+
+    message.textContent = "";
+
+    try {
+        const data = await apiRequest(`${API_BASE}/payments/history`);
+
+        if (Array.isArray(data)) {
+            allPayments = data;
+        } else if (Array.isArray(data.payments)) {
+            allPayments = data.payments;
+        } else {
+            throw new Error("Unexpected payment history response.");
+        }
+
+        filterTransactions();
+
+    } catch (error) {
+        console.error("Load transactions error:", error);
+
+        allPayments = [];
+        filteredPayments = [];
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="6" class="pos-empty">
+                    ${escapeHTML(error.message || "Failed to load transactions.")}
+                </td>
+            </tr>
+        `;
+
+        document.getElementById("summary").innerHTML = "";
+        message.textContent = error.message || "Failed to connect to server.";
+    }
+}
+
+// =========================================
+// FILTER TRANSACTIONS
+// =========================================
+
+function filterTransactions() {
+    const selectedDate = document.getElementById("transactionDate").value;
+
+    const searchText = document.getElementById("transactionSearch")
+        .value.trim().toLowerCase();
+
+    const table = document.getElementById("transactionsTable");
+    const summary = document.getElementById("summary");
+    const message = document.getElementById("message");
+
+    message.textContent = "";
+
+    if (!selectedDate) {
+        filteredPayments = [];
+        summary.innerHTML = "";
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="6" class="pos-empty">
+                    Please select a transaction date.
+                </td>
+            </tr>
+        `;
+
+        message.textContent = "Please select a date.";
+        return;
+    }
+
+    const datePayments = allPayments.filter(payment =>
+        getLocalDate(payment.createdAt) === selectedDate
+    );
+
+    filteredPayments = datePayments.filter(payment => {
+        const saleStatus = determineSaleStatus(payment);
+
+        const searchableText = [
+            getSaleNumber(payment),
+            getPaymentMethod(payment),
+            payment.status,
+            saleStatus,
+            payment.paymentReference,
+            payment.reference,
+            payment.customerName,
+            payment.Sale?.customerName,
+            payment.sale?.customerName
+        ].join(" ").toLowerCase();
+
+        return searchableText.includes(searchText);
+    });
+
+    // Summary: count only successful payment records.
+    let cash = 0;
+    let transfer = 0;
+    let pos = 0;
+    let total = 0;
+
+    datePayments.forEach(payment => {
+        if (!isSuccessfulPayment(payment)) return;
+
+        const amount = Number(payment.amount) || 0;
+        const method = getPaymentMethod(payment).toUpperCase();
+
+        total += amount;
+
+        if (method === "CASH") {
+            cash += amount;
+        } else if (["TRANSFER", "BANK_TRANSFER"].includes(method)) {
+            transfer += amount;
+        } else if (method === "POS") {
+            pos += amount;
+        }
+    });
+
+    summary.innerHTML = `
+        <div class="pos-stat-card">
+            <div class="pos-stat-label">Cash Received</div>
+            <div class="pos-stat-value">${formatMoney(cash)}</div>
+        </div>
+
+        <div class="pos-stat-card">
+            <div class="pos-stat-label">Transfer Received</div>
+            <div class="pos-stat-value">${formatMoney(transfer)}</div>
+        </div>
+
+        <div class="pos-stat-card">
+            <div class="pos-stat-label">POS Received</div>
+            <div class="pos-stat-value">${formatMoney(pos)}</div>
+        </div>
+
+        <div class="pos-stat-card">
+            <div class="pos-stat-label">Total Payments Received</div>
+            <div class="pos-stat-value">${formatMoney(total)}</div>
+        </div>
+    `;
+
+    renderTransactions();
+}
+
+// =========================================
+// RENDER TRANSACTIONS
+// =========================================
+
+function renderTransactions() {
+    // These IDs match the HTML above.
+    const table = document.getElementById("transactionsTable");
+    const message = document.getElementById("message");
+
+    table.innerHTML = "";
+
+    if (filteredPayments.length === 0) {
+        table.innerHTML = `
+            <tr>
+                <td colspan="6" class="pos-empty">
+                    No transactions found for this date.
+                </td>
+            </tr>
+        `;
+
+        message.textContent = "0 transactions found.";
+        return;
+    }
+
+    filteredPayments.forEach(payment => {
+        const row = document.createElement("tr");
+
+        const saleNumber = getSaleNumber(payment);
+        const amount = Number(payment.amount) || 0;
+        const method = getPaymentMethod(payment);
+
+        // Display the SALE status, not the individual payment status.
+        const saleStatus = determineSaleStatus(payment);
+        const statusClass = getStatusClass(saleStatus);
+
+        row.innerHTML = `
+            <td>${escapeHTML(saleNumber)}</td>
+            <td>${escapeHTML(method)}</td>
+            <td>${formatMoney(amount)}</td>
+            <td>
+                <span class="pos-status ${statusClass}">
+                    ${escapeHTML(saleStatus.replace(/_/g, " "))}
+                </span>
+            </td>
+            <td>${escapeHTML(formatDate(payment.createdAt))}</td>
+            <td>
+                <button type="button" class="transaction-action">
+                    View Sale
+                </button>
+            </td>
+        `;
+
+        row.querySelector("button").addEventListener("click", () => {
+            viewSaleDetails(payment);
+        });
+
+        table.appendChild(row);
+    });
+
+    message.textContent =
+        `${filteredPayments.length} transaction(s) found.`;
+}
+
+// =========================================
+// VIEW SALE DETAILS
+// =========================================
+
+async function viewSaleDetails(payment) {
+    const panel = document.getElementById("detailPanel");
+    const content = document.getElementById("detailContent");
+    const heading = document.getElementById("detailSaleNumber");
+
+    const saleNumber = getSaleNumber(payment);
+
+    panel.style.display = "block";
+    heading.textContent = saleNumber;
+
+    content.innerHTML = `
+        <p class="pos-loading">Loading sale and payment details...</p>
+    `;
+
+    panel.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+
+    try {
+        if (
+            !saleNumber ||
+            saleNumber === "Unknown Sale" ||
+            saleNumber.startsWith("Sale #")
+        ) {
+            throw new Error("A valid sale number is required.");
+        }
+
+        const data = await apiRequest(
+            `${API_BASE}/sales/number/${encodeURIComponent(saleNumber)}`
+        );
+
+        const sale = data.sale || data;
+
+        renderSaleDetails(sale, payment);
+
+    } catch (error) {
+        console.error("Sale detail error:", error);
+
+        content.innerHTML = `
+            <div class="empty-detail">
+                <strong>Unable to load full sale details.</strong>
+                <p>${escapeHTML(error.message)}</p>
+            </div>
+        `;
+    }
+}
+
+// =========================================
+// RENDER SALE DETAILS
+// =========================================
+
+function renderSaleDetails(sale, clickedPayment) {
+    const content = document.getElementById("detailContent");
+
+    const saleNumber =
+        sale.saleNumber || getSaleNumber(clickedPayment);
+
+    const totalAmount = Number(
+        sale.totalAmount ?? sale.total ?? sale.grandTotal ?? 0
+    );
+
+    const payments = getSalePayments(sale);
+
+    // If the sale API includes the complete payment history,
+    // use it to calculate the amount received.
+    const hasFullPaymentHistory = payments.length > 0;
+
+    const paymentRecords = hasFullPaymentHistory
+        ? payments
+        : [clickedPayment];
+
+    const calculatedPaid = paymentRecords.reduce((sum, item) => {
+        if (!isSuccessfulPayment(item)) return sum;
+        return sum + (Number(item.amount) || 0);
+    }, 0);
+
+    const paidAmount = hasFullPaymentHistory
+        ? calculatedPaid
+        : Number(clickedPayment.totalPaid ?? calculatedPaid);
+
+    const balance = hasFullPaymentHistory
+        ? Math.max(0, totalAmount - paidAmount)
+        : Number(
+            clickedPayment.balance ??
+            Math.max(0, totalAmount - paidAmount)
+        );
+
+    // Prefer the backend's actual sale status.
+    let saleStatus =
+        sale.saleStatus ||
+        sale.status ||
+        clickedPayment.saleStatus;
+
+    // If payment history is complete, calculate the status
+    // from the actual successful payments.
+    if (hasFullPaymentHistory) {
+        if (totalAmount > 0 && paidAmount >= totalAmount) {
+            saleStatus = "PAID";
+        } else if (paidAmount > 0) {
+            saleStatus = "PARTIALLY_PAID";
+        } else {
+            saleStatus = "UNPAID";
+        }
+    } else if (
+        clickedPayment.saleStatus ||
+        clickedPayment.totalPaid !== undefined
+    ) {
+        saleStatus = determineSaleStatus(clickedPayment);
+    }
+
+    saleStatus = saleStatus || "UNKNOWN";
+
+    const customer =
+        sale.Customer?.name ||
+        sale.customer?.name ||
+        sale.customerName ||
+        sale.Customer?.customerName ||
+        "-";
+
+    const branch =
+        sale.Branch?.name ||
+        sale.branch?.name ||
+        sale.branchName ||
+        "-";
+
+    const paymentHistoryHTML = paymentRecords.map((item, index) => {
+        const method = getPaymentMethod(item);
+        const paymentStatus = item.status || "UNKNOWN";
+
+        const reference =
+            item.paymentReference ||
+            item.reference ||
+            item.transactionReference ||
+            "-";
+
+        return `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${escapeHTML(method)}</td>
+                <td><strong>${formatMoney(item.amount)}</strong></td>
+                <td>
+                    <span class="pos-status ${getStatusClass(paymentStatus)}">
+                        ${escapeHTML(paymentStatus)}
+                    </span>
+                </td>
+                <td>${escapeHTML(formatDate(item.createdAt))}</td>
+                <td>${escapeHTML(reference)}</td>
+            </tr>
+        `;
+    }).join("");
+
+    content.innerHTML = `
+        <div class="detail-grid">
+            <div class="detail-box">
+                <div class="detail-label">Sale Number</div>
+                <div class="detail-value">${escapeHTML(saleNumber)}</div>
+            </div>
+
+            <div class="detail-box">
+                <div class="detail-label">Sale Status</div>
+                <div class="detail-value">
+                    <span class="pos-status ${getStatusClass(saleStatus)}">
+                        ${escapeHTML(saleStatus.replace(/_/g, " "))}
+                    </span>
+                </div>
+            </div>
+
+            <div class="detail-box">
+                <div class="detail-label">Total Sale Amount</div>
+                <div class="detail-value">${formatMoney(totalAmount)}</div>
+            </div>
+
+            <div class="detail-box">
+                <div class="detail-label">Amount Paid</div>
+                <div class="detail-value paid-value">
+                    ${formatMoney(paidAmount)}
+                </div>
+            </div>
+
+            <div class="detail-box">
+                <div class="detail-label">Outstanding Balance</div>
+                <div class="detail-value balance-value">
+                    ${Number.isFinite(balance)
+                        ? formatMoney(balance)
+                        : "Unavailable"}
+                </div>
+            </div>
+
+            <div class="detail-box">
+                <div class="detail-label">Customer</div>
+                <div class="detail-value">${escapeHTML(customer)}</div>
+            </div>
+
+            <div class="detail-box">
+                <div class="detail-label">Branch</div>
+                <div class="detail-value">${escapeHTML(branch)}</div>
+            </div>
+        </div>
+
+        <h3 class="detail-heading">Payment History</h3>
+
+        <div class="pos-table-wrapper">
+            <table class="pos-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Method</th>
+                        <th>Amount</th>
+                        <th>Payment Status</th>
+                        <th>Date</th>
+                        <th>Reference</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    ${paymentHistoryHTML || `
+                        <tr>
+                            <td colspan="6" class="pos-empty">
+                                No payment records are available.
+                            </td>
+                        </tr>
+                    `}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="detail-message">
+            ${hasFullPaymentHistory
+                ? `Outstanding balance: ${formatMoney(balance)}.`
+                : "The full payment history was not returned by the API. Amount paid and balance use the available payment summary where provided."}
+        </div>
+    `;
+}
+
+// =========================================
+// CLOSE DETAILS AND DATE FILTER
+// =========================================
+
+function closeSaleDetails() {
+    document.getElementById("detailPanel").style.display = "none";
+}
+
+function clearDateFilter() {
+    document.getElementById("transactionDate").value = getTodayDate();
+    filterTransactions();
+}
+
+// =========================================
+// INITIALIZE
+// =========================================
+
+document.getElementById("transactionSearch")
+    .addEventListener("input", filterTransactions);
+
+document.getElementById("transactionDate").value = getTodayDate();
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!getToken()) {
+        redirectToLogin();
+        return;
+    }
+
+    loadTransactions();
+});
+</script>
+</body>
+</html>
