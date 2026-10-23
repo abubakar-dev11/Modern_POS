@@ -1,15 +1,17 @@
+@'
 {
   "version": 2,
   "builds": [
     {
-      "src": "vercel.js",
+      "src": "app.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "vercel.js"
+      "dest": "app.js"
     }
   ]
 }
+'@ | Set-Content -Path .\vercel.json -Encoding utf8
