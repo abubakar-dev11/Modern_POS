@@ -163,8 +163,6 @@ body{background:white!important}
 
                         <div class="action-buttons">
                             <button type="button" class="action-button" id="emailButton">Email</button>
-                            <button type="button" class="action-button" id="smsButton">SMS</button>
-                            <button type="button" class="action-button" id="whatsappButton">WhatsApp</button>
                             <button type="button" class="action-button" id="downloadButton">Save / Download</button>
                         </div>
                     </div>
@@ -907,13 +905,6 @@ $("sendEmailButton").addEventListener("click", () => {
     sendReceipt("EMAIL");
 });
 
-$("smsButton").addEventListener("click", () => {
-    sendReceipt("SMS");
-});
-
-$("whatsappButton").addEventListener("click", () => {
-    sendReceipt("WHATSAPP");
-});
 
 /* ==================================================
    AUTO-LOAD SALE FROM RECEIPT QUEUE

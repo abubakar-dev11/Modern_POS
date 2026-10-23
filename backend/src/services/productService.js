@@ -1,4 +1,4 @@
-const Product = require("../models/Product");
+const Product = require("../models/product");
 const Category = require("../models/Category");
 const InventoryMovement = require("../models/InventoryMovement");
 const sequelize = require("../config/database");

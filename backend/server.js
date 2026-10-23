@@ -1,4 +1,11 @@
-require("dotenv").config();
+const dotenv = require("dotenv");
+// Local testing: load Neon connection settings first.
+if (process.env.NODE_ENV !== "production") {
+    dotenv.config({ path: ".env.neon-test" });
+}
+// Load other settings from .env without overwriting Neon settings.
+dotenv.config();
+
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
@@ -63,6 +70,7 @@ async function startServer() {
 
 await sequelize.authenticate();
 console.log("Database connected successfully!");
+console.log("Database dialect:", sequelize.getDialect());
 
 const queryInterface = sequelize.getQueryInterface();
 const DataTypes = require("sequelize").DataTypes;
@@ -165,3 +173,4 @@ console.log("Database tables synchronized successfully!");
 
 
 startServer();
+module.exports = app;

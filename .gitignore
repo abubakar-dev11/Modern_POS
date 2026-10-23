@@ -36,3 +36,7 @@ backend/resetSales.js
 
 # Product uploads are kept locally for now
 backend/uploads/
+
+# Local Neon CLI configuration
+.neon
+.vercel
