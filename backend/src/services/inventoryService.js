@@ -1,5 +1,5 @@
 const InventoryMovement = require("../models/InventoryMovement");
-const Product = require("../models/Product");
+const Product = require("../models/product");
 
 // ADD STOCK
 const addStock = async (productId, quantity, referenceType, referenceId, note) => {

@@ -2,7 +2,7 @@ const express = require("express");
 const { Op } = require("sequelize");
 
 const Category = require("../src/models/Category");
-const Product = require("../src/models/Product");
+const Product = require("../src/models/product");
 
 const {
     authorizeRoles
