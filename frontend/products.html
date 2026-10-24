@@ -273,10 +273,10 @@
         "use strict";
 
         const PRODUCTS_API =
-            "http://127.0.0.1:3000/api/products";
+            `${(window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:3000/api" : "https://modern-pos-tau.vercel.app/api"}/products`;
 
         const CATEGORIES_API =
-            "http://127.0.0.1:3000/api/categories";
+            `${(window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:3000/api" : "https://modern-pos-tau.vercel.app/api"}/categories`;
 
         let allProducts = [];
 

@@ -482,7 +482,7 @@
                 window.location.href = "login.html";
             return;}
             const response = await fetch(
-                "http://127.0.0.1:3000/api/sales/cashier-queue",
+                ((window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:3000/api" : "https://modern-pos-tau.vercel.app/api") + "/sales/cashier-queue",
     {
         headers: {"Authorization": `Bearer ${token}`
         }

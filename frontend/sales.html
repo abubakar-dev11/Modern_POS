@@ -1009,7 +1009,7 @@
     let selectedCustomer = null;
     let customerSearchRequest = 0;
 
-    const API_BASE = "http://127.0.0.1:3000/api";
+    const API_BASE = ((window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:3000/api" : "https://modern-pos-tau.vercel.app/api");
     function getAuthHeaders() {
         const token = localStorage.getItem("posToken");
         if (!token) {
@@ -1387,7 +1387,7 @@ async function createNewCustomer() {
 
                 const imageURL = /^https?:\/\//i.test(imagePath)
                     ? imagePath
-                    : `http://127.0.0.1:3000${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
+                    : `${API_BASE.replace(/\/api$/, "")}${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
 
                 imageHTML = `
                     <img
