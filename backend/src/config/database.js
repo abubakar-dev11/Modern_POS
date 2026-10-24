@@ -1,8 +1,14 @@
 const { Sequelize } = require("sequelize");
 let sequelize;
 
-if (process.env.DATABASE_URL) {
-    // Production: Neon PostgreSQL
+if (process.env.VERCEL) {
+    // Vercel production must use Neon PostgreSQL.
+    if (!process.env.DATABASE_URL) {
+        throw new Error(
+            "DATABASE_URL is missing from the Vercel runtime environment."
+        );
+    }
+
     sequelize = new Sequelize(process.env.DATABASE_URL, {
         dialect: "postgres",
         logging: false,
@@ -20,7 +26,7 @@ if (process.env.DATABASE_URL) {
         }
     });
 } else {
-    // Local development: existing SQLite database
+    // Local development uses SQLite.
     sequelize = new Sequelize({
         dialect: "sqlite",
         storage: "./database.sqlite",
