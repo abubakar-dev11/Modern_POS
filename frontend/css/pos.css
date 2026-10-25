@@ -711,3 +711,122 @@ body {
 .pos-logout-button:hover {
     background: #fee2e2;
 }
+
+/* =========================================
+   MOBILE NAVIGATION MENU
+   ========================================= */
+
+.pos-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.pos-mobile-menu-button {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    color: var(--text);
+    font-size: 23px;
+    cursor: pointer;
+}
+
+.pos-mobile-overlay {
+    display: none;
+}
+
+@media (max-width: 500px) {
+    .pos-mobile-menu-button {
+        display: flex;
+    }
+
+    .pos-sidebar {
+        width: var(--sidebar-width);
+        max-width: 85vw;
+        left: 0;
+        top: 0;
+        height: 100dvh;
+        overflow-y: auto;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        visibility: hidden;
+        z-index: 1200;
+    }
+
+    body.pos-menu-open .pos-sidebar {
+        width: var(--sidebar-width);
+        transform: translateX(0);
+        visibility: visible;
+    }
+
+    .pos-brand-title {
+        font-size: 21px;
+    }
+
+    .pos-brand-title::after {
+        content: none;
+    }
+
+    .pos-brand-subtitle {
+        display: block;
+    }
+
+    .pos-nav-section {
+        display: block;
+    }
+
+    .pos-nav-link {
+        justify-content: flex-start;
+    }
+
+    .pos-nav-link span:not(.pos-nav-icon) {
+        display: inline;
+    }
+
+    .pos-nav-icon {
+        flex-shrink: 0;
+    }
+
+    .pos-mobile-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1100;
+        background: rgba(15, 23, 42, 0.55);
+    }
+
+    body.pos-menu-open .pos-mobile-overlay {
+        display: block;
+    }
+
+    body.pos-menu-open {
+        overflow: hidden;
+    }
+
+    .pos-topbar {
+        gap: 8px;
+        padding: 0 10px;
+    }
+
+    .pos-topbar-title {
+        font-size: 15px;
+    }
+
+    .pos-topbar-right {
+        gap: 6px;
+    }
+
+    .pos-user {
+        gap: 5px;
+    }
+
+    .pos-user-details {
+        display: none;
+    }
+}

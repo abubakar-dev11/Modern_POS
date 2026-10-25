@@ -1,0 +1,911 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b1728">
+    <meta name="description" content="Modern POS helps businesses manage sales, inventory, payments and multiple stores from one place.">
+    <title>Modern POS | Run Your Business Smarter</title>
+
+    <style>
+        :root {
+            --navy: #0b1728;
+            --navy-light: #14243a;
+            --green: #16a34a;
+            --green-light: #dcfce7;
+            --text: #172033;
+            --muted: #64748b;
+            --surface: #ffffff;
+            --background: #f7f9fc;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--text);
+            background: var(--surface);
+            line-height: 1.6;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .container {
+            width: min(1120px, calc(100% - 40px));
+            margin: auto;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255,255,255,.96);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-inner {
+            min-height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -.5px;
+        }
+
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            background: var(--green);
+            color: white;
+            border-radius: 12px;
+            font-size: 22px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .nav-links a:hover { color: var(--green); }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 19px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+
+        .btn-primary {
+            background: var(--green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #15803d;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: white;
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover { background: var(--background); }
+
+        .menu-toggle {
+            display: none;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        /* HERO */
+        .hero {
+            overflow: hidden;
+            background:
+                radial-gradient(ellipse at 85% 20%, #1d4b3b 0, transparent 35%),
+                var(--navy);
+            color: white;
+            padding: 88px 0 94px;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.05fr .95fr;
+            align-items: center;
+            gap: 60px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            background: rgba(22,163,74,.15);
+            color: #86efac;
+            border: 1px solid rgba(134,239,172,.2);
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            margin: 24px 0 20px;
+            max-width: 650px;
+            font-size: clamp(38px, 5vw, 61px);
+            line-height: 1.1;
+            letter-spacing: -2px;
+        }
+
+        .hero h1 span { color: #4ade80; }
+
+        .hero-copy {
+            max-width: 540px;
+            color: #cbd5e1;
+            font-size: 17px;
+            line-height: 1.8;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 13px;
+            margin-top: 30px;
+        }
+
+        .hero .btn-outline {
+            color: white;
+            background: transparent;
+            border-color: #475569;
+        }
+
+        .hero .btn-outline:hover { background: #1e293b; }
+
+        .hero-note {
+            margin-top: 22px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        /* DASHBOARD PREVIEW */
+        .preview {
+            padding: 20px;
+            border: 1px solid #334155;
+            border-radius: 18px;
+            background: #ffffff;
+            color: var(--text);
+            box-shadow: 0 30px 80px rgba(0,0,0,.3);
+            transform: rotate(1deg);
+        }
+
+        .preview-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .preview-title { font-weight: 800; }
+
+        .live-tag {
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: var(--green-light);
+            color: #166534;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .preview-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap: 12px;
+        }
+
+        .preview-stat {
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+        }
+
+        .preview-label {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .preview-value {
+            margin-top: 5px;
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        .preview-positive {
+            margin-top: 4px;
+            color: #15803d;
+            font-size: 10px;
+        }
+
+        .preview-chart {
+            margin-top: 15px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+        }
+
+        .chart-title {
+            margin-bottom: 12px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .bars {
+            height: 90px;
+            display: flex;
+            align-items: end;
+            gap: 9px;
+            padding: 0 5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .bar {
+            flex: 1;
+            min-width: 8px;
+            border-radius: 5px 5px 0 0;
+            background: #86efac;
+        }
+
+        .bar:nth-child(2n) { background: var(--green); }
+
+        /* TRUST STRIP */
+        .trust-strip {
+            padding: 24px 0;
+            background: var(--background);
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .trust-strip p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* GENERAL SECTIONS */
+        .section { padding: 85px 0; }
+
+        .section-heading {
+            max-width: 680px;
+            margin: 0 auto 42px;
+            text-align: center;
+        }
+
+        .section-label {
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+        }
+
+        .section-heading h2 {
+            margin: 12px 0;
+            font-size: clamp(28px, 4vw, 40px);
+            line-height: 1.2;
+            letter-spacing: -1px;
+        }
+
+        .section-heading p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0,1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            padding: 26px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: white;
+            transition: .2s ease;
+        }
+
+        .feature-card:hover {
+            border-color: #86efac;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px #0f172a0b;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            background: var(--green-light);
+            border-radius: 12px;
+            font-size: 23px;
+        }
+
+        .feature-card h3 {
+            margin: 19px 0 9px;
+            font-size: 18px;
+        }
+
+        .feature-card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* BENEFITS */
+        .benefits {
+            background: var(--background);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 65px;
+        }
+
+        .benefits h2 {
+            margin: 12px 0 18px;
+            font-size: clamp(30px, 4vw, 43px);
+            line-height: 1.2;
+            letter-spacing: -1px;
+        }
+
+        .benefits-copy {
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .benefit-list {
+            display: grid;
+            gap: 16px;
+            margin: 25px 0 30px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .benefit-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .check {
+            display: grid;
+            place-items: center;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: var(--green-light);
+            color: #15803d;
+            font-weight: 800;
+        }
+
+        .benefit-panel {
+            padding: 30px;
+            border-radius: 18px;
+            background: var(--navy);
+            color: white;
+        }
+
+        .benefit-panel h3 {
+            margin: 0 0 20px;
+            font-size: 23px;
+        }
+
+        .benefit-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 17px 0;
+            border-bottom: 1px solid #ffffff1c;
+        }
+
+        .benefit-row:last-child { border-bottom: 0; }
+
+        .benefit-row-icon { font-size: 22px; }
+
+        .benefit-row strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .benefit-row p {
+            margin: 0;
+            color: #cbd5e1;
+            font-size: 13px;
+        }
+
+        /* CTA */
+        .cta-section { padding: 75px 0; }
+
+        .cta {
+            padding: 55px 30px;
+            border-radius: 20px;
+            background: var(--green);
+            color: white;
+            text-align: center;
+        }
+
+        .cta h2 {
+            margin: 0 0 12px;
+            font-size: clamp(28px, 4vw, 40px);
+            line-height: 1.2;
+        }
+
+        .cta p {
+            max-width: 600px;
+            margin: 0 auto 25px;
+            color: #f0fdf4;
+            font-size: 15px;
+        }
+
+        .cta .btn {
+            background: white;
+            color: #166534;
+        }
+
+        /* FOOTER */
+        .footer {
+            padding: 35px 0;
+            background: var(--navy);
+            color: #cbd5e1;
+        }
+
+        .footer-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        .footer .brand { color: white; font-size: 17px; }
+
+        .footer .brand-mark {
+            width: 34px;
+            height: 34px;
+            font-size: 18px;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 12px;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            font-size: 12px;
+        }
+
+        .footer-links a:hover { color: #4ade80; }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .nav-links { gap: 16px; }
+            .hero-grid { gap: 35px; }
+            .features-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+            .benefits-grid { gap: 35px; }
+        }
+
+        @media (max-width: 700px) {
+            .nav-inner {
+                min-height: 68px;
+                flex-wrap: wrap;
+                padding: 12px 0;
+            }
+
+            .menu-toggle { display: block; }
+
+            .nav-links {
+                display: none;
+                order: 3;
+                width: 100%;
+                padding: 15px 0;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+            }
+
+            .nav-links.open { display: flex; }
+
+            .nav-links a { padding: 10px 4px; }
+
+            .nav-actions { margin-left: auto; }
+
+            .nav-actions .btn {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            .hero { padding: 62px 0; }
+
+            .hero-grid,
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-grid { gap: 45px; }
+
+            .hero h1 { letter-spacing: -1.2px; }
+
+            .preview { transform: none; }
+
+            .section { padding: 65px 0; }
+
+            .features-grid { grid-template-columns: 1fr; }
+
+            .benefit-panel { padding: 24px; }
+
+            .cta-section { padding: 50px 0; }
+
+            .cta { padding: 40px 22px; }
+
+            .footer-inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 390px) {
+            .container { width: calc(100% - 28px); }
+            .brand { font-size: 17px; }
+            .brand-mark { width: 36px; height: 36px; }
+            .nav-actions { gap: 6px; }
+            .nav-actions .btn { padding: 9px; }
+            .preview { padding: 13px; }
+            .preview-value { font-size: 20px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="container nav-inner">
+            <a class="brand" href="index.html" aria-label="Modern POS home">
+                <span class="brand-mark">M</span>
+                <span>Modern POS</span>
+            </a>
+
+            <button
+                class="menu-toggle"
+                id="menuToggle"
+                type="button"
+                aria-label="Toggle navigation"
+                aria-expanded="false"
+                aria-controls="navLinks"
+            >☰</button>
+
+            <nav class="nav-links" id="navLinks" aria-label="Main navigation">
+                <a href="#home">Home</a>
+                <a href="#features">Features</a>
+                <a href="#benefits">Why Modern POS</a>
+                <a href="#contact">Contact</a>
+            </nav>
+
+            <div class="nav-actions">
+                <a class="btn btn-outline" href="login.html">Sign In</a>
+                <a class="btn btn-primary" href="register-business.html">Get Started</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" id="home">
+            <div class="container hero-grid">
+                <div>
+                    <div class="eyebrow">
+                        <span>●</span> Point of Sale Management
+                    </div>
+
+                    <h1>Run your business <span>smarter.</span></h1>
+
+                    <p class="hero-copy">
+                        Manage sales, track inventory, record payments and
+                        understand your business from one organized platform.
+                        Spend less time on manual work and more time serving
+                        your customers.
+                    </p>
+
+                    <div class="hero-actions">
+                        <a class="btn btn-primary" href="register-business.html">
+                            Get Started <span aria-hidden="true">→</span>
+                        </a>
+                        <a class="btn btn-outline" href="login.html">
+                            Sign In to POS
+                        </a>
+                    </div>
+
+                    <p class="hero-note">
+                        A clearer way to manage everyday business operations.
+                    </p>
+                </div>
+
+                <div class="preview" aria-label="Illustrative POS dashboard preview">
+                    <div class="preview-top">
+                        <div class="preview-title">Business Overview</div>
+                        <span class="live-tag">DASHBOARD PREVIEW</span>
+                    </div>
+
+                    <div class="preview-stats">
+                        <div class="preview-stat">
+                            <div class="preview-label">Sales Overview</div>
+                            <div class="preview-value">₦248k</div>
+                            <div class="preview-positive">Illustrative figure</div>
+                        </div>
+
+                        <div class="preview-stat">
+                            <div class="preview-label">Inventory</div>
+                            <div class="preview-value">1,240</div>
+                            <div class="preview-positive">Sample stock count</div>
+                        </div>
+
+                        <div class="preview-stat">
+                            <div class="preview-label">Payments</div>
+                            <div class="preview-value">₦186k</div>
+                            <div class="preview-positive">Illustrative figure</div>
+                        </div>
+
+                        <div class="preview-stat">
+                            <div class="preview-label">Products</div>
+                            <div class="preview-value">320</div>
+                            <div class="preview-positive">Sample product count</div>
+                        </div>
+                    </div>
+
+                    <div class="preview-chart">
+                        <div class="chart-title">Weekly Activity · Illustration</div>
+                        <div class="bars" aria-hidden="true">
+                            <span class="bar" style="height:35%"></span>
+                            <span class="bar" style="height:58%"></span>
+                            <span class="bar" style="height:43%"></span>
+                            <span class="bar" style="height:78%"></span>
+                            <span class="bar" style="height:54%"></span>
+                            <span class="bar" style="height:90%"></span>
+                            <span class="bar" style="height:68%"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="trust-strip">
+            <div class="container">
+                <p>ONE PLACE TO ORGANIZE YOUR EVERYDAY BUSINESS OPERATIONS</p>
+            </div>
+        </section>
+
+        <section class="section" id="features">
+            <div class="container">
+                <div class="section-heading">
+                    <span class="section-label">Features</span>
+                    <h2>The tools your business needs</h2>
+                    <p>
+                        Keep important daily tasks together with a clear,
+                        organized workflow.
+                    </p>
+                </div>
+
+                <div class="features-grid">
+                    <article class="feature-card">
+                        <div class="feature-icon">🛒</div>
+                        <h3>Sales Management</h3>
+                        <p>Record sales and keep transaction details organized for your business.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon">📦</div>
+                        <h3>Inventory Control</h3>
+                        <p>Organize products, monitor stock and make inventory easier to manage.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon">💳</div>
+                        <h3>Payment Tracking</h3>
+                        <p>Keep payment records together and follow the status of transactions.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Business Reports</h3>
+                        <p>Review recorded business activity with reports designed for everyday use.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon">🏪</div>
+                        <h3>Multi-Store Management</h3>
+                        <p>Use separate business accounts to keep each business's information organized.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon">👥</div>
+                        <h3>Staff & Permissions</h3>
+                        <p>Manage staff accounts and control which POS pages each user can access.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section benefits" id="benefits">
+            <div class="container benefits-grid">
+                <div>
+                    <span class="section-label">Why Modern POS</span>
+                    <h2>Less confusion. More control.</h2>
+
+                    <p class="benefits-copy">
+                        Daily business work can involve many products,
+                        transactions and people. Modern POS brings supported
+                        tasks into one place to help you work in a more
+                        organized way.
+                    </p>
+
+                    <ul class="benefit-list">
+                        <li>
+                            <span class="check">✓</span>
+                            <span>Keep product and transaction records organized.</span>
+                        </li>
+                        <li>
+                            <span class="check">✓</span>
+                            <span>Give staff access based on their assigned permissions.</span>
+                        </li>
+                        <li>
+                            <span class="check">✓</span>
+                            <span>Access your POS from a modern web browser.</span>
+                        </li>
+                        <li>
+                            <span class="check">✓</span>
+                            <span>Keep business records separated by business account.</span>
+                        </li>
+                    </ul>
+
+                    <a class="btn btn-primary" href="register-business.html">
+                        Get Started <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+
+                <div class="benefit-panel">
+                    <h3>Built around daily operations</h3>
+
+                    <div class="benefit-row">
+                        <span class="benefit-row-icon">🧾</span>
+                        <div>
+                            <strong>Clear transaction records</strong>
+                            <p>Keep sales and receipt workflows organized.</p>
+                        </div>
+                    </div>
+
+                    <div class="benefit-row">
+                        <span class="benefit-row-icon">📦</span>
+                        <div>
+                            <strong>Product visibility</strong>
+                            <p>Manage your catalog and inventory records.</p>
+                        </div>
+                    </div>
+
+                    <div class="benefit-row">
+                        <span class="benefit-row-icon">🔐</span>
+                        <div>
+                            <strong>Account-based access</strong>
+                            <p>Keep staff access connected to their assigned accounts and roles.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section" id="contact">
+            <div class="container">
+                <div class="cta">
+                    <h2>Bring your business operations together.</h2>
+                    <p>
+                        Get started with Modern POS and organize your daily
+                        sales, inventory and transaction workflows.
+                    </p>
+                    <a class="btn" href="register-business.html">Get Started Today →</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-inner">
+            <a class="brand" href="index.html">
+                <span class="brand-mark">M</span>
+                <span>Modern POS</span>
+            </a>
+
+            <p>© <span id="year"></span> Modern POS. All rights reserved.</p>
+
+            <div class="footer-links">
+                <a href="#home">Home</a>
+                <a href="#features">Features</a>
+                <a href="login.html">Sign In</a>
+                <a href="register-business.html">Register Business</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const menuToggle = document.getElementById("menuToggle");
+        const navLinks = document.getElementById("navLinks");
+
+        menuToggle.addEventListener("click", function () {
+            const isOpen = navLinks.classList.toggle("open");
+            menuToggle.setAttribute("aria-expanded", String(isOpen));
+            menuToggle.textContent = isOpen ? "✕" : "☰";
+        });
+
+        navLinks.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("click", function () {
+                navLinks.classList.remove("open");
+                menuToggle.setAttribute("aria-expanded", "false");
+                menuToggle.textContent = "☰";
+            });
+        });
+
+        document.getElementById("year").textContent =
+            new Date().getFullYear();
+    </script>
+</body>
+</html>

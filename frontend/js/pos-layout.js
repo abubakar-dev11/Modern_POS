@@ -227,6 +227,7 @@ function renderSidebar() {
 // =========================================
 // TOPBAR
 // =========================================
+
 function renderTopbar(title = "Modern POS") {
     const topbar = document.getElementById("posTopbar");
     if (!topbar) return;
@@ -253,9 +254,22 @@ function renderTopbar(title = "Modern POS") {
 
     topbar.replaceChildren();
 
+    const left = document.createElement("div");
+    left.className = "pos-topbar-left";
+
+    const menuButton = document.createElement("button");
+    menuButton.type = "button";
+    menuButton.className = "pos-mobile-menu-button";
+    menuButton.textContent = "☰";
+    menuButton.setAttribute("aria-label", "Open navigation menu");
+    menuButton.setAttribute("aria-expanded", "false");
+    menuButton.setAttribute("aria-controls", "posSidebar");
+
     const titleElement = document.createElement("div");
     titleElement.className = "pos-topbar-title";
     titleElement.textContent = title;
+
+    left.append(menuButton, titleElement);
 
     const rightElement = document.createElement("div");
     rightElement.className = "pos-topbar-right";
@@ -268,17 +282,65 @@ function renderTopbar(title = "Modern POS") {
     avatar.textContent = initial;
 
     const identity = document.createElement("div");
+    identity.className = "pos-user-details";
 
     const nameElement = document.createElement("div");
+    nameElement.className = "pos-user-name";
     nameElement.textContent = displayName;
 
     const roleElement = document.createElement("small");
+    roleElement.className = "pos-user-role";
     roleElement.textContent = displayRole;
 
     identity.append(nameElement, roleElement);
     userElement.append(avatar, identity);
     rightElement.appendChild(userElement);
-    topbar.append(titleElement, rightElement);
+
+    topbar.append(left, rightElement);
+
+    const sidebar = document.getElementById("posSidebar");
+    let overlay = document.getElementById("posMobileOverlay");
+
+    if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.id = "posMobileOverlay";
+        overlay.className = "pos-mobile-overlay";
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.appendChild(overlay);
+    }
+
+    function closeMenu() {
+        document.body.classList.remove("pos-menu-open");
+        menuButton.setAttribute("aria-expanded", "false");
+        menuButton.setAttribute("aria-label", "Open navigation menu");
+    }
+
+    function toggleMenu() {
+        const isOpen = document.body.classList.toggle("pos-menu-open");
+
+        menuButton.setAttribute("aria-expanded", String(isOpen));
+        menuButton.setAttribute(
+            "aria-label",
+            isOpen ? "Close navigation menu" : "Open navigation menu"
+        );
+    }
+
+    menuButton.addEventListener("click", toggleMenu);
+    overlay.addEventListener("click", closeMenu);
+
+    if (sidebar) {
+        sidebar.querySelectorAll(".pos-nav-link").forEach(link => {
+            link.addEventListener("click", closeMenu);
+        });
+    }
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") closeMenu();
+    });
+
+    window.addEventListener("resize", function () {
+        if (window.innerWidth > 500) closeMenu();
+    });
 }
 
 // =========================================
