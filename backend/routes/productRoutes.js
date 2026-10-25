@@ -33,15 +33,16 @@ router.post(
     authenticateToken,
     authorizeRoles("ADMIN", "MANAGER"),
     uploadProductImage.single("productImage"),
+    uploadProductImage.uploadToCloudinary,
     productController.createProduct
 );
 
-// UPDATE PRODUCT — ADMIN / MANAGER
 router.put(
     "/:id",
     authenticateToken,
     authorizeRoles("ADMIN", "MANAGER"),
     uploadProductImage.single("productImage"),
+    uploadProductImage.uploadToCloudinary,
     productController.updateProduct
 );
 

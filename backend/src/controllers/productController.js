@@ -1,6 +1,4 @@
-
 const productService = require("../services/productService");
-
 
 // ========================================
 // GET ALL PRODUCTS
@@ -20,7 +18,6 @@ const getAllProducts = async (req, res) => {
         });
     }
 };
-
 
 // ========================================
 // GET ONE PRODUCT
@@ -47,7 +44,6 @@ const getProductById = async (req, res) => {
         });
     }
 };
-
 
 // ========================================
 // CREATE PRODUCT
@@ -96,7 +92,7 @@ const createProduct = async (req, res) => {
         const productData = {
             ...req.body,
             imageUrl: req.file
-                ? `/uploads/products/${req.file.filename}`
+                ? req.file.cloudinaryUrl
                 : null
         };
 
@@ -132,7 +128,6 @@ const createProduct = async (req, res) => {
     }
 };
 
-
 // ========================================
 // UPDATE PRODUCT
 // ADMIN / MANAGER — ROLE CHECK IN ROUTE
@@ -143,9 +138,10 @@ const updateProduct = async (req, res) => {
             ...req.body
         };
 
+        // Only replace the image URL when a new image is uploaded.
+        // Otherwise, preserve the existing image.
         if (req.file) {
-            productData.imageUrl =
-                `/uploads/products/${req.file.filename}`;
+            productData.imageUrl = req.file.cloudinaryUrl;
         }
 
         const product = await productService.updateProduct(
@@ -182,7 +178,6 @@ const updateProduct = async (req, res) => {
     }
 };
 
-
 // ========================================
 // DELETE PRODUCT
 // ADMIN ONLY — ROLE CHECK IN ROUTE
@@ -209,7 +204,6 @@ const deleteProduct = async (req, res) => {
         });
     }
 };
-
 
 module.exports = {
     getAllProducts,
