@@ -329,10 +329,14 @@ function renderTopbar(title = "Modern POS") {
     overlay.addEventListener("click", closeMenu);
 
     if (sidebar) {
-        sidebar.querySelectorAll(".pos-nav-link").forEach(link => {
-            link.addEventListener("click", closeMenu);
-        });
-    }
+    sidebar.addEventListener("click", function (event) {
+        const link = event.target.closest(".pos-nav-link");
+
+        if (!link || !sidebar.contains(link)) return;
+
+        closeMenu();
+    });
+}
 
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") closeMenu();
@@ -342,20 +346,34 @@ function renderTopbar(title = "Modern POS") {
         if (window.innerWidth > 500) closeMenu();
     });
 }
-
 // =========================================
 // INITIALIZE LAYOUT
 // =========================================
+let posLayoutInitialized = false;
+
 function initPOSLayout(title = "Modern POS") {
-    if (!checkPageAccess()) return false;
+    if (!checkPageAccess()) {
+        return false;
+    }
+
+    // Prevent duplicate layout initialization on the same page.
+    if (posLayoutInitialized) {
+        return true;
+    }
+
+    posLayoutInitialized = true;
 
     renderSidebar();
     renderTopbar(title);
+
     return true;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
     const heading = document.querySelector("h1");
-    const pageTitle = heading ? heading.textContent.trim() : "Modern POS";
+    const pageTitle = heading
+        ? heading.textContent.trim()
+        : "Modern POS";
+
     initPOSLayout(pageTitle);
 });

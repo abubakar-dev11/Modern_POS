@@ -716,6 +716,10 @@ body {
    MOBILE NAVIGATION MENU
    ========================================= */
 
+/* =========================================
+   MOBILE NAVIGATION MENU
+   ========================================= */
+
 .pos-topbar-left {
     display: flex;
     align-items: center;
@@ -736,6 +740,7 @@ body {
     color: var(--text);
     font-size: 23px;
     cursor: pointer;
+    touch-action: manipulation;
 }
 
 .pos-mobile-overlay {
@@ -743,8 +748,19 @@ body {
 }
 
 @media (max-width: 500px) {
+    .pos-topbar {
+        position: relative;
+        z-index: 1300;
+        gap: 8px;
+        padding: 0 10px;
+    }
+
     .pos-mobile-menu-button {
         display: flex;
+        position: relative;
+        z-index: 1301;
+        pointer-events: auto;
+        cursor: pointer;
     }
 
     .pos-sidebar {
@@ -752,6 +768,7 @@ body {
         max-width: 85vw;
         left: 0;
         top: 0;
+        height: 100vh;
         height: 100dvh;
         overflow-y: auto;
         transform: translateX(-100%);
@@ -809,9 +826,8 @@ body {
         overflow: hidden;
     }
 
-    .pos-topbar {
-        gap: 8px;
-        padding: 0 10px;
+    body.pos-menu-open .pos-topbar {
+        z-index: 1000;
     }
 
     .pos-topbar-title {
@@ -828,5 +844,30 @@ body {
 
     .pos-user-details {
         display: none;
+    }
+}
+/* Mobile navigation fix */
+@media (max-width: 500px) {
+    #posSidebar {
+        position: fixed;
+        z-index: 1402;
+        overflow-y: auto !important;
+        pointer-events: auto;
+    }
+
+    #posMobileOverlay {
+        z-index: 1400;
+    }
+
+    #posTopbar {
+        position: relative;
+        z-index: 1300;
+    }
+
+    #posSidebar .pos-nav-link {
+        position: relative;
+        z-index: 1403;
+        pointer-events: auto;
+        cursor: pointer;
     }
 }
