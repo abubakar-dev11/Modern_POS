@@ -871,3 +871,54 @@ body {
         cursor: pointer;
     }
 }
+/* TOPBAR USER + SIGN OUT */
+.pos-topbar-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    min-width: 0;
+}
+
+.pos-signout-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 10px 16px;
+    flex-shrink: 0;
+
+    background: #ffffff;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.pos-signout-btn:hover {
+    background: #fef2f2;
+    border-color: #f87171;
+}
+
+.pos-signout-btn:focus-visible {
+    outline: 3px solid #fca5a5;
+    outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+    .pos-topbar-right {
+        gap: 8px;
+    }
+
+    .pos-signout-btn {
+        min-height: 36px;
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+}

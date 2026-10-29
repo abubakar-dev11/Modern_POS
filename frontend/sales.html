@@ -61,7 +61,40 @@
             background: #10b981;
             border-radius: 50%;
         }
+        .sales-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
 
+.sales-signin-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 10px 18px;
+    background: #0b7a3b;
+    color: #ffffff;
+    border: 1px solid #0b7a3b;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.sales-signin-button:hover {
+    background: #096632;
+    border-color: #096632;
+}
+
+@media (max-width: 700px) {
+    .sales-header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
         /* =====================================================
            CARDS
         ===================================================== */
@@ -770,11 +803,14 @@
                         <h1>Sales</h1>
                         <p>Create a customer sale and send it to the cashier queue.</p>
                     </div>
+                    <div class="sales-header-actions">
+                        <div class="sales-status">
+                            <span class="sales-status-dot"></span>
+                            Salesperson Mode
+                        </div>
 
-                    <div class="sales-status">
-                        <span class="sales-status-dot"></span>
-                        Salesperson Mode
                     </div>
+
                 </div>
 
                 <!-- SALE INFORMATION -->
