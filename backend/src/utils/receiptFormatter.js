@@ -7,6 +7,8 @@ const formatReceipt = (receipt) => {
 
         date:
             receipt.date,
+        businessLogo:
+            receipt.businessLogo || null,
 
         business:
             receipt.business

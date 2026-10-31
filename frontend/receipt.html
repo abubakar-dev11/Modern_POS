@@ -162,6 +162,18 @@ body {
     background: linear-gradient(135deg,#f6fbf7 0%,#fff 72%);
     border-bottom: 1px solid var(--line);
 }
+.receipt-business-logo {
+    display: block;
+    width: auto;
+    max-width: 160px;
+    max-height: 95px;
+    object-fit: contain;
+    margin: 0 auto 14px;
+}
+
+.receipt-business-logo[hidden] {
+    display: none !important;
+}
 .receipt-logo {
     margin: 0;
     color: var(--ink);
@@ -676,8 +688,14 @@ body {
             <div id="message" class="message" role="alert" aria-live="polite"></div>
 
             <section id="receipt" class="receipt-card" aria-label="Customer receipt">
-
                 <header class="receipt-header">
+
+                    <img
+                        id="receiptBusinessLogo"
+                        class="receipt-business-logo"
+                        alt="Business Logo"
+                        hidden
+                    >
 
                     <h2 id="receiptBusinessName" class="receipt-logo">
                         MODERN POS
@@ -1287,6 +1305,20 @@ function renderReceipt(receipt, searchedSaleNumber) {
     );
 
     renderBusinessContact(receipt);
+    // DISPLAY BUSINESS LOGO
+    const logoElement = $("receiptBusinessLogo");
+    const logoUrl = receipt.businessLogo;
+
+    if (
+        typeof logoUrl === "string" &&
+        /^https:\/\/res\.cloudinary\.com\//i.test(logoUrl)
+    ) {
+        logoElement.src = logoUrl;
+        logoElement.hidden = false;
+    } else {
+        logoElement.removeAttribute("src");
+        logoElement.hidden = true;
+    }
 
     renderItems(receipt.items);
 
