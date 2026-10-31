@@ -79,7 +79,9 @@ const updateSettings = async (businessId, data) => {
         const threshold = Number(updateData.lowStockThreshold);
 
         if (!Number.isInteger(threshold) || threshold < 0) {
-            throw new Error("Low stock threshold must be a non-negative integer");
+            throw new Error(
+                "Low stock threshold must be a non-negative integer"
+            );
         }
 
         updateData.lowStockThreshold = threshold;
@@ -87,7 +89,9 @@ const updateSettings = async (businessId, data) => {
 
     if (updateData.enableLowStockAlerts !== undefined) {
         if (typeof updateData.enableLowStockAlerts !== "boolean") {
-            throw new Error("Enable low stock alerts must be true or false");
+            throw new Error(
+                "Enable low stock alerts must be true or false"
+            );
         }
     }
 
@@ -106,7 +110,8 @@ const updateSettings = async (businessId, data) => {
             }
 
             if (typeof updateData[field] === "string") {
-                updateData[field] = updateData[field].trim() || null;
+                updateData[field] =
+                    updateData[field].trim() || null;
             }
         }
     }
@@ -131,7 +136,97 @@ const updateSettings = async (businessId, data) => {
     return settings;
 };
 
+
+// SAVE BUSINESS LOGO
+const saveBusinessLogo = async (
+    businessId,
+    logoUrl,
+    publicId
+) => {
+    const business = await Business.findByPk(businessId);
+
+    if (!business) {
+        return null;
+    }
+
+    if (
+        typeof logoUrl !== "string" ||
+        !logoUrl.startsWith("https://res.cloudinary.com/")
+    ) {
+        throw new Error("Invalid business logo URL");
+    }
+
+    if (typeof publicId !== "string" || !publicId.trim()) {
+        throw new Error("Invalid Cloudinary public ID");
+    }
+
+    const [settings] = await POSSetting.findOrCreate({
+        where: { businessId },
+        defaults: {
+            businessId,
+            currency: "NGN",
+            decimalPlaces: 2,
+            receiptName: business.name,
+            receiptAddress: business.address,
+            receiptPhone: business.phone,
+            receiptFooter: "Thank you for your patronage",
+            lowStockThreshold: 5,
+            enableLowStockAlerts: true
+        }
+    });
+
+    const previousPublicId =
+        settings.businessLogoPublicId || null;
+
+    await settings.update({
+        businessLogo: logoUrl,
+        businessLogoPublicId: publicId
+    });
+
+    return {
+        settings,
+        previousPublicId
+    };
+};
+
+
+// REMOVE BUSINESS LOGO
+const removeBusinessLogo = async (businessId) => {
+    const business = await Business.findByPk(businessId);
+
+    if (!business) {
+        return null;
+    }
+
+    const settings = await POSSetting.findOne({
+        where: { businessId }
+    });
+
+    if (!settings) {
+        return {
+            publicId: null,
+            settings: null
+        };
+    }
+
+    const publicId =
+        settings.businessLogoPublicId || null;
+
+    await settings.update({
+        businessLogo: null,
+        businessLogoPublicId: null
+    });
+
+    return {
+        publicId,
+        settings
+    };
+};
+
+
 module.exports = {
     getSettings,
-    updateSettings
+    updateSettings,
+    saveBusinessLogo,
+    removeBusinessLogo
 };

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -277,6 +278,62 @@
             flex-shrink: 0;
         }
 
+        /* BUSINESS LOGO */
+
+        .business-logo-box {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 18px;
+            border: 1px solid #e8edf4;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        .business-logo-preview {
+            width: 120px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #cbd5e1;
+            border-radius: 9px;
+            background: #fff;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .business-logo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .business-logo-placeholder {
+            color: #94a3b8;
+            font-size: 12px;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .logo-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .logo-actions input {
+            max-width: 280px;
+        }
+
+        .logo-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         @media (max-width: 900px) {
             .settings-layout {
                 grid-template-columns: minmax(0, 1fr);
@@ -316,6 +373,14 @@
 
             .settings-nav {
                 grid-template-columns: minmax(0, 1fr);
+            }
+
+            .business-logo-box {
+                align-items: flex-start;
+            }
+
+            .logo-actions {
+                width: 100%;
             }
         }
     </style>
@@ -362,18 +427,21 @@
 
                     <form id="settingsForm">
 
+                        <!-- BUSINESS INFORMATION -->
                         <section class="settings-section active" id="section-business">
+
                             <div class="section-heading">
                                 <h2>Business Information</h2>
                                 <p>Enter the basic information for your business.</p>
                             </div>
+
                             <div class="setting-note">
                                 Your business information and POS preferences are loaded
                                 from the database. Changes are saved to your own business account.
                             </div>
 
-
                             <div class="form-grid">
+
                                 <div class="form-group full-width">
                                     <label for="businessName">Business Name</label>
                                     <input type="text" id="businessName"
@@ -401,24 +469,98 @@
                                               name="businessAddress"
                                               placeholder="Enter business address"></textarea>
                                 </div>
+
                             </div>
+
+                            <!-- BUSINESS LOGO -->
+                            <div class="form-group full-width" style="margin-top: 25px;">
+
+                                <label for="businessLogoFile">Business Logo</label>
+
+                                <div class="business-logo-box">
+
+                                    <div class="business-logo-preview">
+                                        <img
+                                            id="businessLogoPreview"
+                                            src=""
+                                            alt="Business logo"
+                                            hidden
+                                        >
+
+                                        <span
+                                            id="businessLogoPlaceholder"
+                                            class="business-logo-placeholder"
+                                        >
+                                            No logo uploaded
+                                        </span>
+                                    </div>
+
+                                    <div class="logo-actions">
+
+                                        <input
+                                            type="file"
+                                            id="businessLogoFile"
+                                            accept="image/jpeg,image/png,image/webp"
+                                        >
+
+                                        <div class="logo-buttons">
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-primary"
+                                                id="uploadLogoButton"
+                                            >
+                                                Upload Logo
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                class="btn"
+                                                id="removeLogoButton"
+                                            >
+                                                Remove Logo
+                                            </button>
+
+                                        </div>
+
+                                        <span class="form-help">
+                                            JPG, PNG or WEBP. Maximum file size: 2 MB.
+                                        </span>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div
+                                class="settings-message"
+                                id="logoMessage"
+                                role="status"
+                                aria-live="polite"
+                            ></div>
+
                         </section>
 
+                        <!-- CURRENCY -->
                         <section class="settings-section" id="section-currency">
+
                             <div class="section-heading">
                                 <h2>Currency & Format</h2>
                                 <p>Choose the currency and number format displayed by the interface.</p>
                             </div>
 
                             <div class="form-grid">
+
                                 <div class="form-group">
                                     <label for="currency">Currency</label>
+
                                     <select id="currency" name="currency">
                                         <option value="NGN">NGN - Nigerian Naira (₦)</option>
                                         <option value="USD">USD - US Dollar ($)</option>
                                         <option value="GBP">GBP - British Pound (£)</option>
                                         <option value="EUR">EUR - Euro (€)</option>
                                     </select>
+
                                     <span class="form-help">
                                         Changing this preference does not convert existing prices.
                                     </span>
@@ -426,86 +568,129 @@
 
                                 <div class="form-group">
                                     <label for="decimalPlaces">Decimal Places</label>
+
                                     <select id="decimalPlaces" name="decimalPlaces">
                                         <option value="0">0 decimal places</option>
                                         <option value="2" selected>2 decimal places</option>
                                     </select>
                                 </div>
+
                             </div>
                         </section>
 
+                        <!-- RECEIPT SETTINGS -->
                         <section class="settings-section" id="section-receipt">
+
                             <div class="section-heading">
                                 <h2>Receipt Settings</h2>
                                 <p>Configure the information shown on customer receipts.</p>
                             </div>
 
                             <div class="form-grid">
+
                                 <div class="form-group full-width">
                                     <label for="receiptName">Receipt Business Name</label>
-                                    <input type="text" id="receiptName"
-                                           name="receiptName"
-                                           placeholder="Name printed on receipt">
+
+                                    <input
+                                        type="text"
+                                        id="receiptName"
+                                        name="receiptName"
+                                        placeholder="Name printed on receipt"
+                                    >
                                 </div>
 
                                 <div class="form-group full-width">
                                     <label for="receiptAddress">Receipt Address</label>
-                                    <textarea id="receiptAddress"
-                                              name="receiptAddress"
-                                              placeholder="Address printed on receipt"></textarea>
+
+                                    <textarea
+                                        id="receiptAddress"
+                                        name="receiptAddress"
+                                        placeholder="Address printed on receipt"
+                                    ></textarea>
                                 </div>
 
                                 <div class="form-group">
                                     <label for="receiptPhone">Receipt Phone</label>
-                                    <input type="tel" id="receiptPhone"
-                                           name="receiptPhone"
-                                           placeholder="Phone printed on receipt">
+
+                                    <input
+                                        type="tel"
+                                        id="receiptPhone"
+                                        name="receiptPhone"
+                                        placeholder="Phone printed on receipt"
+                                    >
                                 </div>
 
                                 <div class="form-group">
                                     <label for="receiptFooter">Receipt Footer Message</label>
-                                    <input type="text" id="receiptFooter"
-                                           name="receiptFooter"
-                                           placeholder="Thank you for your patronage">
+
+                                    <input
+                                        type="text"
+                                        id="receiptFooter"
+                                        name="receiptFooter"
+                                        placeholder="Thank you for your patronage"
+                                    >
                                 </div>
+
                             </div>
                         </section>
 
+                        <!-- INVENTORY -->
                         <section class="settings-section" id="section-inventory">
+
                             <div class="section-heading">
                                 <h2>Inventory Alerts</h2>
                                 <p>Set a preferred stock threshold for low-stock warnings.</p>
                             </div>
 
                             <div class="form-grid">
+
                                 <div class="form-group">
                                     <label for="lowStockThreshold">Low Stock Threshold</label>
-                                    <input type="number" id="lowStockThreshold"
-                                           name="lowStockThreshold"
-                                           min="0" step="1" value="5">
+
+                                    <input
+                                        type="number"
+                                        id="lowStockThreshold"
+                                        name="lowStockThreshold"
+                                        min="0"
+                                        step="1"
+                                        value="5"
+                                    >
+
                                     <span class="form-help">
                                         Products at or below this quantity may need attention.
                                     </span>
                                 </div>
+
                             </div>
 
                             <div class="toggle-row">
                                 <div>
                                     <div class="toggle-title">Enable Low Stock Alerts</div>
+
                                     <div class="toggle-description">
                                         Preference only until connected to the inventory backend.
                                     </div>
                                 </div>
 
-                                <input type="checkbox" id="enableLowStockAlerts"
-                                       name="enableLowStockAlerts" checked>
+                                <input
+                                    type="checkbox"
+                                    id="enableLowStockAlerts"
+                                    name="enableLowStockAlerts"
+                                    checked
+                                >
                             </div>
+
                         </section>
 
-                        <div class="settings-message" id="settingsMessage"
-                             role="status" aria-live="polite"></div>
+                        <div
+                            class="settings-message"
+                            id="settingsMessage"
+                            role="status"
+                            aria-live="polite"
+                        ></div>
 
                         <div class="settings-footer">
+
                             <button type="button" class="btn" id="resetButton">
                                 Reset Form
                             </button>
@@ -513,6 +698,7 @@
                             <button type="submit" class="btn btn-primary">
                                 Save Preferences
                             </button>
+
                         </div>
 
                     </form>
@@ -529,25 +715,34 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", async function () {
-    const API_BASE_URL = ((window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://localhost:3000/api" : "https://modern-pos-tau.vercel.app/api");
+
+    const API_BASE_URL =
+        (window.location.hostname === "localhost" ||
+         window.location.hostname === "127.0.0.1")
+            ? "http://localhost:3000/api"
+            : "https://modern-pos-tau.vercel.app/api";
+
     const currentUser = JSON.parse(
-    localStorage.getItem("posUser") || "null");
+        localStorage.getItem("posUser") || "null"
+    );
 
     const BUSINESS_ID = Number(currentUser?.businessId);
 
     if (!Number.isInteger(BUSINESS_ID) || BUSINESS_ID < 1) {
-    window.location.href = "login.html";
-    return;}
+        window.location.href = "login.html";
+        return;
+    }
 
     const BUSINESS_API = `${API_BASE_URL}/businesses/${BUSINESS_ID}`;
     const SETTINGS_API = `${API_BASE_URL}/settings`;
-
 
     if (typeof initPOSLayout === "function") {
         initPOSLayout("Settings");
     } else {
         console.warn("initPOSLayout was not found.");
     }
+
+    // GENERAL ELEMENTS
 
     const navButtons = document.querySelectorAll("[data-section]");
     const sections = document.querySelectorAll(".settings-section");
@@ -556,8 +751,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     const resetButton = document.getElementById("resetButton");
     const saveButton = form.querySelector('[type="submit"]');
 
+    // LOGO ELEMENTS
+
+    const logoFileInput = document.getElementById("businessLogoFile");
+    const uploadLogoButton = document.getElementById("uploadLogoButton");
+    const removeLogoButton = document.getElementById("removeLogoButton");
+    const logoPreview = document.getElementById("businessLogoPreview");
+    const logoPlaceholder = document.getElementById("businessLogoPlaceholder");
+    const logoMessage = document.getElementById("logoMessage");
+
     let originalBusiness = null;
     let originalSettings = null;
+
+    // GENERAL MESSAGES
 
     function showMessage(type, text) {
         message.className = `settings-message ${type}`;
@@ -568,22 +774,38 @@ document.addEventListener("DOMContentLoaded", async function () {
         message.className = "settings-message";
         message.textContent = "";
     }
-    async function requestJSON(url, options = {}) {
-    const token = localStorage.getItem("posToken");
 
-    if (!token) {
-        window.location.href = "login.html";
-        throw new Error("Authentication required. Please log in again.");
+    // LOGO MESSAGE
+
+    function showLogoMessage(type, text) {
+        logoMessage.className = `settings-message ${type}`;
+        logoMessage.textContent = text;
     }
 
-    const response = await fetch(url, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...(options.headers || {}),
-            "Authorization": `Bearer ${token}`
+    function clearLogoMessage() {
+        logoMessage.className = "settings-message";
+        logoMessage.textContent = "";
+    }
+
+    // AUTHENTICATED JSON REQUEST
+
+    async function requestJSON(url, options = {}) {
+
+        const token = localStorage.getItem("posToken");
+
+        if (!token) {
+            window.location.href = "login.html";
+            throw new Error("Authentication required. Please log in again.");
         }
-    });
+
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                ...(options.headers || {}),
+                "Authorization": `Bearer ${token}`
+            }
+        });
 
         const result = await response.json().catch(() => ({}));
 
@@ -596,7 +818,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         return result;
     }
 
+    // SETTINGS NAVIGATION
+
     function showSection(sectionName) {
+
         navButtons.forEach(button => {
             button.classList.toggle(
                 "active",
@@ -620,15 +845,45 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     });
 
+    // DISPLAY BUSINESS LOGO
+
+    function displayBusinessLogo(url) {
+
+        if (
+            typeof url === "string" &&
+            /^https:\/\/res\.cloudinary\.com\//i.test(url)
+        ) {
+            logoPreview.src = url;
+            logoPreview.hidden = false;
+            logoPlaceholder.hidden = true;
+        } else {
+            logoPreview.removeAttribute("src");
+            logoPreview.hidden = true;
+            logoPlaceholder.hidden = false;
+        }
+    }
+
+    // BUSINESS FORM FIELDS
+
     function setBusinessFields(business) {
-        document.getElementById("businessName").value = business.name || "";
-        document.getElementById("businessPhone").value = business.phone || "";
-        document.getElementById("businessEmail").value = business.email || "";
+
+        document.getElementById("businessName").value =
+            business.name || "";
+
+        document.getElementById("businessPhone").value =
+            business.phone || "";
+
+        document.getElementById("businessEmail").value =
+            business.email || "";
+
         document.getElementById("businessAddress").value =
             business.address || "";
     }
 
+    // SETTINGS FORM FIELDS
+
     function setSettingsFields(settings) {
+
         document.getElementById("currency").value =
             settings.currency || "NGN";
 
@@ -652,9 +907,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         document.getElementById("enableLowStockAlerts").checked =
             settings.enableLowStockAlerts !== false;
+
+        displayBusinessLogo(settings.businessLogo);
     }
 
+    // READ BUSINESS FIELDS
+
     function readBusinessFields() {
+
         return {
             name: document.getElementById("businessName").value.trim(),
             phone: document.getElementById("businessPhone").value.trim(),
@@ -663,30 +923,45 @@ document.addEventListener("DOMContentLoaded", async function () {
         };
     }
 
+    // READ SETTINGS FIELDS
+
     function readSettingsFields() {
+
         return {
             currency: document.getElementById("currency").value,
+
             decimalPlaces: Number(
                 document.getElementById("decimalPlaces").value
             ),
+
             receiptName: document.getElementById("receiptName").value.trim(),
+
             receiptAddress: document.getElementById("receiptAddress").value.trim(),
+
             receiptPhone: document.getElementById("receiptPhone").value.trim(),
+
             receiptFooter: document.getElementById("receiptFooter").value.trim(),
+
             lowStockThreshold: Number(
                 document.getElementById("lowStockThreshold").value
             ),
+
             enableLowStockAlerts:
                 document.getElementById("enableLowStockAlerts").checked
         };
     }
 
+    // LOAD SETTINGS
+
     async function loadSettings() {
+
         saveButton.disabled = true;
         resetButton.disabled = true;
+
         showMessage("info", "Loading settings from database...");
 
         try {
+
             const [businessResult, settingsResult] = await Promise.all([
                 requestJSON(BUSINESS_API),
                 requestJSON(SETTINGS_API)
@@ -699,20 +974,27 @@ document.addEventListener("DOMContentLoaded", async function () {
             setSettingsFields(originalSettings);
 
             showMessage("success", "Settings loaded successfully.");
+
         } catch (error) {
+
             console.error("Load settings error:", error);
 
             showMessage(
                 "error",
                 `Could not load settings: ${error.message}. Check that your backend is running.`
             );
+
         } finally {
+
             saveButton.disabled = false;
             resetButton.disabled = false;
         }
     }
 
+    // SAVE BUSINESS AND POS SETTINGS
+
     form.addEventListener("submit", async function (event) {
+
         event.preventDefault();
         clearMessage();
 
@@ -720,7 +1002,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         const settingsData = readSettingsFields();
 
         if (!businessData.name) {
+
             showSection("business");
+
             document.getElementById("businessName").focus();
 
             showMessage("error", "Business name is required.");
@@ -731,13 +1015,16 @@ document.addEventListener("DOMContentLoaded", async function () {
             !Number.isInteger(settingsData.lowStockThreshold) ||
             settingsData.lowStockThreshold < 0
         ) {
+
             showSection("inventory");
+
             document.getElementById("lowStockThreshold").focus();
 
             showMessage(
                 "error",
                 "Low stock threshold must be a whole number of zero or more."
             );
+
             return;
         }
 
@@ -746,58 +1033,281 @@ document.addEventListener("DOMContentLoaded", async function () {
         saveButton.textContent = "Saving...";
 
         try {
+
             await requestJSON(BUSINESS_API, {
                 method: "PUT",
                 body: JSON.stringify(businessData)
             });
 
             try {
+
                 await requestJSON(SETTINGS_API, {
                     method: "PUT",
                     body: JSON.stringify(settingsData)
                 });
+
             } catch (settingsError) {
+
                 originalBusiness = { ...businessData };
 
                 showMessage(
                     "error",
                     `Business information was saved, but POS preferences were not saved: ${settingsError.message}`
                 );
+
                 return;
             }
 
             originalBusiness = { ...businessData };
-            originalSettings = { ...settingsData };
+            originalSettings = {
+                ...originalSettings,
+                ...settingsData
+            };
 
             showMessage("success", "All settings saved successfully.");
+
         } catch (error) {
+
             console.error("Save settings error:", error);
 
             showMessage(
                 "error",
                 `Could not save business information: ${error.message}`
             );
+
         } finally {
+
             saveButton.disabled = false;
             resetButton.disabled = false;
             saveButton.textContent = "Save Preferences";
         }
     });
 
+    // RESET FORM
+
     resetButton.addEventListener("click", function () {
+
         if (originalBusiness && originalSettings) {
+
             setBusinessFields(originalBusiness);
             setSettingsFields(originalSettings);
-            showMessage("info", "Form restored to the last loaded or saved values.");
+
+            showMessage(
+                "info",
+                "Form restored to the last loaded or saved values."
+            );
+
         } else {
+
             form.reset();
+
             showMessage("info", "Form fields have been reset.");
         }
+
+        logoFileInput.value = "";
+        clearLogoMessage();
 
         showSection("business");
     });
 
+    // UPLOAD BUSINESS LOGO
+
+    uploadLogoButton.addEventListener("click", async function () {
+
+        clearLogoMessage();
+
+        const file = logoFileInput.files[0];
+
+        if (!file) {
+            showLogoMessage("error", "Please select a logo image.");
+            return;
+        }
+
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            showLogoMessage(
+                "error",
+                "Only JPG, PNG and WEBP images are allowed."
+            );
+            return;
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+            showLogoMessage(
+                "error",
+                "Logo must not exceed 2 MB."
+            );
+            return;
+        }
+
+        const token = localStorage.getItem("posToken");
+
+        if (!token) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        const formData = new FormData();
+
+        formData.append("businessLogo", file);
+
+        uploadLogoButton.disabled = true;
+        removeLogoButton.disabled = true;
+
+        showLogoMessage("info", "Uploading business logo...");
+
+        try {
+
+            const response = await fetch(`${SETTINGS_API}/logo`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(
+                    result.message || "Logo upload failed."
+                );
+            }
+
+            if (result.settings) {
+
+                originalSettings = {
+                    ...originalSettings,
+                    ...result.settings
+                };
+
+                displayBusinessLogo(result.settings.businessLogo);
+            } else {
+                // Refresh saved logo if the API response has no settings.
+                const refreshed = await requestJSON(SETTINGS_API);
+
+                originalSettings = {
+                    ...originalSettings,
+                    ...refreshed.settings
+                };
+
+                displayBusinessLogo(refreshed.settings?.businessLogo);
+            }
+
+            logoFileInput.value = "";
+
+            showLogoMessage(
+                "success",
+                "Business logo uploaded successfully."
+            );
+
+        } catch (error) {
+
+            console.error("Logo upload error:", error);
+
+            showLogoMessage("error", error.message);
+
+        } finally {
+
+            uploadLogoButton.disabled = false;
+            removeLogoButton.disabled = false;
+        }
+    });
+
+    // REMOVE BUSINESS LOGO
+
+    removeLogoButton.addEventListener("click", async function () {
+
+        clearLogoMessage();
+
+        if (logoPreview.hidden || !logoPreview.src) {
+            showLogoMessage(
+                "info",
+                "There is no business logo to remove."
+            );
+            return;
+        }
+
+        if (!confirm("Are you sure you want to remove your business logo?")) {
+            return;
+        }
+
+        const token = localStorage.getItem("posToken");
+
+        if (!token) {
+            window.location.href = "login.html";
+            return;
+        }
+
+        removeLogoButton.disabled = true;
+        uploadLogoButton.disabled = true;
+
+        showLogoMessage("info", "Removing business logo...");
+
+        try {
+
+            const response = await fetch(`${SETTINGS_API}/logo`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(
+                    result.message || "Logo removal failed."
+                );
+            }
+
+            displayBusinessLogo(null);
+            logoFileInput.value = "";
+
+            if (result.settings) {
+
+                originalSettings = {
+                    ...originalSettings,
+                    ...result.settings
+                };
+
+            } else {
+
+                const refreshed = await requestJSON(SETTINGS_API);
+
+                originalSettings = {
+                    ...originalSettings,
+                    ...refreshed.settings
+                };
+            }
+
+            showLogoMessage(
+                "success",
+                "Business logo removed successfully."
+            );
+
+        } catch (error) {
+
+            console.error("Logo removal error:", error);
+
+            showLogoMessage("error", error.message);
+
+        } finally {
+
+            removeLogoButton.disabled = false;
+            uploadLogoButton.disabled = false;
+        }
+    });
+
+    // INITIAL LOAD
+
     await loadSettings();
+
 });
 </script>
 

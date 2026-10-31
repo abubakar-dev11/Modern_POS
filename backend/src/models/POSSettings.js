@@ -57,6 +57,16 @@ const POSSetting = sequelize.define("POSSettings", {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: true
+    },
+
+    businessLogo: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+
+    businessLogoPublicId: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 });
 

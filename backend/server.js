@@ -114,7 +114,30 @@ if (customersTableExists) {
 }
 
 await sequelize.sync();
+// POSSettings logo migration
+const settingsColumns = await queryInterface.describeTable("POSSettings");
 
+if (!settingsColumns.businessLogo) {
+    await queryInterface.addColumn("POSSettings", "businessLogo", {
+        type: DataTypes.STRING,
+        allowNull: true
+    });
+
+    console.log("Added businessLogo column.");
+}
+
+if (!settingsColumns.businessLogoPublicId) {
+    await queryInterface.addColumn(
+        "POSSettings",
+        "businessLogoPublicId",
+        {
+            type: DataTypes.STRING,
+            allowNull: true
+        }
+    );
+
+    console.log("Added businessLogoPublicId column.");
+}
 console.log("Database tables synchronized successfully!");
 
 
