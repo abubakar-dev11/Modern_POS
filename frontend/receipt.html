@@ -685,7 +685,6 @@ receiptEmailInput.addEventListener("input", () => {
         }
     }, 300);
 });
-
 /* ==================================================
    SEND DIGITAL RECEIPT
 ================================================== */
@@ -735,13 +734,17 @@ async function sendReceipt(method) {
         phone = phone.trim();
     }
 
+    // Keep only buttons that exist in this page.
     const buttons = [
         $("sendEmailButton"),
         $("smsButton"),
         $("whatsappButton")
-    ];
+    ].filter(Boolean);
 
-    buttons.forEach(button => button.disabled = true);
+    buttons.forEach(button => {
+        button.disabled = true;
+    });
+
     hideMessage();
 
     let sendSucceeded = false;
@@ -768,7 +771,6 @@ async function sendReceipt(method) {
             );
         }
 
-        // Cire receipt daga queue a browser ɗin nan.
         markReceiptAsSent(saleNumber, method);
 
         sendSucceeded = true;
@@ -790,16 +792,18 @@ async function sendReceipt(method) {
         );
 
     } finally {
-        buttons.forEach(button => button.disabled = false);
+        buttons.forEach(button => {
+            button.disabled = false;
+        });
     }
 
-    // Komawa Receipt Queue ne kawai idan aika request ta yi nasara.
     if (sendSucceeded) {
         setTimeout(() => {
             window.location.replace("receipt-queue.html");
         }, 1500);
     }
 }
+
 /* ==================================================
    PRINT RECEIPT
 ================================================== */
