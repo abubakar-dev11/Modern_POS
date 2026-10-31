@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const sequelize = require("../config/database");
+const { PlatformAdmin } = require("../models");
 
 const {
     User,
@@ -356,9 +357,126 @@ const login = async (req, res) => {
         });
     }
 };
+const unifiedLogin = async (req, res) => {
+    try {
+        const jwtSecret = process.env.JWT_SECRET;
 
+        if (!jwtSecret) {
+            return res.status(503).json({
+                message: "Authentication is not configured."
+            });
+        }
+
+        const { email, password } = req.body;
+
+        if (
+            typeof email !== "string" ||
+            typeof password !== "string" ||
+            !email.trim() ||
+            !password
+        ) {
+            return res.status(400).json({
+                message: "Email and password are required."
+            });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // Check Platform Admin first.
+        const platformAdmin = await PlatformAdmin.findOne({
+            where: { email: normalizedEmail }
+        });
+
+        if (platformAdmin) {
+            if (!(await bcrypt.compare(password, platformAdmin.password))) {
+                return res.status(401).json({
+                    message: "Invalid email or password."
+                });
+            }
+
+            if (platformAdmin.status !== "ACTIVE") {
+                return res.status(403).json({
+                    message: "This platform admin account is inactive."
+                });
+            }
+
+            const token = jwt.sign(
+                {
+                    tokenType: "PLATFORM_ADMIN",
+                    platformAdminId: platformAdmin.id
+                },
+                jwtSecret,
+                { expiresIn: "8h" }
+            );
+
+            return res.status(200).json({
+                message: "Login successful.",
+                accountType: "PLATFORM_ADMIN",
+                token,
+                admin: {
+                    id: platformAdmin.id,
+                    name: platformAdmin.name,
+                    email: platformAdmin.email
+                }
+            });
+        }
+
+        // Otherwise check Business User.
+        const user = await User.findOne({
+            where: { email: normalizedEmail }
+        });
+
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(401).json({
+                message: "Invalid email or password."
+            });
+        }
+
+        if (user.status !== "ACTIVE") {
+            return res.status(403).json({
+                message: "Your account is not active."
+            });
+        }
+
+        const token = jwt.sign(
+            {
+                userId: user.id,
+                businessId: user.businessId,
+                branchId: user.branchId,
+                role: user.role
+            },
+            jwtSecret,
+            { expiresIn: "8h" }
+        );
+
+        return res.status(200).json({
+            message: "Login successful.",
+            accountType: "BUSINESS_USER",
+            token,
+            user: {
+                id: user.id,
+                businessId: user.businessId,
+                branchId: user.branchId,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                pagePermissions: user.pagePermissions
+                    ? JSON.parse(user.pagePermissions)
+                    : null
+            }
+        });
+
+    } catch (error) {
+        console.error("Unified login error:", error);
+
+        return res.status(500).json({
+            message: "Login failed."
+        });
+    }
+};
 module.exports = {
     setupAdmin,
     registerBusiness,
-    login
+    login,
+    unifiedLogin
 };

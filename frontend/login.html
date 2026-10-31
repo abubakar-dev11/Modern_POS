@@ -763,38 +763,27 @@ a:focus-visible {
 </main>
 
 <script>
-"use strict";
+    "use strict";
 
-/*
- * API configuration.
- * Keep the production URL aligned with your actual deployment.
- */
 const API_ROOT =
     location.hostname === "localhost" ||
     location.hostname === "127.0.0.1"
         ? "http://localhost:3000/api"
         : "https://modern-pos-tau.vercel.app/api";
 
-/*
- * Login endpoints and destinations are kept separate.
- */
+const UNIFIED_LOGIN_ENDPOINT = `${API_ROOT}/auth/unified-login`;
+
 const AUTH_CONFIG = {
     business: {
-        endpoint: `${API_ROOT}/auth/login`,
         destination: "dashboard.html",
         tokenKey: "posToken",
-        userKey: "posUser",
-        title: "Sign in to your account",
-        description: "Enter your business account details to continue."
+        userKey: "posUser"
     },
 
     platform: {
-        endpoint: `${API_ROOT}/platform-auth/login`,
         destination: "platform-dashboard.html",
         tokenKey: "platformToken",
-        userKey: "platformAdmin",
-        title: "Super Admin sign in",
-        description: "Sign in to manage the Modern POS platform."
+        userKey: "platformAdmin"
     }
 };
 
@@ -806,16 +795,10 @@ const elements = {
     buttonText: document.getElementById("buttonText"),
     buttonArrow: document.getElementById("buttonArrow"),
     message: document.getElementById("message"),
-    title: document.getElementById("formTitle"),
-    description: document.getElementById("formDescription"),
     togglePassword: document.getElementById("togglePassword"),
     eyeIcon: document.getElementById("eyeIcon")
 };
-const params = new URLSearchParams(window.location.search);
-let selectedMode =
-    params.get("mode") === "platform"
-        ? "platform"
-        : "business";
+
 let isSubmitting = false;
 
 document.getElementById("currentYear").textContent =
@@ -824,9 +807,6 @@ document.getElementById("currentYear").textContent =
 document.getElementById("mobileYear").textContent =
     new Date().getFullYear();
 
-/*
- * Display user-friendly feedback without inserting HTML.
- */
 function showMessage(message, type = "error") {
     elements.message.textContent = message;
     elements.message.className = `message ${type}`;
@@ -837,10 +817,6 @@ function clearMessage() {
     elements.message.className = "message";
 }
 
-/*
- * Prevent changing login type or editing credentials
- * while a login request is being processed.
- */
 function setLoading(loading) {
     isSubmitting = loading;
 
@@ -848,10 +824,6 @@ function setLoading(loading) {
     elements.email.readOnly = loading;
     elements.password.readOnly = loading;
     elements.togglePassword.disabled = loading;
-
-    document.querySelectorAll("[data-mode]").forEach(button => {
-        button.disabled = loading;
-    });
 
     if (loading) {
         elements.buttonText.textContent = "Signing in...";
@@ -863,10 +835,6 @@ function setLoading(loading) {
     }
 }
 
-/*
- * Parse server responses safely.
- * This also handles an HTML error page instead of JSON.
- */
 async function readApiResponse(response) {
     const raw = await response.text();
 
@@ -878,39 +846,12 @@ async function readApiResponse(response) {
         return JSON.parse(raw);
     } catch {
         throw new Error(
-            "The server returned an invalid response. " +
-            "Check the API route and backend configuration."
+            "The server returned an invalid response. Check the API configuration."
         );
     }
 }
 
-/*
- * Switch between Business Login and Super Admin.
- * No authentication request is sent when switching modes.
- */
-function selectLoginMode(mode) {
-    if (isSubmitting || !AUTH_CONFIG[mode]) {
-        return;
-    }
-
-    selectedMode = mode;
-    clearMessage();
-
-    document.querySelectorAll("[data-mode]").forEach(button => {
-        button.setAttribute(
-            "aria-pressed",
-            String(button.dataset.mode === mode)
-        );
-    });
-
-    elements.title.textContent = AUTH_CONFIG[mode].title;
-    elements.description.textContent =
-        AUTH_CONFIG[mode].description;
-}
-selectLoginMode(selectedMode);
-/*
- * Show or hide the password.
- */
+/* Show or hide password */
 elements.togglePassword.addEventListener("click", () => {
     const shouldShow = elements.password.type === "password";
 
@@ -932,38 +873,13 @@ elements.togglePassword.addEventListener("click", () => {
 });
 
 /*
- * Accept the known token and user response shapes.
- * This does not replace backend authorization.
+ * One login endpoint detects the account type.
  */
-function getAuthenticatedUser(result, mode) {
-    if (mode === "platform") {
-        return result.platformAdmin || result.admin || result.user || null;
-    }
-
-    return result.user || null;
-}
-
-function clearOtherSession(mode) {
-    if (mode === "platform") {
-        localStorage.removeItem("posToken");
-        localStorage.removeItem("posUser");
-    } else {
-        localStorage.removeItem("platformToken");
-        localStorage.removeItem("platformAdmin");
-    }
-}
-
-/*
- * Authenticate using ONLY the endpoint selected by the user.
- * A failed Super Admin login never silently becomes a POS login.
- */
-async function authenticate(mode, email, password) {
-    const config = AUTH_CONFIG[mode];
-
+async function authenticate(email, password) {
     let response;
 
     try {
-        response = await fetch(config.endpoint, {
+        response = await fetch(UNIFIED_LOGIN_ENDPOINT, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -975,8 +891,7 @@ async function authenticate(mode, email, password) {
         });
     } catch {
         throw new Error(
-            "Cannot connect to the server. Check your connection " +
-            "and confirm that the backend is running."
+            "Cannot connect to the server. Check your internet connection."
         );
     }
 
@@ -986,37 +901,62 @@ async function authenticate(mode, email, password) {
         throw new Error(
             result.message ||
             result.error ||
-            `Login failed (HTTP ${response.status}). Please try again.`
+            `Login failed (HTTP ${response.status}).`
         );
     }
 
-    if (typeof result.token !== "string" || !result.token.trim()) {
+    if (
+        typeof result.token !== "string" ||
+        !result.token.trim()
+    ) {
+        throw new Error("The server did not return an authentication token.");
+    }
+
+    let mode;
+    let user;
+
+    if (result.accountType === "PLATFORM_ADMIN") {
+        mode = "platform";
+        user = result.admin;
+    } else if (result.accountType === "BUSINESS_USER") {
+        mode = "business";
+        user = result.user;
+    } else {
         throw new Error(
-            "The server did not return an authentication token. " +
-            "Check the login controller response."
+            "Unknown account type returned by the server."
         );
     }
-
-    const user = getAuthenticatedUser(result, mode);
 
     if (!user || typeof user !== "object") {
-        throw new Error(
-            "Login response is missing the account details. " +
-            "Check the response returned by the backend."
-        );
+        throw new Error("The server did not return valid account details.");
     }
 
     return {
+        mode,
         token: result.token,
         user
     };
 }
 
 /*
- * Save the correct session only after authentication succeeds.
+ * Keep Platform and Business sessions separate.
  */
+function clearOtherSession(mode) {
+    if (mode === "platform") {
+        localStorage.removeItem("posToken");
+        localStorage.removeItem("posUser");
+    } else {
+        localStorage.removeItem("platformToken");
+        localStorage.removeItem("platformAdmin");
+    }
+}
+
 function saveSession(mode, token, user) {
     const config = AUTH_CONFIG[mode];
+
+    if (!config) {
+        throw new Error("Invalid account type.");
+    }
 
     try {
         clearOtherSession(mode);
@@ -1028,15 +968,12 @@ function saveSession(mode, token, user) {
         localStorage.removeItem(config.userKey);
 
         throw new Error(
-            "The browser could not save your session. " +
-            "Check browser storage settings and try again."
+            "The browser could not save your login session."
         );
     }
 }
 
-/*
- * Submit handler.
- */
+/* Login form submission */
 elements.form.addEventListener("submit", async event => {
     event.preventDefault();
 
@@ -1063,14 +1000,10 @@ elements.form.addEventListener("submit", async event => {
     setLoading(true);
 
     try {
-        const result = await authenticate(
-            selectedMode,
-            email,
-            password
-        );
+        const result = await authenticate(email, password);
 
         saveSession(
-            selectedMode,
+            result.mode,
             result.token,
             result.user
         );
@@ -1083,7 +1016,8 @@ elements.form.addEventListener("submit", async event => {
         elements.buttonText.textContent = "Welcome!";
         elements.buttonArrow.textContent = "✓";
 
-        const destination = AUTH_CONFIG[selectedMode].destination;
+        const destination =
+            AUTH_CONFIG[result.mode].destination;
 
         window.location.replace(destination);
 
