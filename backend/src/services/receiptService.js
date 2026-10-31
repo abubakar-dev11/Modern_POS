@@ -6,7 +6,7 @@ const {
     Payment,
     Branch,
     Business,
-    POSSettings
+    POSSetting
 } = require("../models");
 
 const { Op } = require("sequelize");
@@ -67,7 +67,7 @@ const getReceipt = async (saleNumber, businessId) => {
     if (!sale) {
         throw new Error("Sale not found");
     }
-    const settings = await POSSettings.findOne({
+    const setting = await POSSetting.findOne({
     where: { businessId: id },
     attributes: ["businessLogo"]
 });
@@ -81,7 +81,7 @@ const getReceipt = async (saleNumber, businessId) => {
         saleId: sale.id,
         date: sale.createdAt,
         business: sale.Branch?.Business || null,
-        businessLogo: settings?.businessLogo || null,
+        businessLogo: setting?.businessLogo || null,
         branch: sale.Branch || null,
         customer: sale.Customer || null,
         customerName: sale.customerName || null,
