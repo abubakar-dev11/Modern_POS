@@ -345,9 +345,7 @@ td {
 const API = ((window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") ? "http://127.0.0.1:3000/api" : "https://modern-pos-tau.vercel.app/api");
 const token = localStorage.getItem("platformToken");
 
-if (!token) {
-    window.location.replace("platform-login.html");
-}
+if (!token) {window.location.replace("login.html");}
 
 function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, character => ({
@@ -371,7 +369,7 @@ async function apiGet(path) {
     if (response.status === 401 || response.status === 403) {
         localStorage.removeItem("platformToken");
         localStorage.removeItem("platformAdmin");
-        window.location.replace("platform-login.html");
+        window.location.replace("login.html");
         throw new Error("Your session has expired. Please sign in again.");
     }
 
@@ -437,7 +435,7 @@ async function updateBusinessStatus(id, currentStatus, button) {
         if (response.status === 401 || response.status === 403) {
             localStorage.removeItem("platformToken");
             localStorage.removeItem("platformAdmin");
-            window.location.replace("platform-login.html");
+            window.location.replace("login.html");
             return;
         }
 
@@ -564,8 +562,8 @@ document.getElementById("logout").addEventListener("click", event => {
 
     localStorage.removeItem("platformToken");
     localStorage.removeItem("platformAdmin");
+    window.location.replace("login.html");
 
-    window.location.href = "platform-login.html";
 });
 
 if (token) {
